@@ -74,7 +74,17 @@ def r_asif_tue5(c):
     if k in hx: m.Add(hx[k] == 1)
 
 
+def r_galit_spread(c):
+    """גלית בכיתתה גם בתחילת השבוע: לפחות שיעור אחד בראשון ואחד ברביעי."""
+    m, hx, HDAY = c["m"], c["hx"], c["HDAY"]
+    for d in (0, 3):
+        v = [hx[k] for k in hx if k[0] == "ח גלית" and k[1][0] == d and k[3] == "גלית"]
+        if v: m.Add(sum(v) >= 1)
+
+
 RULES = [
+    {"id": "galit_spread", "name": "גלית עם כיתתה בראשון וברביעי", "active": True, "fn": r_galit_spread,
+     "desc": "לפחות שיעור אחד של גלית בח בראשון ולפחות אחד ברביעי — לא הכל בסוף השבוע."},
     {"id": "tamir_subjects", "name": "המקצועות של תמיר בט", "active": True, "fn": r_tamir_subjects,
      "desc": 'חינוך, היסטוריה, אזרחות ותנ"ך בכיתות ט — שעתיים כל אחד, תמיר בלבד (23 שעות סה"כ).'},
     {"id": "leah_not_late", "name": "תנ\"ך לייה לא בסוף היום", "active": True, "fn": r_leah_not_late,
