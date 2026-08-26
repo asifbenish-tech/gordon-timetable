@@ -29,6 +29,7 @@ if "INFEASIBLE" in out or "MODEL_INVALID" in out:
     print("\n!!! הפותר לא מצא פתרון - האילוצים סותרים. שום קובץ לא נדרס.")
     sys.exit(1)
 run("fill2.py", "ממלא חורים")
+run("checks.py", "בדיקות")
 run("outGAPS.py", "אקסל")
 run("make_viewer.py", "צופה")
 
