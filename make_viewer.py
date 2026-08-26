@@ -97,6 +97,10 @@ for c in HCLASSES:
         if f"{c}|{k}" in GJ: cell["co"]="+ גלית"
         cells[k]=cell
     dd=DUTY.get(c)
+    if dd:
+        for _d2,_dn2 in enumerate(DAY_NAMES):
+            if _dn2==dd and f"{_d2},5" in cells:
+                cells[f"{_d2},5"]["co"]="סידור חדר אוכל 🍽"
     _plan=[]
     _cnt={}; _mis={}
     for (d,h) in HSLOTS:
@@ -265,7 +269,9 @@ SYS_CORE=[
  ("תנ\"ך בכיתות ז","במערכת ללא מורה כרגע - עד גיוס."),
  ("שישי בט אסיף","שעתיים חסרות מורה - עד גיוס מחליף לאסיף."),
 ]
-SYS_RULES=[(n,d) for n,d in _R.export()]+SYS_CORE
+SYS_RULES=[("["+r["id"]+"] "+r["name"]+("" if r["active"] else " — כבוי"),r["desc"]) for r in _R.RULES]
+SYS_RULES+= [("— כללי היסוד של המנוע —","הכללים הבאים מובנים במנוע (engine.py). שינוי שלהם דורש עריכת קוד:")]+SYS_CORE
+SYS_RULES.insert(0,("איך משנים חוק?","כל חוק מדיניות מופיע עם מזהה בסוגריים. כדי לכבות, לשנות או למחוק - אמרו לקלוד את המזהה (למשל: \"תכבה את thursday_67\") והשינוי ייכנס בריצה הבאה. החוקים שמורים בקובץ rules.py."))
 # ---------- אילוצי מורים ----------
 from data2 import DAYS_OFF2 as _DO
 from hdata import HOFF as _HO
