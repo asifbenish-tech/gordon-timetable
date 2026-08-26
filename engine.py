@@ -466,7 +466,7 @@ for c in HCLASSES:
     for subj,per in NEED.items():
         if per[g]==0: continue
         v=[hx[(c,s,subj,t)] for s in HSLOTS for (sj,t) in pairs[c] if sj==subj and (c,s,subj,t) in hx]
-        _ovr={("ט אסיף","חינוך"):4,("ט אסיף","מתמטיקה"):3,("ט תמיר","חינוך"):3}
+        _ovr={("ט אסיף","חינוך"):4,("ט אסיף","מתמטיקה"):4,("ט תמיר","חינוך"):3}   # מתמטיקה חוזרת ל-4
         m.Add(sum(v)==_ovr.get((c,subj),per[g]))
 
 # מגמות: בלוקים קבועים

@@ -30,7 +30,7 @@ for (d, h) in SLOTS:
                 errors.append(f"{t} (חטיבה) ביום חופש {DAY_NAMES[d]}")
 
 # 2. תוכניות לימודים חטיבה
-OVR = {("ט אסיף", "חינוך"): 4, ("ט אסיף", "מתמטיקה"): 3}
+OVR = {("ט אסיף", "חינוך"): 4, ("ט אסיף", "מתמטיקה"): 4, ("ט תמיר", "חינוך"): 3}
 for c in HCLASSES:
     g = GRADE[c]
     cnt = collections.Counter(sof(H[c][f"{d},{h}"]) for (d, h) in HSLOTS if H[c][f"{d},{h}"])
