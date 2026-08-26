@@ -23,8 +23,7 @@ def run(script, label):
 
 
 print("מריץ (מגבלת זמן " + TL + " שניות)...")
-run("make_unified.py", "בונה מודל")
-out = run("solveALL.py", "פותר")
+out = run("engine.py", "פותר")
 if "INFEASIBLE" in out or "MODEL_INVALID" in out:
     print("\n!!! הפותר לא מצא פתרון - האילוצים סותרים. שום קובץ לא נדרס.")
     sys.exit(1)
