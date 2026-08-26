@@ -1,0 +1,336 @@
+<title>לוח גורדון</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Frank+Ruhl+Libre:wght@700&display=swap">
+<style>
+:root{
+  --bg:#FAF9F6; --surface:#FFFFFF; --ink:#22303D; --muted:#6B7A88; --line:#E3E0D8;
+  --accent:#0E6E66; --accent-ink:#FFFFFF;
+  --home:#E3EEF7; --home-b:#B9D4E8; --tln:#E4F0DF; --tln-b:#BFDCB4;
+  --mag:#E7E6F4; --mag-b:#C4C2E4; --pe:#FBEFD8; --pe-b:#EAD3A2;
+  --fill:#D7EEF2; --fill-b:#68B7C4; --hole:#FBE4E1; --hole-b:#E5A79F;
+  --away:#FDEBDC; --chip:#EFECE4;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141B22; --surface:#1C2530; --ink:#E8EDF2; --muted:#93A1AE; --line:#2C3742;
+    --accent:#3FB8AC; --accent-ink:#0E1A18;
+    --home:#22384A; --home-b:#3A5B76; --tln:#253822; --tln-b:#3F5F37;
+    --mag:#2B2A44; --mag-b:#4A4880; --pe:#3A3220; --pe-b:#6B5A2E;
+    --fill:#173B42; --fill-b:#3FB8AC; --hole:#43231F; --hole-b:#8A4A40;
+    --away:#3D2E1F; --chip:#242E39;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141B22; --surface:#1C2530; --ink:#E8EDF2; --muted:#93A1AE; --line:#2C3742;
+  --accent:#3FB8AC; --accent-ink:#0E1A18;
+  --home:#22384A; --home-b:#3A5B76; --tln:#253822; --tln-b:#3F5F37;
+  --mag:#2B2A44; --mag-b:#4A4880; --pe:#3A3220; --pe-b:#6B5A2E;
+  --fill:#173B42; --fill-b:#3FB8AC; --hole:#43231F; --hole-b:#8A4A40;
+  --away:#3D2E1F; --chip:#242E39;
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 Heebo,"Segoe UI",Arial,sans-serif;direction:rtl}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:.9rem 1.2rem .7rem}
+h1{font:700 1.5rem "Frank Ruhl Libre",Heebo,serif;letter-spacing:.01em}
+h1 small{font:500 .8rem Heebo;color:var(--muted);margin-inline-start:.6rem}
+nav{display:flex;gap:.4rem;margin-top:.7rem;flex-wrap:wrap}
+nav button{border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  padding:.35rem .9rem;border-radius:999px;font:500 .9rem Heebo;cursor:pointer}
+nav button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+nav button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#chips{display:flex;gap:.35rem;margin-top:.55rem;flex-wrap:wrap}
+#chips button{border:1px solid var(--line);background:var(--chip);color:var(--ink);
+  padding:.22rem .7rem;border-radius:.5rem;font:500 .85rem Heebo;cursor:pointer}
+#chips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+#chips select{border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  padding:.3rem .6rem;border-radius:.5rem;font:500 .9rem Heebo}
+main{padding:1rem 1.2rem 3rem;max-width:1080px;margin:0 auto}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:.75rem;padding:1rem 1.1rem;margin-top:1rem}
+.card h2{font:700 1.15rem "Frank Ruhl Libre",Heebo,serif}
+.card .sub{color:var(--muted);font-size:.85rem;margin-top:.15rem}
+.tblwrap{overflow-x:auto;margin-top:.7rem}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{border:1px solid var(--line);padding:.42rem .5rem;text-align:center;font-size:.86rem}
+th{background:var(--chip);font-weight:700}
+td .s{display:block;color:var(--muted);font-size:.74rem;margin-top:.1rem}
+td .co{display:block;color:var(--accent);font-size:.74rem;font-weight:700}
+td .aw{display:block;color:var(--muted);font-size:.7rem;font-style:italic}
+tr th:first-child{width:2.6rem;font-variant-numeric:tabular-nums}
+.k-home{background:var(--home);box-shadow:inset 3px 0 0 var(--home-b)}
+.k-tln{background:var(--tln);box-shadow:inset 3px 0 0 var(--tln-b)}
+.k-mag{background:var(--mag);box-shadow:inset 3px 0 0 var(--mag-b)}
+.k-pe{background:var(--pe);box-shadow:inset 3px 0 0 var(--pe-b)}
+.k-fill{background:var(--fill);box-shadow:inset 3px 0 0 var(--fill-b);font-weight:700}
+.k-hole{background:var(--hole);box-shadow:inset 3px 0 0 var(--hole-b);color:var(--muted)}
+.k-off{background:transparent;color:var(--muted)}
+.duty{outline:2px dashed var(--pe-b);outline-offset:-3px}
+td.num{font-variant-numeric:tabular-nums;text-align:center}
+td.name{text-align:right;font-weight:500}
+.over{color:#B3261E;font-weight:700}
+:root:not([data-theme="light"]) .over{color:#FF8A80}
+:root[data-theme="dark"] .over{color:#FF8A80}
+.full{color:var(--accent);font-weight:700}
+.pill{display:inline-block;padding:.1rem .5rem;border-radius:999px;font-size:.74rem;font-weight:700;
+  background:var(--hole);border:1px solid var(--hole-b)}
+.imp{display:inline-block;padding:.08rem .55rem;border-radius:999px;font-size:.72rem;font-weight:700;
+  background:var(--chip);border:1px solid var(--line);color:var(--muted)}
+.imp.hi{background:var(--fill);border-color:var(--fill-b);color:var(--ink)}
+.sol{border:1px solid var(--line);border-radius:.6rem;padding:.7rem .85rem;background:var(--bg)}
+.sollist{display:flex;flex-direction:column;gap:.6rem;margin-top:.8rem}
+.sol h3{font:700 .98rem Heebo;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.sol p{color:var(--muted);font-size:.85rem;margin-top:.3rem;max-width:68ch}
+.gapgrid{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.7rem}
+.gaprow{display:grid;grid-template-columns:minmax(9rem,auto) 1fr auto;gap:.7rem;align-items:center;
+  border:1px solid var(--line);border-left:4px solid var(--hole-b);border-radius:.55rem;
+  padding:.55rem .8rem;background:var(--bg)}
+.gaprow .where{font-weight:700;font-size:.92rem}
+.gaprow .where small{display:block;color:var(--muted);font-weight:400;font-size:.76rem;margin-top:.1rem}
+.gaprow .fix{font-size:.82rem;color:var(--muted)}
+.gaprow .fix b{color:var(--ink);font-weight:700}
+.gaprow .cands{display:flex;gap:.3rem;flex-wrap:wrap;margin-top:.25rem}
+.gaprow .cand{background:var(--tln);border:1px solid var(--tln-b);border-radius:.4rem;
+  padding:.05rem .45rem;font-size:.75rem;font-weight:500;color:var(--ink)}
+.gaprow .none{color:var(--hole-b);font-weight:700}
+.jump{border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;
+  border-radius:.45rem;padding:.3rem .7rem;font:500 .8rem Heebo;white-space:nowrap}
+.jump:hover{background:var(--chip)}
+.jump:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hit{animation:flash 1.6s ease-out}
+@keyframes flash{0%,60%{background:var(--fill);box-shadow:inset 3px 0 0 var(--fill-b)}}
+.gaplist{display:flex;flex-direction:column;gap:.45rem;margin-top:.8rem}
+details.plan{margin-top:.6rem}
+details.plan summary{cursor:pointer;font:500 .85rem Heebo;color:var(--accent)}
+details.plan table{min-width:0;max-width:34rem;margin-top:.5rem}
+details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
+.ok2{color:var(--accent);font-weight:700}
+.short{color:#B3261E;font-weight:700}
+:root:not([data-theme="light"]) .short{color:#FF8A80}
+:root[data-theme="dark"] .short{color:#FF8A80}
+#legend{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem;font-size:.78rem;color:var(--muted)}
+#legend span{display:inline-flex;align-items:center;gap:.3rem}
+#legend i{width:.95rem;height:.95rem;border-radius:.25rem;display:inline-block;border:1px solid var(--line)}
+@media (prefers-reduced-motion:no-preference){ .card{animation:up .18s ease-out} @keyframes up{from{opacity:0;transform:translateY(4px)}to{opacity:1}} }
+</style>
+<header>
+  <h1>לוח גורדון <small id="stamp"></small></h1>
+  <nav id="tabs" role="tablist">
+    <button data-v="elem" aria-pressed="true">יסודי א׳–ו׳</button>
+    <button data-v="jun" aria-pressed="false">חטיבה ז׳–ט׳</button>
+    <button data-v="teach" aria-pressed="false">מערכות מורים</button>
+    <button data-v="gaps" aria-pressed="false">חוסרים</button>
+    <button data-v="util" aria-pressed="false">ניצול שעות</button>
+    <button data-v="rules" aria-pressed="false">אילוצים</button>
+    <button data-v="trules" aria-pressed="false">אילוצי מורים</button>
+  </nav>
+  <div id="chips"></div>
+  <div id="legend">
+    <span><i style="background:var(--home)"></i> מחנך/ת</span>
+    <span><i style="background:var(--tln)"></i> תל״ן</span>
+    <span><i style="background:var(--mag)"></i> מגמות / שירה</span>
+    <span><i style="background:var(--pe)"></i> חנ״ג שכבתי</span>
+    <span><i style="background:var(--fill)"></i> כיסוי ממורה חטיבה</span>
+    <span><i style="background:var(--hole)"></i> חסר מורה</span>
+    <span><i style="border:2px dashed var(--pe-b)"></i> סידור חדר אוכל</span>
+  </div>
+</header>
+<main id="main"></main>
+<script>
+/*__DATA__*/
+const $q=s=>document.querySelector(s);
+let view="elem", pick=null;
+const DAYS=DATA.days;
+function tabBtns(){ document.querySelectorAll("#tabs button").forEach(b=>{
+  b.setAttribute("aria-pressed", b.dataset.v===view ? "true":"false");
+  b.onclick=()=>{view=b.dataset.v; pick=null; render();};
+});}
+function chipRow(){
+  const box=$q("#chips"); box.innerHTML="";
+  if(view==="util"||view==="gaps"||view==="rules"||view==="trules"){ return; }
+  if(view==="teach"){
+    const sel=document.createElement("select");
+    let opts='<option value="">בחר/י מורה…</option>';
+    for(const t of Object.keys(DATA.teachers)){
+      opts+='<option'+(t===pick?' selected':'')+'>'+t+'</option>';
+    }
+    sel.innerHTML=opts;
+    sel.onchange=()=>{pick=sel.value||null; render();};
+    box.appendChild(sel); return;
+  }
+  const names=Object.keys(view==="elem"?DATA.elem:DATA.jun);
+  const all=document.createElement("button");
+  all.textContent="הכל"; all.setAttribute("aria-pressed", pick? "false":"true");
+  all.onclick=()=>{pick=null;render();}; box.appendChild(all);
+  names.forEach(n=>{const b=document.createElement("button");
+    b.textContent=n; b.setAttribute("aria-pressed", pick===n?"true":"false");
+    b.onclick=()=>{pick=(pick===n?null:n);render();}; box.appendChild(b);});
+}
+function cellHtml(c,info,extraCls){
+  let inner=(c.t||"");
+  if(c.s) inner+='<span class="s">'+c.s+'</span>';
+  if(c.co) inner+='<span class="co">'+c.co+'</span>';
+  if(c.away) inner+='<span class="aw">'+info.home+' בחוץ: '+c.away+'</span>';
+  return '<td class="'+extraCls+'">'+inner+'</td>';
+}
+function planTable(info){
+  if(!info.plan||!info.plan.length) return "";
+  let rows="";
+  let tw=0,tg=0;
+  info.plan.forEach(p=>{
+    tw+=p.want; tg+=p.got;
+    const diff=p.got-p.want;
+    const st=diff===0?(p.miss?'<span class="short">'+p.miss+' חסר מורה</span>':'<span class="ok2">מלא</span>'):
+      (diff<0?'<span class="short">חסרות '+(-diff)+'</span>':'<span class="short">עודף '+diff+'</span>');
+    rows+='<tr><td class="name">'+p.n+'</td><td class="num">'+p.want+'</td><td class="num">'+p.got+'</td><td>'+st+'</td></tr>';
+  });
+  return '<details class="plan"><summary>תוכנית לימודים: '+tg+' מתוך '+tw+' שעות משובצות</summary>'+
+    '<div class="tblwrap"><table><tr><th>מקצוע / מורה</th><th>בתוכנית</th><th>בפועל</th><th>מצב</th></tr>'+
+    rows+'</table></div></details>';
+}
+function grid(name,info,duty){
+  const H=Math.max.apply(null,info.hours);
+  let rows="";
+  for(let h=1;h<=H;h++){
+    rows+='<tr><th>'+h+'</th>';
+    DAYS.forEach((dn,d)=>{
+      if(h>info.hours[d]){ rows+='<td class="k-off"></td>'; return; }
+      const c=info.cells[d+","+h]||{t:""};
+      const cls=(c.k?("k-"+c.k):"")+((duty&&duty===dn&&h===5)?" duty":"");
+      rows+=cellHtml(c,info,cls);
+    });
+    rows+='</tr>';
+  }
+  let head='<tr><th>שעה</th>';
+  DAYS.forEach(dn=>{head+='<th>'+dn+'</th>';}); head+='</tr>';
+  return '<section class="card"><h2>'+name+'</h2><div class="sub">מחנך/ת: '+info.home+
+    (duty?(' · סידור חדר אוכל: יום '+duty+' ש5'):'')+'</div>'+
+    '<div class="tblwrap"><table>'+head+rows+'</table></div>'+planTable(info)+'</section>';
+}
+function teacherGrid(t){
+  const ev=DATA.teachers[t]||[]; const per={};
+  ev.forEach(e=>{const side=e[0],d=e[1],h=e[2],label=e[3];
+    const add=label+(side!=="יסודי"?(' <span class="s">'+side+'</span>'):'');
+    per[d+","+h]=(per[d+","+h]?per[d+","+h]+' · ':'')+add;});
+  let rows="";
+  for(let h=1;h<=7;h++){
+    rows+='<tr><th>'+h+'</th>';
+    DAYS.forEach((dn,d)=>{rows+='<td>'+(per[d+","+h]||'')+'</td>';});
+    rows+='</tr>';
+  }
+  let head='<tr><th>שעה</th>';
+  DAYS.forEach(dn=>{head+='<th>'+dn+'</th>';}); head+='</tr>';
+  const u=(DATA.util||[]).find(z=>z.t===t);
+  let sub=ev.length+' שעות בשבוע';
+  if(u){
+    const pct=Math.round(100*u.tot/u.q);
+    const state=u.left<0?'<span class="over">חריגה של '+(-u.left)+'</span>':
+                (u.left===0?'<span class="full">מכסה מלאה</span>':'נותרו '+u.left);
+    sub='משובץ '+u.tot+' מתוך '+u.q+' שעות משרה ('+pct+'%) · '+state;
+  }
+  return '<section class="card"><h2>'+t+'</h2><div class="sub">'+sub+'</div>'+
+    '<div class="tblwrap"><table>'+head+rows+'</table></div></section>';
+}
+function utilView(){
+  let rows="";
+  DATA.util.forEach(u=>{
+    const cls=u.left<0?"over":(u.left===0?"full":"");
+    rows+='<tr><td class="name">'+u.t+'</td>'+
+      ['ye','ch','tl','mg'].map(k=>'<td class="num">'+(u[k]||"")+'</td>').join("")+
+      '<td class="num"><b>'+u.tot+'</b></td><td class="num">'+u.q+'</td>'+
+      '<td class="num '+cls+'">'+u.left+'</td></tr>';
+  });
+  const st=DATA.util.reduce((a,u)=>{a.t+=u.tot;a.q+=u.q;return a;},{t:0,q:0});
+  return '<section class="card"><h2>ניצול שעות מול מכסה</h2>'+
+    '<div class="sub">אדום = חריגה מהמכסה · ירוק = מכסה מלאה. סה״כ משובץ '+st.t+' מתוך '+st.q+' שעות מכסה.</div>'+
+    '<div class="tblwrap"><table><tr><th>מורה</th><th>יסודי</th><th>חטיבה</th><th>תל״ן</th><th>מגמות</th>'+
+    '<th>סה״כ</th><th>מכסה</th><th>נותר</th></tr>'+rows+'</table></div></section>';
+}
+function gapsView(){
+  const g=DATA.gaps;
+  const byday={};
+  g.forEach(x=>{byday[x.d]=(byday[x.d]||0)+1;});
+  let rows="";
+  g.forEach((x,idx)=>{
+    let fix="";
+    if(x.cand&&x.cand.length){
+      fix='<b>מורים פנויים כרגע:</b><div class="cands">'+
+        x.cand.map(c=>c.ext?('<span class="cand" style="background:var(--pe);border-color:var(--pe-b)">'+c.t+' · בהגדלת משרה</span>'):('<span class="cand">'+c.t+' · נותרו '+c.left+'</span>')).join("")+'</div>';
+    } else {
+      fix='<span class="none">אין מורה פנוי בבית הספר בשעה זו</span>' +
+          (x.lvl==="jun"?' — נדרש גיוס מורה חדש':' — נדרש שינוי במבנה: יום חופש, סדירות או מכסה');
+    }
+    const sub=(x.subj?x.subj+' · ':'')+(x.why||"");
+    rows+='<div class="gaprow" id="gap'+idx+'">'+
+      '<div class="where">'+x.c+'<small>'+x.d+' · שעה '+x.h+'</small></div>'+
+      '<div class="fix">'+(sub?'<div style="margin-bottom:.25rem">'+sub+'</div>':'')+fix+'</div>'+
+      '<button class="jump" data-c="'+x.c+'" data-lvl="'+x.lvl+'" data-d="'+x.d+'" data-h="'+x.h+'">'+
+      'הצג במערכת ←</button></div>';
+  });
+  let sols="";
+  DATA.sol.forEach(s2=>{
+    const hi=(s2.i==="גבוהה")?" hi":"";
+    sols+='<div class="sol"><h3>'+s2.t+'<span class="imp'+hi+'">'+s2.i+'</span></h3><p>'+s2.d+'</p></div>';
+  });
+  const dl=Object.keys(byday).map(k=>k+': '+byday[k]).join(" · ");
+  return '<section class="card"><h2>'+g.length+' שעות ללא מורה</h2>'+
+    '<div class="sub">'+(dl||"אין חוסרים")+' — לחיצה על "הצג במערכת" קופצת למשבצת בכיתה.</div>'+
+    '<div class="gaplist">'+rows+'</div></section>'+
+    '<section class="card"><h2>מהלכים רוחביים</h2>'+
+    '<div class="sub">פתרונות שסוגרים כמה חוסרים בבת אחת.</div>'+
+    '<div class="sollist">'+sols+'</div></section>';
+}
+function jumpTo(cls,lvl,dn,hr){
+  view=(lvl==="jun")?"jun":"elem"; pick=cls; render();
+  requestAnimationFrame(()=>{
+    const di=DAYS.indexOf(dn);
+    const tb=$q("#main table");
+    if(!tb) return;
+    const row=tb.rows[hr];
+    if(!row) return;
+    const cell=row.cells[di+1];
+    if(!cell) return;
+    cell.classList.add("hit");
+    cell.scrollIntoView({block:"center",behavior:"smooth"});
+  });
+}
+function rulesView(){
+  let rows="";
+  DATA.rules.forEach(r=>{
+    rows+='<div class="sol"><h3>'+r[0]+'</h3><p>'+r[1]+'</p></div>';
+  });
+  return '<section class="card"><h2>אילוצי המערכת</h2>'+
+    '<div class="sub">הכללים הקבועים שהפותר מציית להם בכל ריצה.</div>'+
+    '<div class="sollist">'+rows+'</div></section>';
+}
+function trulesView(){
+  let rows="";
+  DATA.trules.forEach(r=>{
+    rows+='<tr><td class="name">'+r.t+'</td><td>'+r.off+'</td><td style="text-align:right">'+r.subj+'</td><td class="num">'+r.n+'</td></tr>';
+  });
+  return '<section class="card"><h2>אילוצי מורים</h2>'+
+    '<div class="sub">ימים חופשיים, תפקידים ותחומי הוראה של כל מורה.</div>'+
+    '<div class="tblwrap"><table><tr><th>מורה</th><th>ימים חופשיים</th><th>מה מלמד/ת</th><th>שעות</th></tr>'+rows+'</table></div></section>';
+}
+function render(){
+  tabBtns(); chipRow();
+  const M=$q("#main"); M.innerHTML="";
+  if(view==="util"){ M.innerHTML=utilView(); return; }
+  if(view==="rules"){ M.innerHTML=rulesView(); return; }
+  if(view==="trules"){ M.innerHTML=trulesView(); return; }
+  if(view==="gaps"){
+    M.innerHTML=gapsView();
+    M.querySelectorAll(".jump").forEach(b=>{
+      b.onclick=()=>jumpTo(b.dataset.c,b.dataset.lvl,b.dataset.d,+b.dataset.h);
+    });
+    return;
+  }
+  if(view==="teach"){
+    M.innerHTML = pick ? teacherGrid(pick) :
+      '<section class="card"><h2>מערכות מורים</h2><div class="sub">בחר/י מורה מהרשימה למעלה כדי לראות את השבוע המלא — יסודי, חטיבה ותל״ן יחד.</div></section>';
+    return;
+  }
+  const src=view==="elem"?DATA.elem:DATA.jun;
+  const names=pick?[pick]:Object.keys(src);
+  M.innerHTML=names.map(n=>grid(n,src[n],src[n].duty)).join("");
+}
+$q("#stamp").textContent="עודכן "+new Date().toLocaleDateString("he-IL");
+render();
+</script>
