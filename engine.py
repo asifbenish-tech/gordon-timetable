@@ -16,7 +16,7 @@ DEU=[c for c in CLASSES if c[0] in "דהו"]; B_CL=[c for c in CLASSES if c.star
 G_CL=[c for c in CLASSES if c[0]=="ג"]
 POOL={"אלי":(4,["ו אורנה","ו שרית"]),"אופיר":(3,["ו אורנה","ו שרית"]),"טלי":(3,B_CL),"ליאור":(6,CLASSES),"מרים":(15,CLASSES),"צופיה":(8,[c for c in CLASSES if c[0] in "אבג"]),"שחר":(2,[c for c in CLASSES if c[0] in "אבג"])}
 TLN_OFF2={"הילית":["חמישי","שישי"],"חגית":["חמישי"],"יפעת":["חמישי","שישי"],"יעל":[]}
-TLN_UN2={"הילית":[(2,h) for h in range(4,9)],"חגית":[],"יפעת":[],"יעל":[]}
+TLN_UN2={"הילית":[(2,h) for h in range(4,9)],"חגית":[],"יפעת":[(2,h) for h in range(1,9)],"יעל":[]}   # יפעת: בלי שלישי - 3 ימים מרוכזים
 
 def blk(t):
     b=set()
@@ -360,7 +360,7 @@ OBJ_E=(-300*sum(orna)+10000*sum(empty.values())+sum(pen)+200*(len(farm)-sum(farm
 _SEDF=json.load(io.open("sed_J.json",encoding="utf-8"))
 for _t in ALLC:
     if False: pass
-    elif _t=="אלי":                  m.Add(gm[_t]==1)   # קבוצת שני (מלמד חינוך בשלישי ש5)
+    elif _t=="אלי":                  m.Add(gm[_t]==0)   # קבוצת שלישי (קבוע)
     elif _t=="שרית":                 m.Add(gm[_t]==0)   # לקבוצת שלישי (תורנות שני ש4)
     elif _t in _SEDF["קבוצת שני"]:   m.Add(gm[_t]==1)
     elif _t in _SEDF["קבוצת שלישי"]: m.Add(gm[_t]==0)
@@ -407,7 +407,9 @@ for day in ("שני","שלישי"):
 for t in ["לייה","שרית","יערה","צופיה","אסיף","אלי"]:
     for h in HSED["ישיבת ניהול שלישי"]: hebusy[t].add((2,h))
 
-hebusy["אלי"].discard((HCM["שלישי"],5)); hebusy["אלי"].discard((HCM["שלישי"],6))   # אלי בקבוצת שני
+# אלי: קבוצת שלישי קבוע - בלי תלות ב-sed הישן
+hebusy["אלי"].discard((HCM["שני"],3)); hebusy["אלי"].discard((HCM["שני"],4))
+hebusy["אלי"].add((HCM["שלישי"],5)); hebusy["אלי"].add((HCM["שלישי"],6))
 def htblk(t):
     b=set(hebusy.get(t,()))
     for dn in HOFF.get(t,[]):
@@ -594,7 +596,8 @@ for d in range(5):
         for h in range(1,HDAY[d]+1) if (_c2,(d,h),"מתמטיקה","הדר") in hx]
     if _v:
         for _vv in _v: m.Add(_vv<=hd_act[d])
-        m.Add(sum(_v)>=2*hd_act[d])               # יום פעיל = לפחות שעתיים
+        _min=1 if d==2 else 2                     # בשלישי מותר שעה אחת (ש5 בלבד קיימת לז)
+        m.Add(sum(_v)>=_min*hd_act[d])
     else: m.Add(hd_act[d]==0)
 m.Add(sum(hd_act.values())<=3)
 
