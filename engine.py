@@ -16,7 +16,7 @@ DEU=[c for c in CLASSES if c[0] in "דהו"]; B_CL=[c for c in CLASSES if c.star
 G_CL=[c for c in CLASSES if c[0]=="ג"]
 POOL={"אלי":(4,["ו אורנה","ו שרית"]),"אופיר":(3,["ו אורנה","ו שרית"]),"טלי":(3,B_CL),"ליאור":(6,CLASSES),"מרים":(15,CLASSES),"צופיה":(8,[c for c in CLASSES if c[0] in "אבג"]),"שחר":(2,[c for c in CLASSES if c[0] in "אבג"])}
 TLN_OFF2={"הילית":["חמישי","שישי"],"חגית":["חמישי"],"יפעת":["חמישי","שישי"],"יעל":[]}
-TLN_UN2={"הילית":[(2,h) for h in range(4,9)],"חגית":[],"יפעת":[(2,h) for h in range(1,9)],"יעל":[]}   # יפעת: בלי שלישי - 3 ימים מרוכזים
+TLN_UN2={"הילית":[(2,h) for h in range(4,9)],"חגית":[],"יפעת":[],"יעל":[]}   # תל"ן גמיש על 4 ימים
 
 def blk(t):
     b=set()
