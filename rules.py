@@ -82,7 +82,19 @@ def r_galit_spread(c):
         if v: m.Add(sum(v) >= 1)
 
 
+def r_hadracha_sunday(c):
+    """הדרכות ראשון: גלית+סימה בהדרכת אנגלית ש5; שרית+אורנה בהדרכת עברית ש1."""
+    m, x, hx = c["m"], c["x"], c["hx"]
+    for k in [k for k in hx if k[3] == "גלית" and k[1] == (0, 5)]:
+        m.Add(hx[k] == 0)
+    for t, sl in (("סימה", (0, 5)), ("אורנה", (0, 1)), ("שרית", (0, 1))):
+        for k in [k for k in x if k[2] == t and k[1] == sl]:
+            m.Add(x[k] == 0)
+
+
 RULES = [
+    {"id": "hadracha_sunday", "name": "הדרכות יום ראשון", "active": True, "fn": r_hadracha_sunday,
+     "desc": "גלית וסימה פנויות בראשון ש5 (הדרכת אנגלית עם סיגל); שרית ואורנה פנויות בראשון ש1 (הדרכת עברית עם קטיה)."},
     {"id": "galit_spread", "name": "גלית עם כיתתה בראשון וברביעי", "active": True, "fn": r_galit_spread,
      "desc": "לפחות שיעור אחד של גלית בח בראשון ולפחות אחד ברביעי — לא הכל בסוף השבוע."},
     {"id": "tamir_subjects", "name": "המקצועות של תמיר בט", "active": True, "fn": r_tamir_subjects,

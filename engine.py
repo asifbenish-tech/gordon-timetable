@@ -360,13 +360,14 @@ OBJ_E=(-300*sum(orna)+10000*sum(empty.values())+sum(pen)+200*(len(farm)-sum(farm
 _SEDF=json.load(io.open("sed_J.json",encoding="utf-8"))
 for _t in ALLC:
     if False: pass
+    elif _t=="שרית":                 m.Add(gm[_t]==0)   # לקבוצת שלישי (תורנות שני ש4)
     elif _t in _SEDF["קבוצת שני"]:   m.Add(gm[_t]==1)
     elif _t in _SEDF["קבוצת שלישי"]: m.Add(gm[_t]==0)
 # שלישי: רק שני שילובים אפשריים (מגמות תופסות 1-4). נעילה למצב המקורי.
 for _h in range(1,7):
     if ("u",_h) in blkh: m.Add(blkh[("u",_h)]==(1 if _h in (5,6) else 0))
 m.Add(nst[0]==1)
-_hm={5,6}
+_hm={3,4}   # מעגל שני 10:00-11:30
 for _h in range(1,7):
     if ("m",_h) in blkh: m.Add(blkh[("m",_h)]==(1 if _h in _hm else 0))
 
