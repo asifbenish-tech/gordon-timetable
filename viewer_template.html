@@ -97,6 +97,9 @@ td.name{text-align:right;font-weight:500}
 .hit{animation:flash 1.6s ease-out}
 @keyframes flash{0%,60%{background:var(--fill);box-shadow:inset 3px 0 0 var(--fill-b)}}
 .gaplist{display:flex;flex-direction:column;gap:.45rem;margin-top:.8rem}
+td.sed{background:repeating-linear-gradient(45deg,transparent,transparent 6px,var(--chip) 6px,var(--chip) 7px);
+  color:var(--muted);font-style:italic;border-style:dashed}
+td.sed .s{font-style:italic}
 details.plan{margin-top:.6rem}
 details.plan summary{cursor:pointer;font:500 .85rem Heebo;color:var(--accent)}
 details.plan table{min-width:0;max-width:34rem;margin-top:.5rem}
@@ -206,13 +209,19 @@ function grid(name,info,duty){
 }
 function teacherGrid(t){
   const ev=DATA.teachers[t]||[]; const per={};
+  const sedOnly={};
   ev.forEach(e=>{const side=e[0],d=e[1],h=e[2],label=e[3];
-    const add=label+(side!=="יסודי"?(' <span class="s">'+side+'</span>'):'');
-    per[d+","+h]=(per[d+","+h]?per[d+","+h]+' · ':'')+add;});
+    const key=d+","+h;
+    const add=(side==="סדירות")?('◦ '+label):(label+(side!=="יסודי"?(' <span class="s">'+side+'</span>'):''));
+    sedOnly[key]=(sedOnly[key]===undefined?true:sedOnly[key])&&(side==="סדירות");
+    per[key]=(per[key]?per[key]+' · ':'')+add;});
   let rows="";
   for(let h=1;h<=7;h++){
     rows+='<tr><th>'+h+'</th>';
-    DAYS.forEach((dn,d)=>{rows+='<td>'+(per[d+","+h]||'')+'</td>';});
+    DAYS.forEach((dn,d)=>{
+      const key=d+","+h;
+      const cls=(per[key]&&sedOnly[key])?' class="sed"':'';
+      rows+='<td'+cls+'>'+(per[key]||'')+'</td>';});
     rows+='</tr>';
   }
   let head='<tr><th>שעה</th>';

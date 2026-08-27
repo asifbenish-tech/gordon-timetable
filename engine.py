@@ -152,7 +152,7 @@ for t in ALLC:
 m.Add(sum(gm.values())>=8); m.Add(sum(gm.values())<=10)
 m.Add(gm["נעמי"]==1)     # נעמי בקבוצת שני - פנויה בשלישי 5-6
 JH=["אסיף","אלי","נעמי","גלית","תמיר"]
-m.Add(sum(gm[t] for t in JH)>=2); m.Add(sum(gm[t] for t in JH)<=3)
+m.Add(sum(gm[t] for t in JH)>=1); m.Add(sum(gm[t] for t in JH)<=4)
 for t in ALLC:                                   # מי שבמגמות ג' לא יכול בקבוצת שלישי באותן שעות
     for (d,h),tt in MAGAMA.items():
         if d==2 and t in tt: m.Add(blkh[("u",h)]+gm[t].Not()<=1)
@@ -360,6 +360,7 @@ OBJ_E=(-300*sum(orna)+10000*sum(empty.values())+sum(pen)+200*(len(farm)-sum(farm
 _SEDF=json.load(io.open("sed_J.json",encoding="utf-8"))
 for _t in ALLC:
     if False: pass
+    elif _t=="אלי":                  m.Add(gm[_t]==1)   # קבוצת שני (מלמד חינוך בשלישי ש5)
     elif _t=="שרית":                 m.Add(gm[_t]==0)   # לקבוצת שלישי (תורנות שני ש4)
     elif _t in _SEDF["קבוצת שני"]:   m.Add(gm[_t]==1)
     elif _t in _SEDF["קבוצת שלישי"]: m.Add(gm[_t]==0)
@@ -406,7 +407,7 @@ for day in ("שני","שלישי"):
 for t in ["לייה","שרית","יערה","צופיה","אסיף","אלי"]:
     for h in HSED["ישיבת ניהול שלישי"]: hebusy[t].add((2,h))
 
-hebusy["אלי"].discard((HCM["שלישי"],5))
+hebusy["אלי"].discard((HCM["שלישי"],5)); hebusy["אלי"].discard((HCM["שלישי"],6))   # אלי בקבוצת שני
 def htblk(t):
     b=set(hebusy.get(t,()))
     for dn in HOFF.get(t,[]):
