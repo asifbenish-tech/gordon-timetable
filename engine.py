@@ -894,7 +894,15 @@ import rules as _rules
 _rules.apply(globals())
 
 # ================= מטרה משולבת + פתרון =================
-m.Minimize(OBJ_E + OBJ_H)
+# פיזור חורים (spread_holes): קנס על כיתה עם יותר מחור אחד
+_sp_pen=[]
+for _c in CLASSES:
+    _hv=[empty[(_c,_s)] for _s in NONFRI if (_c,_s) in empty]
+    if _hv:
+        _ex=m.NewIntVar(0,32,f"exh_{_c}")
+        m.Add(_ex>=sum(_hv)-1)
+        _sp_pen.append(_ex)
+m.Minimize(OBJ_E + OBJ_H + 6000*sum(_sp_pen))
 sol=cp_model.CpSolver()
 import os as _os
 sol.parameters.max_time_in_seconds=float(_os.environ.get("TL","150"))
