@@ -95,6 +95,14 @@ def r_hadracha_sunday(c):
             m.Add(x[k] == 0)
 
 
+def r_naomi_sifrut_tet(c):
+    """ספרות בט תמיר — נעמי בעצמה, לא חסר מורה."""
+    m, hx, HSLOTS = c["m"], c["hx"], c["HSLOTS"]
+    v = [hx[("ט תמיר", s2, "ספרות", "נעמי")] for s2 in HSLOTS
+         if ("ט תמיר", s2, "ספרות", "נעמי") in hx]
+    if v: m.Add(sum(v) == 1)
+
+
 def r_zayin_friday_full(c):
     """כיתות ז: שישי מלא — כל 4 השעות עם שיעור (המחנך; בז אלי — שיר)."""
     m, hfree = c["m"], c["hfree"]
@@ -104,6 +112,8 @@ def r_zayin_friday_full(c):
 
 
 RULES = [
+    {"id": "naomi_sifrut_tet", "name": "נעמי מלמדת ספרות בט תמיר", "active": True, "fn": r_naomi_sifrut_tet,
+     "desc": "שעת הספרות של ט תמיר — אצל נעמי, לא חסר מורה."},
     {"id": "zayin_friday_full", "name": "שישי מלא בכיתות ז", "active": True, "fn": r_zayin_friday_full,
      "desc": "כל 4 שעות שישי מאוישות בכיתות ז — עם המחנך (בז אלי: שיר)."},
     {"id": "hadracha_sunday", "name": "הדרכות יום ראשון", "active": True, "fn": r_hadracha_sunday,
