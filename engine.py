@@ -691,6 +691,9 @@ for c in HCLASSES:
     for d in range(6):
         k=(c,(d,HDAY[d]),"שפה","אסיף")
         if k in hx: m.Add(hx[k]==0)
+# אסיף: לא מלמד שעה שביעית בכלל
+for _k in [k for k in hx if k[3]=="אסיף" and k[1][1]==7]:
+    m.Add(hx[_k]==0)
 
 # ==== חלוקת רב מלל ותנ"ך בכיתות ט (rules_rm) ====
 # אסיף: שעת החינוך השנייה שלו בשעה שישית
