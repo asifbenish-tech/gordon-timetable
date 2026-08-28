@@ -46,7 +46,11 @@ def grid(ws,title,home,cells,dayhours,hdr,away,cls=None):
             if h>dayhours[d]: cell.fill=PatternFill("solid",fgColor="F2F2F2"); continue
             v=cells.get((d,h),"")
             if not v:
-                cell.value="חסר מורה"
+                if cls is not None:                       # חוסר ביסודי: המנהל נכנס בינתיים
+                    cell.value="מנהל (זמני)"
+                    cell.comment=openpyxl.comments.Comment("המנהל נכנס בינתיים - שיבוץ זמני עד סגירת החוסר","מערכת")
+                else:
+                    cell.value="חסר מורה"
                 cell.fill=PatternFill("solid",fgColor="FF9999"); cell.font=Font(bold=True,color="990000")
                 cell.border=BO; continue
             cell.value=v
@@ -109,7 +113,8 @@ for c in HCLASSES:                                    # ---- חטיבה ----
     cnt=collections.Counter(v.split(" – ")[0] for v in H[c].values() if v)
     for i,(sj,n) in enumerate(cnt.most_common()):
         ws.cell(row=r+1+i,column=1,value=sj); ws.cell(row=r+1+i,column=2,value=n)
-        ws.cell(row=r+1+i,column=3,value="✔" if n==NEED[sj][GRADE[c]] else f"נדרש {NEED[sj][GRADE[c]]}")
+        _nd=NEED.get(sj,{}).get(GRADE[c])
+        ws.cell(row=r+1+i,column=3,value="✔" if _nd is None or n==_nd else f"נדרש {_nd}")
 
 ws=wb.create_sheet("סדירויות"); ws.sheet_view.rightToLeft=True   # ---- ריכוז ----
 ws["A1"]="סדירויות ובלוקים קבועים"; ws["A1"].font=Font(bold=True,size=14)
@@ -188,7 +193,7 @@ for c in CLASSES:
 for c in HCLASSES:
     for s2 in HSLOTS:
         t = tof(H[c][f"{s2[0]},{s2[1]}"])
-        if t: teachers.add(t)
+        if t and t!="שכבת ט יחד": teachers.add(t)
 teachers.add("צופיה")
 
 wst = wb.create_sheet("מערכות מורים"); wst.sheet_view.rightToLeft = True

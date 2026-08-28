@@ -626,8 +626,10 @@ for _k in [k for k in hx if k[0]==_MC and k[3]=="חסר מורה" and k[2]!="ח�
 # אנגלית=גלית ושפה=נעמי/אסיף - חסר מורה אסור בהן (no_miss_eng)
 for _k in [k for k in hx if k[3]=="חסר מורה" and k[2] in ("אנגלית","שפה")]:
     m.Add(hx[_k]==0)
+# שעת גיבוש שכבת ט: שישי ש1, שתי כיתות ט יחד - אין שיעור רגיל במשבצת
+for _c9g in T9: m.Add(hfree[(_c9g,(5,1))]==1)
 _miss_fri=[hx[k] for k in hx if k[3]=="חסר מורה" and k[0]==_MC and k[1][0]==5]
-if _miss_fri: m.Add(sum(_miss_fri)==4)   # כל שישי בכיתת אסיף ללא מורה   # תמיר מכסה 2 (שירה + כפול)
+if _miss_fri: m.Add(sum(_miss_fri)==3)   # שישי ט אסיף: ש1 גיבוש, ש2-4 צבי נכנס (נרשם כחסר מורה במודל)
 for _k in [k for k in hx if k[3]=="חסר מורה" and k[1][0]==5 and k[0]!=_MC]:
     m.Add(hx[_k]==0)                      # בשאר הכיתות אין חוסר בשישי
 # שלישי: כל הכיתות עד שעה 6 - מותר "חסר מורה" בקנס
@@ -764,6 +766,7 @@ for c in HCLASSES:
 for c in HCLASSES:
     for d in range(6):
         for h in range(1,HDAY[d]):
+            if d==5 and h==1 and GRADE[c]=="ט": continue   # שישי ש1 ט: שעת גיבוש (לא חלון)
             m.AddImplication(hfree[(c,(d,h))], hfree[(c,(d,h+1))])
 
 # פיזור: לא יותר מ-2 שעות של אותו מקצוע ביום (חוץ ממגמות/ספורט)
@@ -962,6 +965,10 @@ if st in (cp_model.OPTIMAL,cp_model.FEASIBLE):
         for s in HSLOTS:
             got=[(sj,t) for (sj,t) in pairs[c] if (c,s,sj,t) in hx and sol.Value(hx[(c,s,sj,t)])]
             out[c][f"{s[0]},{s[1]}"]= (f"{got[0][0]} – {got[0][1]}" if got else "")
+    for _c9g in T9: out[_c9g]["5,1"]="שעת גיבוש – שכבת ט יחד"   # שתי כיתות ט ביחד
+    for _h5 in (2,3,4):                                          # צבי נכנס לכיתת אסיף בשישי
+        _v5=out[_MC][f"5,{_h5}"]
+        if "חסר מורה" in _v5: out[_MC][f"5,{_h5}"]=_v5.replace("חסר מורה","צבי")
     io.open("sol_hat.json","w",encoding="utf-8").write(json.dumps(out,ensure_ascii=False,indent=1))
     peo={f"{DAY_NAMES[d]} ש{h}":g for (g,d,h) in hpe if sol.Value(hpe[(g,d,h)])}
     io.open("duty.json","w",encoding="utf-8").write(json.dumps(
