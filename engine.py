@@ -241,7 +241,7 @@ m.Add(sum(_ml)>=7)
 # מרים: אפס יסודי בשלישי (שמורה לחטיבה), מקס 4 ביום בשאר הימים
 for d in range(5):
     dv=[x[(c,(d,h),"מרים")] for c in CLASSES for h in range(1,DAY_HOURS[d]+1) if (c,(d,h),"מרים") in x]
-    if dv: m.Add(sum(dv)<=(0 if d==2 else 5))   # סטאז עברית - עד 5 ביום
+    if dv: m.Add(sum(dv)<=(2 if d==2 else 5))   # ניסוי: עד 2 ביסודי בשלישי   # סטאז עברית - עד 5 ביום
 
 empty={}
 for c in CLASSES:

@@ -95,7 +95,17 @@ def r_hadracha_sunday(c):
             m.Add(x[k] == 0)
 
 
+def r_zayin_friday_full(c):
+    """כיתות ז: שישי מלא — כל 4 השעות עם שיעור (המחנך; בז אלי — שיר)."""
+    m, hfree = c["m"], c["hfree"]
+    for cz in ("ז נעמי", "ז אלי"):
+        for h in (1, 2, 3, 4):
+            m.Add(hfree[(cz, (5, h))] == 0)
+
+
 RULES = [
+    {"id": "zayin_friday_full", "name": "שישי מלא בכיתות ז", "active": True, "fn": r_zayin_friday_full,
+     "desc": "כל 4 שעות שישי מאוישות בכיתות ז — עם המחנך (בז אלי: שיר)."},
     {"id": "hadracha_sunday", "name": "הדרכות יום ראשון", "active": True, "fn": r_hadracha_sunday,
      "desc": "גלית וסימה פנויות בראשון ש5 (הדרכת אנגלית עם סיגל); שרית ואורנה פנויות בראשון ש1 (הדרכת עברית עם קטיה)."},
     {"id": "galit_spread", "name": "גלית עם כיתתה בראשון וברביעי", "active": True, "fn": r_galit_spread,
