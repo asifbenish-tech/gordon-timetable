@@ -14,7 +14,7 @@ from data2 import *
 NONFRI=[s for s in SLOTS if s[0]!=5]; FRI=[s for s in SLOTS if s[0]==5]
 DEU=[c for c in CLASSES if c[0] in "דהו"]; B_CL=[c for c in CLASSES if c.startswith("ב ")]
 G_CL=[c for c in CLASSES if c[0]=="ג"]
-POOL={"אלי":(4,["ו אורנה","ו שרית"]),"אופיר":(3,["ו אורנה","ו שרית"]),"טלי":(3,B_CL),"ליאור":(6,CLASSES),"מרים":(15,CLASSES),"צופיה":(8,[c for c in CLASSES if c[0] in "אבג"]),"שחר":(2,[c for c in CLASSES if c[0] in "אבג"])}
+POOL={"אלי":(4,["ו אורנה","ו שרית"]),"אופיר":(3,["ו אורנה","ו שרית"]),"יערה":(7,CLASSES),"דני":(5,CLASSES),"דניאל":(5,CLASSES),"אנה":(2,CLASSES),"אביטל":(4,CLASSES),"לייה":(4,CLASSES),"אינס":(1,CLASSES),"אורנה":(1,CLASSES),"טלי":(3,B_CL),"ליאור":(6,CLASSES),"מרים":(15,CLASSES),"צופיה":(8,[c for c in CLASSES if c[0] in "אבג"]),"שחר":(2,[c for c in CLASSES if c[0] in "אבג"])}
 TLN_OFF2={"הילית":["חמישי","שישי"],"חגית":["חמישי"],"יפעת":["חמישי","שישי"],"יעל":[]}
 TLN_UN2={"הילית":[(2,h) for h in range(4,9)],"חגית":[],"יפעת":[],"יעל":[]}   # תל"ן גמיש על 4 ימים
 
@@ -50,7 +50,7 @@ pe={}
 for tag,d,maxst in (("sun",0,3),("wed",3,4)):
     st=[m.NewBoolVar(f"pe{tag}{h}") for h in range(1,maxst+1)]
     m.Add(sum(st)==1)
-    m.Add(st[0 if tag=="sun" else 3]==1)   # קבוע: ראשון 1-3, רביעי 4-6
+    m.Add(st[1 if tag=="sun" else 3]==1)   # קבוע: ראשון 2-4 (שרית בהדרכה בש1), רביעי 4-6
     for h in range(1,DAY_HOURS[d]+1):
         v=m.NewBoolVar(f"peh{tag}{h}")
         src=[st[k-1] for k in range(max(1,h-2),h+1) if k<=maxst]
@@ -236,12 +236,12 @@ for c in CLASSES:
 _mv=[x[k] for k in x if k[2]=="מרים"]
 m.Add(sum(_mv)>=13)
 _ml=[x[k] for k in x if k[2]=="מרים" and k[0][0] in "אבג"]
-m.Add(sum(_ml)>=7)
+m.Add(sum(_ml)>=6)
 
 # מרים: אפס יסודי בשלישי (שמורה לחטיבה), מקס 4 ביום בשאר הימים
 for d in range(5):
     dv=[x[(c,(d,h),"מרים")] for c in CLASSES for h in range(1,DAY_HOURS[d]+1) if (c,(d,h),"מרים") in x]
-    if dv: m.Add(sum(dv)<=(0 if d==2 else 5))   # סטאז עברית - עד 5 ביום
+    if dv: m.Add(sum(dv)<=(4 if d==2 else 5))   # ניסוי: עד 2 ביסודי בשלישי   # סטאז עברית - עד 5 ביום
 
 empty={}
 for c in CLASSES:

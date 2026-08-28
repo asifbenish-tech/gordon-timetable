@@ -36,9 +36,9 @@ def r_track_day(c):
     m.Add(c["hfree"][("ז אלי", (2, 5))] == 0)
     for k in [k for k in hx if k[0] == "ז אלי" and k[1] == (2, 5) and k[3] in ("חסר מורה", "אלי")]:
         m.Add(hx[k] == 0)
-    v5m = [hx[k] for k in hx if k[0] == "ח גלית" and k[1] == (2, 5)
-           and k[2] == "מתמטיקה" and k[3] == "מורה חיצוני"]
-    if v5m: m.Add(sum(v5m) == 1)
+    m.Add(hfree[("ח גלית", (2, 5))] == 0)
+    for k in [k for k in hx if k[0] == "ח גלית" and k[1] == (2, 5) and k[3] in ("גלית", "חסר מורה")]:
+        m.Add(hx[k] == 0)
     for c9 in T9:
         v5 = [hx[k] for k in hx if k[0] == c9 and k[1] == (4, 5) and k[2] == "חינוך"]
         if v5: m.Add(sum(v5) == 1)
@@ -95,7 +95,46 @@ def r_hadracha_sunday(c):
             m.Add(x[k] == 0)
 
 
+def r_naomi_sifrut_tet(c):
+    """ספרות בט תמיר — נעמי בעצמה, לא חסר מורה."""
+    m, hx, HSLOTS = c["m"], c["hx"], c["HSLOTS"]
+    v = [hx[("ט תמיר", s2, "ספרות", "נעמי")] for s2 in HSLOTS
+         if ("ט תמיר", s2, "ספרות", "נעמי") in hx]
+    if v: m.Add(sum(v) == 1)
+
+
+def r_tamir_tue_covered(c):
+    """ט תמיר: יום שלישי בלי חסר מורה — כל שעה עם מורה אמיתי."""
+    m, hx = c["m"], c["hx"]
+    for k in [k for k in hx if k[0] == "ט תמיר" and k[1][0] == 2 and k[3] == "חסר מורה"]:
+        m.Add(hx[k] == 0)
+
+
+def r_aravit_tamir(c):
+    """ערבית בט תמיר — שתי השעות עם מרים, לא חסר מורה."""
+    m, hx, HSLOTS = c["m"], c["hx"], c["HSLOTS"]
+    v = [hx[("ט תמיר", s2, "ערבית", "מרים")] for s2 in HSLOTS
+         if ("ט תמיר", s2, "ערבית", "מרים") in hx]
+    if v: m.Add(sum(v) == 2)
+
+
+def r_zayin_friday_full(c):
+    """כיתות ז: שישי מלא — כל 4 השעות עם שיעור (המחנך; בז אלי — שיר)."""
+    m, hfree = c["m"], c["hfree"]
+    for cz in ("ז נעמי", "ז אלי"):
+        for h in (1, 2, 3, 4):
+            m.Add(hfree[(cz, (5, h))] == 0)
+
+
 RULES = [
+    {"id": "tamir_tue_covered", "name": "ט תמיר — שלישי מאויש", "active": True, "fn": r_tamir_tue_covered,
+     "desc": "אין חסר מורה בט תמיר ביום שלישי."},
+    {"id": "aravit_tamir", "name": "ערבית ט תמיר מאוישת", "active": True, "fn": r_aravit_tamir,
+     "desc": "שתי שעות הערבית של ט תמיר — עם מרים, בלי חסר מורה."},
+    {"id": "naomi_sifrut_tet", "name": "נעמי מלמדת ספרות בט תמיר", "active": True, "fn": r_naomi_sifrut_tet,
+     "desc": "שעת הספרות של ט תמיר — אצל נעמי, לא חסר מורה."},
+    {"id": "zayin_friday_full", "name": "שישי מלא בכיתות ז", "active": True, "fn": r_zayin_friday_full,
+     "desc": "כל 4 שעות שישי מאוישות בכיתות ז — עם המחנך (בז אלי: שיר)."},
     {"id": "hadracha_sunday", "name": "הדרכות יום ראשון", "active": True, "fn": r_hadracha_sunday,
      "desc": "גלית וסימה פנויות בראשון ש5 (הדרכת אנגלית עם סיגל); שרית ואורנה פנויות בראשון ש1 (הדרכת עברית עם קטיה)."},
     {"id": "galit_spread", "name": "גלית עם כיתתה בראשון וברביעי", "active": True, "fn": r_galit_spread,
