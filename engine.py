@@ -903,10 +903,6 @@ for _c in CLASSES:
         m.Add(_ex>=sum(_hv)-1)
         _sp_pen.append(_ex)
 # עידוד תל"ן בשלישי אחה"צ - יפעת יכולה לכסות את שעות המחסור
-# ניסיון ממוקד: תל"ן א פנינה בשלישי 5-6 (חגית פנויה שם אחרי המגמה)
-for _hp in (5,6):
-    _kp=("א פנינה",(2,_hp),'תל"ן')
-    if _kp in x: m.Add(x[_kp]==1)
 _tln_tue=[x[(c,(2,h),'תל"ן')] for c in CLASSES for h in (3,4,5,6)
           if (c,(2,h),'תל"ן') in x]
 m.Minimize(OBJ_E + OBJ_H + 6000*sum(_sp_pen) - 1500*sum(_tln_tue))
