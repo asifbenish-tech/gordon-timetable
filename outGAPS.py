@@ -46,9 +46,9 @@ def grid(ws,title,home,cells,dayhours,hdr,away,cls=None):
             if h>dayhours[d]: cell.fill=PatternFill("solid",fgColor="F2F2F2"); continue
             v=cells.get((d,h),"")
             if not v:
-                if cls is not None:                       # חוסר ביסודי: המנהל נכנס בינתיים
-                    cell.value="מנהל (זמני)"
-                    cell.comment=openpyxl.comments.Comment("המנהל נכנס בינתיים - שיבוץ זמני עד סגירת החוסר","מערכת")
+                if cls is not None:                       # חוסר ביסודי: מחנך/ת הכיתה נכנס/ת בינתיים
+                    cell.value=f"{home} (זמני)"
+                    cell.comment=openpyxl.comments.Comment("מחנך/ת הכיתה נכנס/ת בינתיים - שיבוץ זמני עד סגירת החוסר","מערכת")
                 else:
                     cell.value="חסר מורה"
                 cell.fill=PatternFill("solid",fgColor="FF9999"); cell.font=Font(bold=True,color="990000")
