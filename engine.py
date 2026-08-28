@@ -473,7 +473,7 @@ for c in HCLASSES:
     for subj,per in NEED.items():
         if per[g]==0: continue
         v=[hx[(c,s,subj,t)] for s in HSLOTS for (sj,t) in pairs[c] if sj==subj and (c,s,subj,t) in hx]
-        _ovr={("ט אסיף","חינוך"):4,("ט אסיף","מתמטיקה"):4,("ט תמיר","חינוך"):3}   # מתמטיקה חוזרת ל-4
+        _ovr={("ט אסיף","חינוך"):3,("ט אסיף","מתמטיקה"):5,("ט תמיר","חינוך"):3}   # מתמטיקה חוזרת ל-4
         m.Add(sum(v)==_ovr.get((c,subj),per[g]))
 
 # מגמות: בלוקים קבועים
@@ -867,22 +867,20 @@ for _t in ("תמיר",):
                     elif _t2 is None: m.Add(_t1-_e3<=0)
                     else: m.Add(_t1+_t2-_e3<=1)
 
-# ---- PARALLEL_EQ: כיתות מקבילות מסיימות באותה שעה בכל יום ----
+# ---- PARALLEL_EQ: כיתות מקבילות - אותו סך שעות שבועי (לא חייבות לסיים יחד) ----
 import collections as _cl
 _bygrade=_cl.defaultdict(list)
 for _c in HCLASSES: _bygrade[GRADE[_c]].append(_c)
 _neq=0
 for _g,_cs in _bygrade.items():
     if len(_cs)<2: continue
-    for _d in range(6):
-        _tot=[]
-        for _c in _cs:
-            _v=[hx[k] for k in hx if k[0]==_c and k[1][0]==_d]
-            _iv=m.NewIntVar(0,HDAY[_d],f"pq_{_c}_{_d}")
-            m.Add(_iv==sum(_v)); _tot.append(_iv)
-        for _i in range(1,len(_tot)):
-            if _g=="ט" and _d==2: _neq+=1; continue   # שלישי: ט תמיר מסיים ב-5, ט אסיף ב-6
-            m.Add(_tot[0]==_tot[_i]); _neq+=1
+    _tot=[]
+    for _c in _cs:
+        _v=[hx[k] for k in hx if k[0]==_c]
+        _iv=m.NewIntVar(0,45,f"pq_{_c}")
+        m.Add(_iv==sum(_v)); _tot.append(_iv)
+    for _i in range(1,len(_tot)):
+        m.Add(_tot[0]==_tot[_i]); _neq+=1
 print(f"שוויון מקבילות: {_neq} אילוצים")
 
 # ---- WARM START: רמז מהפתרון הקודם -> פתרון מהיר בהרבה ----
