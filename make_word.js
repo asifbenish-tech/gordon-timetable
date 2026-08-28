@@ -102,7 +102,37 @@ function classTable(kind, c) {
 }
 
 // ---------- הרכבת המסמך ----------
+const SPEC = process.argv[4] ? JSON.parse(fs.readFileSync(process.argv[4], "utf8")) : null;
 const kids = [];
+function heading(text, size, opts = {}) {
+  kids.push(new Paragraph({
+    children: [new TextRun({ text, font: FONT, rightToLeft: true, size, bold: true })],
+    bidirectional: true, alignment: opts.center ? AlignmentType.CENTER : AlignmentType.RIGHT,
+    spacing: { before: opts.before || 60, after: opts.after || 100 },
+  }));
+}
+function pageBreak() { kids.push(new Paragraph({ children: [new PageBreak()] })); }
+
+if (SPEC) {
+  // קובץ בית: קודם מערכות הכיתות, אחר כך מערכות המורים
+  heading(SPEC.title, 40, { center: true, after: 120 });
+  kids.push(textPara(SPEC.subtitle || "", { size: 16, align: AlignmentType.CENTER, spacing: { after: 240 } }));
+  heading("מערכות הכיתות", 32, { center: true, after: 200 });
+  SPEC.classes.forEach(([kind, c], i) => {
+    if (i > 0) pageBreak();
+    heading("כיתה " + c + "   (מחנך/ת: " + (kind === "elem" ? D.elem : D.jun)[c].home + ")", 28);
+    kids.push(classTable(kind, c));
+  });
+  pageBreak();
+  heading("מערכות המורים", 32, { center: true, after: 200 });
+  SPEC.teachers.forEach((t, i) => {
+    if (i > 0) pageBreak();
+    const homes = D.home_of[t] || [];
+    const homeNote = homes.length ? " — מחנך/ת " + homes.map(x => x[1]).join(", ") : "";
+    heading(t + homeNote, 28);
+    kids.push(teacherTable(t));
+  });
+} else {
 kids.push(new Paragraph({
   children: [new TextRun({ text: 'מערכות שעות מורים – בית חינוך ע"ש א.ד גורדון', font: FONT, rightToLeft: true, size: 40, bold: true })],
   bidirectional: true, alignment: AlignmentType.CENTER, spacing: { after: 120 },
@@ -127,6 +157,7 @@ names.forEach((t, i) => {
     kids.push(classTable(kind, c));
   }
 });
+}
 
 const doc = new Document({
   sections: [{
@@ -142,5 +173,5 @@ const doc = new Document({
 
 Packer.toBuffer(doc).then(buf => {
   fs.writeFileSync(process.argv[3], buf);
-  console.log("written", process.argv[3], buf.length, "bytes,", names.length, "teachers");
+  console.log("written", process.argv[3], buf.length, "bytes");
 });
