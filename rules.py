@@ -32,10 +32,13 @@ def r_track_day(c):
     m, hx, hfree, T9 = c["m"], c["hx"], c["hfree"], c["T9"]
     v5 = [hx[k] for k in hx if k[0] == "ז נעמי" and k[1] == (2, 5) and k[2] == "חינוך"]
     if v5: m.Add(sum(v5) == 1)
-    # ז אלי: המחנך במעגל שיח - שיעור רגיל עם מורה אמיתי בש5
+    # ז אלי: אלי נכנס לכיתתו בש5 - זמני עד תחילת המפגשות (מתנגש במפגשה בכוונה)
     m.Add(c["hfree"][("ז אלי", (2, 5))] == 0)
-    for k in [k for k in hx if k[0] == "ז אלי" and k[1] == (2, 5) and k[3] in ("חסר מורה", "אלי")]:
+    for k in [k for k in hx if k[0] == "ז אלי" and k[1] == (2, 5) and k[3] == "חסר מורה"]:
         m.Add(hx[k] == 0)
+    va5 = [hx[k] for k in hx if k[0] == "ז אלי" and k[1] == (2, 5) and k[3] == "אלי"]
+    if va5: m.Add(sum(va5) == 1)
+
     m.Add(hfree[("ח גלית", (2, 5))] == 0)
     for k in [k for k in hx if k[0] == "ח גלית" and k[1] == (2, 5) and k[3] in ("גלית", "חסר מורה")]:
         m.Add(hx[k] == 0)
@@ -146,7 +149,7 @@ RULES = [
     {"id": "het_monday5", "name": "ח גלית — שני 5+ שעות", "active": True, "fn": r_het_monday5,
      "desc": "יום שני של ח לא מסתיים אחרי 4 שעות."},
     {"id": "track_day", "name": "יום המגמות", "active": True, "fn": r_track_day,
-     "desc": "מגמות ש1-4, ואז ש5: חינוך עם המחנך (ז נעמי, ט); בח ובז אלי - מורה אחר, כי גלית ואלי במעגל השיח. ואז הביתה."},
+     "desc": "מגמות ש1-4, ואז ש5: חינוך עם המחנך (ז נעמי, ט); בח - מורה אחר (גלית במפגשה); בז אלי - אלי נכנס זמנית עד תחילת המפגשות. ואז הביתה."},
     {"id": "sifrut_historia", "name": "ספרות והיסטוריה", "active": True, "fn": r_sifrut_historia,
      "desc": "נעמי (ספרות) ואלי (היסטוריה) — שעתיים בכל כיתת ז ובח; שיר משלימה בשישי בז אלי."},
     {"id": "thursday_67", "name": "חמישי 6-7", "active": True, "fn": r_thursday_67,

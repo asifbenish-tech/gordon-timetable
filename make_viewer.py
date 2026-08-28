@@ -98,6 +98,8 @@ for c in HCLASSES:
                 if t==HHOME[c]: cell["k"]="home"
         if f"{c}|{k}" in GJ: cell["co"]="+ גלית"
         cells[k]=cell
+    if c=="ז אלי" and "2,5" in cells and cells["2,5"].get("s")=="אלי":
+        cells["2,5"]["co"]="זמני – עד תחילת המפגשות"
     dd=DUTY.get(c)
     if dd:
         for _d2,_dn2 in enumerate(DAY_NAMES):

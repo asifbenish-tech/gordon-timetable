@@ -103,8 +103,12 @@ for c in HCLASSES:                                    # ---- חטיבה ----
     for day in ("שני","שלישי"):
         if hr in D.get("קבוצת "+day,[]):
             for h in D["מעגלי שיח "+day]: away[(CM[day],h)]="מפגשה (מעגלי שיח)"
+    if c=="ז אלי": away.pop((2,5),None)               # אלי נכנס לכיתתו בש5 (זמני)
     grid(ws,f"חטיבה – כיתה {c}   (מחנך/ת: {hr})",hr,
          {(d,h):H[c][f"{d},{h}"] for (d,h) in HSLOTS},HDAY,HDRG,away)
+    if c=="ז אלי" and "אלי" in H[c]["2,5"]:
+        _c25=ws.cell(row=2+5,column=2+2)
+        _c25.comment=openpyxl.comments.Comment("אלי נכנס לכיתתו זמנית עד תחילת המפגשות (מתנגש במפגשה)","מערכת")
     dd=DAY_NAMES.index(DUTY[c])
     cell=ws.cell(row=2+5,column=2+dd); cell.fill=DUTYFILL
     cell.comment=openpyxl.comments.Comment(f"סידור חדר אוכל – {hr} עם הכיתה","מערכת")

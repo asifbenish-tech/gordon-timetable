@@ -411,7 +411,8 @@ for t in ["לייה","שרית","יערה","צופיה","אסיף","אלי"]:
 
 # אלי: קבוצת שלישי קבוע - בלי תלות ב-sed הישן
 hebusy["אלי"].discard((HCM["שני"],3)); hebusy["אלי"].discard((HCM["שני"],4))
-hebusy["אלי"].add((HCM["שלישי"],5)); hebusy["אלי"].add((HCM["שלישי"],6))
+hebusy["אלי"].add((HCM["שלישי"],6))
+hebusy["אלי"].discard((HCM["שלישי"],5))   # ש5 שוחררה זמנית: אלי נכנס לכיתתו עד תחילת המפגשות
 def htblk(t):
     b=set(hebusy.get(t,()))
     for dn in HOFF.get(t,[]):
@@ -585,13 +586,16 @@ for s in HSLOTS:
 for t,cap in CAP.items():
     v=[hx[(c,s,sj,t)] for c in HCLASSES for s in HSLOTS for (sj,tt) in pairs[c] if tt==t and (c,s,sj,t) in hx]
     if v: m.Add(sum(v)<=cap)   # CAP הוא תקציב החטיבה בלבד
-# מתמטיקה ז: הדר 8 שעות (4+4 לפי הסדין), צבי משלים 2
+# מתמטיקה ז: הדר 8 שעות (4+4), שני+חמישי בלבד; בשלישי ש5 אלי נכנס לכיתתו (זמני)
 hadar=[hx[(c,s,"מתמטיקה","הדר")] for c in HCLASSES for s in HSLOTS if (c,s,"מתמטיקה","הדר") in hx]
 # הדר: בדיוק יומיים, בכל יום 2 שעות בכל כיתת ז (2+2)
-# הדר מפוצלת: שעה בכל כיתת ז בשלישי 5-6, והיתרה ביומיים (2-3 ימי עבודה)
+# הדר: רק שני וחמישי (צמצום מ-3 ימים)
+for _k in [k for k in hx if k[3]=="הדר" and k[1][0] not in (1,4)]:
+    m.Add(hx[_k]==0)
 for _c in [c for c in HCLASSES if GRADE[c]=="ז"]:
     _tot=[hx[(_c,s,"מתמטיקה","הדר")] for s in HSLOTS if (_c,s,"מתמטיקה","הדר") in hx]
     if _tot: m.Add(sum(_tot)==4)
+
 hd_act={d:m.NewBoolVar(f"hd_day{d}") for d in range(5)}
 for d in range(5):
     _v=[hx[(_c2,(d,h),"מתמטיקה","הדר")] for _c2 in HCLASSES if GRADE[_c2]=="ז"
