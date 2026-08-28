@@ -50,7 +50,7 @@ pe={}
 for tag,d,maxst in (("sun",0,3),("wed",3,4)):
     st=[m.NewBoolVar(f"pe{tag}{h}") for h in range(1,maxst+1)]
     m.Add(sum(st)==1)
-    m.Add(st[0 if tag=="sun" else 3]==1)   # קבוע: ראשון 1-3, רביעי 4-6
+    m.Add(st[1 if tag=="sun" else 3]==1)   # קבוע: ראשון 2-4 (שרית בהדרכה בש1), רביעי 4-6
     for h in range(1,DAY_HOURS[d]+1):
         v=m.NewBoolVar(f"peh{tag}{h}")
         src=[st[k-1] for k in range(max(1,h-2),h+1) if k<=maxst]
