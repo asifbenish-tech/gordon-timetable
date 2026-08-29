@@ -112,6 +112,15 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
 #legend span{display:inline-flex;align-items:center;gap:.3rem}
 #legend i{width:.95rem;height:.95rem;border-radius:.25rem;display:inline-block;border:1px solid var(--line)}
 @media (prefers-reduced-motion:no-preference){ .card{animation:up .18s ease-out} @keyframes up{from{opacity:0;transform:translateY(4px)}to{opacity:1}} }
+.cmtbl td{vertical-align:top;text-align:right;min-width:120px}
+.cmt{border:1px solid var(--line);border-radius:.45rem;padding:.28rem .45rem;margin:.15rem 0;font-size:.78rem;line-height:1.25}
+.cmt b{display:block;font-size:.78rem}
+.cmt small{color:var(--muted)}
+.cm-had{background:var(--fill);border-color:var(--fill-b)}
+.cm-mif{background:var(--home);border-color:var(--home-b)}
+.cm-mtg{background:var(--mag);border-color:var(--mag-b)}
+.cm-asp{background:var(--pe);border-color:var(--pe-b)}
+.cm-mag{background:var(--tln);border-color:var(--tln-b)}
 </style>
 <header>
   <h1>לוח גורדון <small id="stamp"></small></h1>
@@ -121,6 +130,7 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
     <button data-v="teach" aria-pressed="false">מערכות מורים</button>
     <button data-v="gaps" aria-pressed="false">חוסרים</button>
     <button data-v="util" aria-pressed="false">ניצול שעות</button>
+    <button data-v="commit" aria-pressed="false">לוח סדירויות</button>
     <button data-v="rules" aria-pressed="false">אילוצים</button>
     <button data-v="trules" aria-pressed="false">אילוצי מורים</button>
   </nav>
@@ -147,7 +157,7 @@ function tabBtns(){ document.querySelectorAll("#tabs button").forEach(b=>{
 });}
 function chipRow(){
   const box=$q("#chips"); box.innerHTML="";
-  if(view==="util"||view==="gaps"||view==="rules"||view==="trules"){ return; }
+  if(view==="util"||view==="gaps"||view==="rules"||view==="trules"||view==="commit"){ return; }
   if(view==="teach"){
     const sel=document.createElement("select");
     let opts='<option value="">בחר/י מורה…</option>';
@@ -300,6 +310,32 @@ function jumpTo(cls,lvl,dn,hr){
     cell.scrollIntoView({block:"center",behavior:"smooth"});
   });
 }
+function commitView(){
+  const HRS=[1,2,3,4,5,6,7];
+  const kind=n=> n.indexOf("הדרכ")>=0?"cm-had": n.indexOf("מפגשה")>=0?"cm-mif":
+    n.indexOf("ישיב")>=0?"cm-mtg": n.indexOf("אסיפ")>=0?"cm-asp":
+    n.indexOf("ליווי")>=0?"cm-mag":"cm-oth";
+  let rows="";
+  for(const h of HRS){
+    let tds="";
+    for(let d=0;d<6;d++){
+      const ev=(DATA.commit||[]).filter(e=>e.d===d&&e.h===h);
+      tds+='<td>'+ev.map(e=>'<div class="cmt '+kind(e.n)+'"><b>'+e.n+'</b><small>'+e.p+'</small></div>').join("")+'</td>';
+    }
+    rows+='<tr><th>ש'+h+'</th>'+tds+'</tr>';
+  }
+  let hd="<tr><th></th>"; for(let d=0;d<6;d++) hd+="<th>"+DAYS[d]+"</th>"; hd+="</tr>";
+  return '<section class="card"><h2>לוח סדירויות</h2>'+
+    '<div class="sub">הדרכות, מפגשות, ישיבות, אסיפות וליוויי מגמות — מתי ומי משתתף/ת.</div>'+
+    '<div class="tblwrap"><table class="cmtbl">'+hd+rows+'</table></div>'+
+    '<div id="legend" style="margin-top:.8rem">'+
+    '<span><i class="cm-had" style="border-style:solid"></i> הדרכה</span>'+
+    '<span><i class="cm-mif" style="border-style:solid"></i> מפגשה (מעגלי שיח)</span>'+
+    '<span><i class="cm-mtg" style="border-style:solid"></i> ישיבה</span>'+
+    '<span><i class="cm-asp" style="border-style:solid"></i> אסיפת צוות</span>'+
+    '<span><i class="cm-mag" style="border-style:solid"></i> ליווי מגמות</span>'+
+    '</div></section>';
+}
 function rulesView(){
   let rows="";
   DATA.rules.forEach(r=>{
@@ -322,6 +358,7 @@ function render(){
   tabBtns(); chipRow();
   const M=$q("#main"); M.innerHTML="";
   if(view==="util"){ M.innerHTML=utilView(); return; }
+  if(view==="commit"){ M.innerHTML=commitView(); return; }
   if(view==="rules"){ M.innerHTML=rulesView(); return; }
   if(view==="trules"){ M.innerHTML=trulesView(); return; }
   if(view==="gaps"){
