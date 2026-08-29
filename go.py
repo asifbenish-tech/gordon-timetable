@@ -31,6 +31,7 @@ run("fill2.py", "ממלא חורים")
 run("checks.py", "בדיקות")
 run("outGAPS.py", "אקסל")
 run("make_viewer.py", "צופה")
+run("outAPI.py", "timetable.json לאפליקציה")
 
 S = json.load(io.open("sol_J.json", encoding="utf-8"))
 from data2 import CLASSES, SLOTS, DAY_NAMES
