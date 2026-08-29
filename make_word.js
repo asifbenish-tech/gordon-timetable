@@ -103,6 +103,7 @@ function classTable(kind, c) {
 
 // ---------- הרכבת המסמך ----------
 const SPEC = process.argv[4] ? JSON.parse(fs.readFileSync(process.argv[4], "utf8")) : null;
+const FN = t => (D.full_names && D.full_names[t]) || t;
 const kids = [];
 function heading(text, size, opts = {}) {
   kids.push(new Paragraph({
@@ -129,7 +130,7 @@ if (SPEC) {
     if (i > 0) pageBreak();
     const homes = D.home_of[t] || [];
     const homeNote = homes.length ? " — מחנך/ת " + homes.map(x => x[1]).join(", ") : "";
-    heading(t + homeNote, 28);
+    heading(FN(t) + homeNote, 28);
     kids.push(teacherTable(t));
   });
 } else {
@@ -145,7 +146,7 @@ names.forEach((t, i) => {
   const homeNote = homes.length ? " — מחנך/ת " + homes.map(x => x[1]).join(", ") : "";
   if (i > 0) kids.push(new Paragraph({ children: [new PageBreak()] }));
   kids.push(new Paragraph({
-    children: [new TextRun({ text: t + homeNote, font: FONT, rightToLeft: true, size: 30, bold: true })],
+    children: [new TextRun({ text: FN(t) + homeNote, font: FONT, rightToLeft: true, size: 30, bold: true })],
     bidirectional: true, alignment: AlignmentType.RIGHT, spacing: { before: 60, after: 100 },
   }));
   kids.push(teacherTable(t));

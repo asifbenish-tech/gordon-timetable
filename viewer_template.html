@@ -155,6 +155,7 @@ function tabBtns(){ document.querySelectorAll("#tabs button").forEach(b=>{
   b.setAttribute("aria-pressed", b.dataset.v===view ? "true":"false");
   b.onclick=()=>{view=b.dataset.v; pick=null; render();};
 });}
+const FN=t=>(DATA.full_names&&DATA.full_names[t])||t;
 function chipRow(){
   const box=$q("#chips"); box.innerHTML="";
   if(view==="util"||view==="gaps"||view==="rules"||view==="trules"||view==="commit"){ return; }
@@ -162,7 +163,7 @@ function chipRow(){
     const sel=document.createElement("select");
     let opts='<option value="">בחר/י מורה…</option>';
     for(const t of Object.keys(DATA.teachers)){
-      opts+='<option'+(t===pick?' selected':'')+'>'+t+'</option>';
+      opts+='<option value="'+t+'"'+(t===pick?' selected':'')+'>'+FN(t)+'</option>';
     }
     sel.innerHTML=opts;
     sel.onchange=()=>{pick=sel.value||null; render();};
@@ -244,7 +245,7 @@ function teacherGrid(t){
                 (u.left===0?'<span class="full">מכסה מלאה</span>':'נותרו '+u.left);
     sub='משובץ '+u.tot+' מתוך '+u.q+' שעות משרה ('+pct+'%) · '+state;
   }
-  return '<section class="card"><h2>'+t+'</h2><div class="sub">'+sub+'</div>'+
+  return '<section class="card"><h2>'+FN(t)+'</h2><div class="sub">'+sub+'</div>'+
     '<div class="tblwrap"><table>'+head+rows+'</table></div></section>';
 }
 function utilView(){

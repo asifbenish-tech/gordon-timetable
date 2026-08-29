@@ -206,7 +206,9 @@ wst["A1"] = "מערכות שעות לכל מורה (יסודי + חטיבה)"; w
 r = 3
 MAXHR = 7
 for t in sorted(teachers):
-    wst.cell(row=r, column=1, value=t).font = Font(bold=True, size=12)
+    try: _fn=json.load(io.open("names_map.json",encoding="utf-8")).get(t) or t
+    except Exception: _fn=t
+    wst.cell(row=r, column=1, value=_fn).font = Font(bold=True, size=12)
     for i, dn in enumerate(DAY_NAMES):
         cc = wst.cell(row=r+1, column=2+i, value=dn); cc.fill = HDRF; cc.font = HF; cc.alignment = CEN
     total = 0

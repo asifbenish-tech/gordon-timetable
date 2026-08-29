@@ -4,6 +4,8 @@ import io, json
 from data2 import CLASSES, SLOTS, DAY_NAMES, DAY_HOURS, HOMEROOM, QUOTA
 from hdata import HCLASSES, HSLOTS, HDAY, HHOME, NEED, GRADE
 
+try: _FULLN={k:v for k,v in json.load(io.open("names_map.json",encoding="utf-8")).items() if v}
+except Exception: _FULLN={}
 S   = json.load(io.open("sol_J.json",  encoding="utf-8"))
 H   = json.load(io.open("sol_hat.json",encoding="utf-8"))
 TLN = json.load(io.open("tln_map.json",encoding="utf-8"))
@@ -341,7 +343,8 @@ for t,subj in _TEACH_SUBJ.items():
     ev=teachers.get(t,[])
     TR.append({"t":t,"off":", ".join(off) if off else "—","subj":subj,"n":len(ev)})
 data={"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"sol":SOLUTIONS,"elem":elem,"jun":jun,"teachers":{k:sorted(v,key=lambda z:(z[1],z[2])) for k,v in sorted(teachers.items())},"commit":commit,
-      "days":DAY_NAMES,"legend_sed":{k:v for k,v in SED.items() if "קבוצת" not in k}}
+      "days":DAY_NAMES,"legend_sed":{k:v for k,v in SED.items() if "קבוצת" not in k},
+      "full_names":_FULLN}
 
 html = io.open("viewer_template.html", encoding="utf-8").read()
 html = html.replace("/*__DATA__*/", "const DATA="+json.dumps(data,ensure_ascii=False)+";")

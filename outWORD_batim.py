@@ -20,6 +20,7 @@ data = {
     "elem": {c: {"cells": v["cells"], "home": v["home"]} for c, v in mv.elem.items()},
     "jun":  {c: {"cells": v["cells"], "home": v["home"]} for c, v in mv.jun.items()},
     "home_of": home_of,
+    "full_names": (lambda: (json.load(io.open("names_map.json", encoding="utf-8"))))() if __import__("os").path.exists("names_map.json") else {},
 }
 io.open("word_data.json", "w", encoding="utf-8").write(json.dumps(data, ensure_ascii=False))
 
