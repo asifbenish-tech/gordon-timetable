@@ -185,6 +185,11 @@ function tabBtns(){ document.querySelectorAll("#tabs button[data-v]").forEach(b=
     item("📥 מערכות בית א (PDF)","מערכות בית א.pdf");
     item("📥 מערכות בית ב (PDF)","מערכות בית ב.pdf");
     item("📥 מערכות בית ג (PDF)","מערכות בית ג.pdf");
+    item("📥 ניצול שעות (PDF)","ניצול שעות.pdf");
+    item("📥 חוסרים (PDF)","חוסרים.pdf");
+    item("📥 לוח סדירויות (PDF)","לוח סדירויות.pdf");
+    item("📥 אילוצים (PDF)","אילוצים.pdf");
+    item("📥 אילוצי מורים (PDF)","אילוצי מורים.pdf");
     const pr=document.createElement("button");pr.textContent="🖨 הדפסת התצוגה הנוכחית";
     pr.style.cssText="border:none;background:none;color:var(--accent);cursor:pointer;padding:.35rem .6rem;text-align:right;font:700 .88rem Heebo;border-top:1px solid var(--line);margin-top:.15rem";
     pr.onclick=()=>{pm.hidden=true;try{window.print();}catch(e){alert("להדפסה: Ctrl+P ואז 'שמירה כ-PDF'");}};

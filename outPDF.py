@@ -134,4 +134,17 @@ with sync_playwright() as p:
         page.set_content(f"<!doctype html><html lang='he' dir='rtl'><head><meta charset='utf-8'><style>{CSS}</style></head><body>{body}</body></html>", wait_until="load")
         page.pdf(path=f"{name}.pdf", format="A4", print_background=True)
         print(f"{name}.pdf נוצר, {os.path.getsize(name + '.pdf')//1024} KB")
+    # לשוניות הלוח: מרונדרות ע"י הצופה עצמו ומודפסות
+    TABS = [("util", "ניצול שעות"), ("gaps", "חוסרים"), ("commit", "לוח סדירויות"),
+            ("rules", "אילוצים"), ("trules", "אילוצי מורים")]
+    vpath = os.path.abspath("viewer.html")
+    if os.path.exists(vpath):
+        page.goto("file://" + vpath)
+        page.wait_for_timeout(400)
+        page.emulate_media(media="print")
+        for vkey, vname in TABS:
+            page.evaluate(f"view='{vkey}'; pick=null; render();")
+            page.wait_for_timeout(150)
+            page.pdf(path=f"{vname}.pdf", format="A4", print_background=True)
+            print(f"{vname}.pdf נוצר, {os.path.getsize(vname + '.pdf')//1024} KB")
     browser.close()
