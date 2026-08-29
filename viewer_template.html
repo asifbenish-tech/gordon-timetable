@@ -121,6 +121,19 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
 .cm-mtg{background:var(--mag);border-color:var(--mag-b)}
 .cm-asp{background:var(--pe);border-color:var(--pe-b)}
 .cm-mag{background:var(--tln);border-color:var(--tln-b)}
+@media print{
+  header,#chips,#legend,nav,.jump{display:none!important}
+  body{background:#fff;color:#000;font-size:13px}
+  main{max-width:none;padding:0}
+  .card{border:none;box-shadow:none;page-break-inside:avoid;page-break-after:always;padding:0;margin:0 0 8px;background:#fff}
+  .card:last-child{page-break-after:auto}
+  .tblwrap{overflow:visible}
+  table{min-width:0;width:100%}
+  th,td{font-size:11px;padding:3px 2px}
+  details.plan{display:none}
+  .gaprow,.sol{page-break-inside:avoid}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 <header>
   <h1>לוח גורדון <small id="stamp"></small></h1>
@@ -133,6 +146,7 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
     <button data-v="commit" aria-pressed="false">לוח סדירויות</button>
     <button data-v="rules" aria-pressed="false">אילוצים</button>
     <button data-v="trules" aria-pressed="false">אילוצי מורים</button>
+    <button id="pdfbtn" title="שמירת התצוגה הנוכחית כ-PDF (נפתח חלון הדפסה - בחרו 'שמירה כ-PDF')" style="margin-inline-start:auto;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)">📄 יצירת PDF</button>
   </nav>
   <div id="chips"></div>
   <div id="legend">
@@ -151,10 +165,13 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
 const $q=s=>document.querySelector(s);
 let view="elem", pick=null;
 const DAYS=DATA.days;
-function tabBtns(){ document.querySelectorAll("#tabs button").forEach(b=>{
+function tabBtns(){ document.querySelectorAll("#tabs button[data-v]").forEach(b=>{
   b.setAttribute("aria-pressed", b.dataset.v===view ? "true":"false");
   b.onclick=()=>{view=b.dataset.v; pick=null; render();};
-});}
+});
+  const pb=document.getElementById("pdfbtn");
+  if(pb) pb.onclick=()=>{ try{ window.print(); }catch(e){ alert("להדפסה: Ctrl+P ואז 'שמירה כ-PDF'"); } };
+}
 const FN=t=>(DATA.full_names&&DATA.full_names[t])||t;
 function chipRow(){
   const box=$q("#chips"); box.innerHTML="";
