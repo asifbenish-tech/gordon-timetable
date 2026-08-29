@@ -31,9 +31,12 @@ SED = json.load(io.open("sed_J.json", encoding="utf-8"))
 holes = [{"class": c, "day": d, "hour": h, "cover": HOMEROOM[c] + " (זמני)"}
          for c in CLASSES for (d, h) in SLOTS if not S[c][f"{d},{h}"]]
 
+try:    NAMES = json.load(io.open("names_map.json", encoding="utf-8"))
+except Exception: NAMES = {}
 out = {
     "generated": datetime.datetime.now().isoformat(timespec="seconds"),
     "days": DAY_NAMES,
+    "full_names": {k: v for k, v in NAMES.items() if v},   # שם פרטי -> שם מלא (מתוך names_map.json)
     "elementary": {c: {"home": v["home"], "hours": DAY_HOURS, "cells": v["cells"]}
                    for c, v in mv.elem.items()},
     "junior": {c: {"home": v["home"], "hours": HDAY, "cells": v["cells"]}
