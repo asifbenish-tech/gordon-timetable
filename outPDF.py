@@ -121,7 +121,10 @@ for name, grades, classes in [("מערכות בית א", "כיתות א-ג", [c 
                               ("מערכות בית ג", "חטיבה ז-ט", list(HCLASSES))]:
     DOCS[name] = doc_house(name.replace("מערכות ", ""), grades, classes)
 
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:
+    print("playwright לא מותקן - מדלג על PDF (pip install playwright)"); sys.exit(0)
 exe = "/opt/pw-browsers/chromium" if os.path.exists("/opt/pw-browsers/chromium") else None
 with sync_playwright() as p:
     kw = {"executable_path": exe} if exe else {}

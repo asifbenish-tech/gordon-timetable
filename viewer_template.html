@@ -146,7 +146,10 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
     <button data-v="commit" aria-pressed="false">לוח סדירויות</button>
     <button data-v="rules" aria-pressed="false">אילוצים</button>
     <button data-v="trules" aria-pressed="false">אילוצי מורים</button>
-    <button id="pdfbtn" title="שמירת התצוגה הנוכחית כ-PDF (נפתח חלון הדפסה - בחרו 'שמירה כ-PDF')" style="margin-inline-start:auto;background:var(--accent);color:var(--accent-ink);border-color:var(--accent)">📄 יצירת PDF</button>
+    <span style="position:relative;margin-inline-start:auto">
+      <button id="pdfbtn" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent)">📄 יצירת PDF</button>
+      <div id="pdfmenu" hidden style="position:absolute;top:110%;inset-inline-end:0;z-index:9;background:var(--surface);border:1px solid var(--line);border-radius:.6rem;padding:.4rem;min-width:15rem;box-shadow:0 6px 20px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:.25rem"></div>
+    </span>
   </nav>
   <div id="chips"></div>
   <div id="legend">
@@ -169,8 +172,26 @@ function tabBtns(){ document.querySelectorAll("#tabs button[data-v]").forEach(b=
   b.setAttribute("aria-pressed", b.dataset.v===view ? "true":"false");
   b.onclick=()=>{view=b.dataset.v; pick=null; render();};
 });
-  const pb=document.getElementById("pdfbtn");
-  if(pb) pb.onclick=()=>{ try{ window.print(); }catch(e){ alert("להדפסה: Ctrl+P ואז 'שמירה כ-PDF'"); } };
+  const pb=document.getElementById("pdfbtn"), pm=document.getElementById("pdfmenu");
+  if(pb&&pm&&!pm.dataset.ready){
+    pm.dataset.ready="1";
+    const RAW="https://raw.githubusercontent.com/asifbenish-tech/gordon-timetable/master/";
+    const item=(label,fn2)=>{const a2=document.createElement("a");a2.textContent=label;
+      a2.href=RAW+encodeURIComponent(fn2);a2.target="_blank";a2.rel="noopener";
+      a2.style.cssText="padding:.35rem .6rem;border-radius:.4rem;color:var(--ink);text-decoration:none;font:500 .88rem Heebo";
+      a2.onmouseenter=()=>a2.style.background="var(--chip)";a2.onmouseleave=()=>a2.style.background="";
+      pm.appendChild(a2);};
+    item("📥 כל מערכות המורים (PDF)","מערכות שעות מורים.pdf");
+    item("📥 מערכות בית א (PDF)","מערכות בית א.pdf");
+    item("📥 מערכות בית ב (PDF)","מערכות בית ב.pdf");
+    item("📥 מערכות בית ג (PDF)","מערכות בית ג.pdf");
+    const pr=document.createElement("button");pr.textContent="🖨 הדפסת התצוגה הנוכחית";
+    pr.style.cssText="border:none;background:none;color:var(--accent);cursor:pointer;padding:.35rem .6rem;text-align:right;font:700 .88rem Heebo;border-top:1px solid var(--line);margin-top:.15rem";
+    pr.onclick=()=>{pm.hidden=true;try{window.print();}catch(e){alert("להדפסה: Ctrl+P ואז 'שמירה כ-PDF'");}};
+    pm.appendChild(pr);
+    pb.onclick=(e)=>{e.stopPropagation();pm.hidden=!pm.hidden;};
+    document.addEventListener("click",(e)=>{if(!pm.hidden&&!pm.contains(e.target))pm.hidden=true;});
+  }
 }
 const FN=t=>(DATA.full_names&&DATA.full_names[t])||t;
 function chipRow(){
