@@ -176,6 +176,19 @@ for k,lst in MAGROLES.items():
 for _t in list(teachers):
     add_t(_t,"סדירות",0,6,"אסיפת צוות"); add_t(_t,"סדירות",0,7,"אסיפת צוות")
 
+# ---------- לוח סדירויות: מתי כל מחויבות ומי משתתף ----------
+_cmt={}
+_KINDS=("הדרכ","מפגשה","ישיב","אסיפ")
+for _t,_evs in teachers.items():
+    for _side,_d,_h,_lbl in _evs:
+        if _side=="סדירות" and any(_k in _lbl for _k in _KINDS):
+            _cmt.setdefault((_d,_h,_lbl),[]).append(_t)
+_ALLN=sum(1 for t in teachers)
+commit=[]
+for (_d,_h,_lbl),_ps in sorted(_cmt.items()):
+    _ps=sorted(set(_ps))
+    commit.append({"d":_d,"h":_h,"n":_lbl,"p":("כל המורים" if len(_ps)>=20 else " · ".join(_ps))})
+
 # ---------- ניצול שעות מול מכסה ----------
 QUOTA_FILE={"יעל":12,"חגית":8,"דליה":24,"תמיר":24,"סימה":24,"לייה":23,"פנינה":23,"מירי":23,
  "אסיף":20,"גלית":20,"נעמי":20,"תניה":18,"אורנה":18,"הילית":16,"פאני":16,"יפעת":16,
@@ -327,7 +340,7 @@ for t,subj in _TEACH_SUBJ.items():
     off=_DO.get(t) or _HO.get(t) or []
     ev=teachers.get(t,[])
     TR.append({"t":t,"off":", ".join(off) if off else "—","subj":subj,"n":len(ev)})
-data={"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"sol":SOLUTIONS,"elem":elem,"jun":jun,"teachers":{k:sorted(v,key=lambda z:(z[1],z[2])) for k,v in sorted(teachers.items())},
+data={"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"sol":SOLUTIONS,"elem":elem,"jun":jun,"teachers":{k:sorted(v,key=lambda z:(z[1],z[2])) for k,v in sorted(teachers.items())},"commit":commit,
       "days":DAY_NAMES,"legend_sed":{k:v for k,v in SED.items() if "קבוצת" not in k}}
 
 html = io.open("viewer_template.html", encoding="utf-8").read()

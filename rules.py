@@ -98,6 +98,13 @@ def r_hadracha_sunday(c):
             m.Add(x[k] == 0)
 
 
+def r_tln_ines_sunday(c):
+    """התל"ן של ד אינס — ביום ראשון (חגית לא זמינה ברביעי)."""
+    m, x = c["m"], c["x"]
+    for k in [k for k in x if k[0] == "ד אינס" and k[2] == 'תל"ן' and k[1][0] != 0]:
+        m.Add(x[k] == 0)
+
+
 def r_naomi_sifrut_tet(c):
     """ספרות בט תמיר — נעמי בעצמה, לא חסר מורה."""
     m, hx, HSLOTS = c["m"], c["hx"], c["HSLOTS"]
@@ -130,6 +137,8 @@ def r_zayin_friday_full(c):
 
 
 RULES = [
+    {"id": "tln_ines_sunday", "name": "תל\"ן ד אינס בראשון", "active": True, "fn": r_tln_ines_sunday,
+     "desc": "חגית לא מלמדת ברביעי; שעתיים התל\"ן של ד אינס (יעל+חגית) עוברות ליום ראשון."},
     {"id": "tamir_tue_covered", "name": "ט תמיר — שלישי מאויש", "active": True, "fn": r_tamir_tue_covered,
      "desc": "אין חסר מורה בט תמיר ביום שלישי."},
     {"id": "aravit_tamir", "name": "ערבית ט תמיר מאוישת", "active": True, "fn": r_aravit_tamir,
