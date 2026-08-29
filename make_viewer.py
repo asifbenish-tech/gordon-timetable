@@ -178,12 +178,11 @@ for _t in list(teachers):
 
 # ---------- לוח סדירויות: מתי כל מחויבות ומי משתתף ----------
 _cmt={}
+_KINDS=("הדרכ","מפגשה","ישיב","אסיפ")
 for _t,_evs in teachers.items():
     for _side,_d,_h,_lbl in _evs:
-        if _side=="סדירות": _cmt.setdefault((_d,_h,_lbl),[]).append(_t)
-        elif _side=="מגמות":
-            _nm=("ליווי "+_lbl).replace("ליווי מגמת ליווי","ליווי")
-            _cmt.setdefault((_d,_h,_nm),[]).append(_t)
+        if _side=="סדירות" and any(_k in _lbl for _k in _KINDS):
+            _cmt.setdefault((_d,_h,_lbl),[]).append(_t)
 _ALLN=sum(1 for t in teachers)
 commit=[]
 for (_d,_h,_lbl),_ps in sorted(_cmt.items()):

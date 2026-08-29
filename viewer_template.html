@@ -326,14 +326,14 @@ function commitView(){
   }
   let hd="<tr><th></th>"; for(let d=0;d<6;d++) hd+="<th>"+DAYS[d]+"</th>"; hd+="</tr>";
   return '<section class="card"><h2>לוח סדירויות</h2>'+
-    '<div class="sub">הדרכות, מפגשות, ישיבות, אסיפות וליוויי מגמות — מתי ומי משתתף/ת.</div>'+
+    '<div class="sub">הדרכות, מפגשות, ישיבות ואסיפות — מתי ומי משתתף/ת.</div>'+
     '<div class="tblwrap"><table class="cmtbl">'+hd+rows+'</table></div>'+
     '<div id="legend" style="margin-top:.8rem">'+
     '<span><i class="cm-had" style="border-style:solid"></i> הדרכה</span>'+
     '<span><i class="cm-mif" style="border-style:solid"></i> מפגשה (מעגלי שיח)</span>'+
     '<span><i class="cm-mtg" style="border-style:solid"></i> ישיבה</span>'+
     '<span><i class="cm-asp" style="border-style:solid"></i> אסיפת צוות</span>'+
-    '<span><i class="cm-mag" style="border-style:solid"></i> ליווי מגמות</span>'+
+    
     '</div></section>';
 }
 function rulesView(){
