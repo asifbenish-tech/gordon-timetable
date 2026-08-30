@@ -189,8 +189,8 @@ if v: m.Add(sum(v)>=17-fx)
 for c in ("ו שרית","ו אורנה"):
     v=[x[(c,s,"דניאל")] for s in NONFRI if (c,s,"דניאל") in x]
     if v: m.Add(sum(v)<=2)
-# תניה: 12 בכיתתה + 5 בה דני = 17 הוראה (השעה ה-18: שיעור הדרכה בראשון ש3)
-for _ct,_nt in (("ה תניה",12),("ה דני",5)):
+# תניה: 11 בכיתתה + 6 בה דני = 17 הוראה + שיעור הדרכה (ראשון ש3) = 18
+for _ct,_nt in (("ה תניה",11),("ה דני",6)):
     _fxt=sum(1 for (cc,ss),tt in fixed.items() if tt=="תניה" and cc==_ct)
     _vt=[x[(_ct,s,"תניה")] for s in NONFRI if (_ct,s,"תניה") in x]
     if _vt: m.Add(sum(_vt)==_nt-_fxt)
