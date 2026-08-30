@@ -189,6 +189,11 @@ if v: m.Add(sum(v)>=17-fx)
 for c in ("ו שרית","ו אורנה"):
     v=[x[(c,s,"דניאל")] for s in NONFRI if (c,s,"דניאל") in x]
     if v: m.Add(sum(v)<=2)
+# תניה: 12 שעות בכיתתה + 6 בכיתה של דני (קשיח, כולל שישי)
+for _ct,_nt in (("ה תניה",12),("ה דני",6)):
+    _fxt=sum(1 for (cc,ss),tt in fixed.items() if tt=="תניה" and cc==_ct)
+    _vt=[x[(_ct,s,"תניה")] for s in NONFRI if (_ct,s,"תניה") in x]
+    if _vt: m.Add(sum(_vt)==_nt-_fxt)
 # צופיה: 2 שעות אנגלית בכל כיתת ג, וסה"כ עד 18
 for c,n in (("ג לייה",2),("ג דליה",2),("ג דניאל",3)):
     v=[x[(c,s,"צופיה")] for s in NONFRI if (c,s,"צופיה") in x]
