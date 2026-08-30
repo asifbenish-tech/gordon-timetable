@@ -15,7 +15,7 @@ NONFRI=[s for s in SLOTS if s[0]!=5]; FRI=[s for s in SLOTS if s[0]==5]
 DEU=[c for c in CLASSES if c[0] in "דהו"]; B_CL=[c for c in CLASSES if c.startswith("ב ")]
 G_CL=[c for c in CLASSES if c[0]=="ג"]
 POOL={"אלי":(4,["ו אורנה","ו שרית"]),"אופיר":(3,["ו אורנה","ו שרית"]),"יערה":(7,CLASSES),"דני":(0,CLASSES),"דניאל":(5,CLASSES),"אנה":(2,CLASSES),"אביטל":(4,CLASSES),"לייה":(4,CLASSES),"אינס":(1,CLASSES),"אורנה":(1,CLASSES),"טלי":(3,B_CL),"ליאור":(6,CLASSES),"מרים":(15,CLASSES),"צופיה":(8,[c for c in CLASSES if c[0] in "אבג"]),"שחר":(2,[c for c in CLASSES if c[0] in "אבג"])}
-TLN_OFF2={"הילית":["חמישי","שישי"],"חגית":["רביעי","חמישי"],"יפעת":["שלישי","חמישי","שישי"],"יעל":[]}
+TLN_OFF2={"הילית":["חמישי","שישי"],"חגית":["רביעי","חמישי"],"יפעת":["חמישי","שישי"],"יעל":[]}
 TLN_UN2={"הילית":[(2,h) for h in range(4,9)],"חגית":[],"יפעת":[],"יעל":[]}   # תל"ן גמיש על 4 ימים
 
 def blk(t):
@@ -28,11 +28,12 @@ def blk(t):
     return b
 BLOCK={t:blk(t) for t in set(list(QUOTA)+list(POOL))}
 ALEF=["א אנה","א פנינה"]
-YAEL_CLS=[c for c in CLASSES if "יעל" in TLN_PAIR.get(c,())]   # פיצול אפשרי עם המחנך/ת
+YAEL_CLS=[c for c in CLASSES if "יעל" in TLN_PAIR.get(c,())]
+FLEX_CLS=[c for c in CLASSES if ("יעל" in TLN_PAIR.get(c,()) or "יפעת" in TLN_PAIR.get(c,()))]
 def tb(c):
     b=set()
     subs_c = ["חגית","הילית","יפעת"] if c in ALEF else list(TLN_PAIR[c])
-    if c in YAEL_CLS: subs_c=["יעל"]      # בת הזוג: או השותפה או המחנך/ת - נקבע במודל
+    if c in FLEX_CLS: subs_c=[]           # הזוג נבחר דינמית (תל"ן/מחנך/ליאור)
     for sub in subs_c:
         for dn in TLN_OFF2[sub]:
             for h in range(1,9): b.add((DIDX[dn],h))
@@ -302,30 +303,53 @@ for c in CLASSES:
 # הילית ויפעת בשכבת א: שעה אחת כל אחת - מטופל בנפרד למטה
 HL_CLASSES=[c for c in CLASSES if "הילית" in TLN_PAIR[c] and c not in ALEF]
 YF_CLASSES=[c for c in CLASSES if "יפעת" in TLN_PAIR[c] and c not in ALEF]
-# ---- פיצול כיתה בתל"ן: חצי עם המחנך/ת, חצי עם יעל (במקום שתי מורות תל"ן) ----
-def _sub_free(sub,s):
-    if DAY_NAMES[s[0]] in TLN_OFF2.get(sub,[]): return False
-    if s in TLN_UN2.get(sub,[]): return False
-    if sub in MAGAMA.get(s,[]): return False
+# ---- תל"ן בכיתות של יעל: זוג גמיש (יעל / השותפה / המחנך/ת / ליאור) ----
+def _tln_free(t,s):
+    if t in TLN_OFF2:
+        if DAY_NAMES[s[0]] in TLN_OFF2[t]: return False
+        if s in TLN_UN2.get(t,[]): return False
+    else:
+        if DAY_NAMES[s[0]] in (DAYS_OFF2.get(t) or []): return False
+        if s in ((UNAVAIL2.get(t) or [])+(EVENTS2.get(t) or [])): return False
+    if t in MAGAMA.get(s,[]): return False
     return True
-def _home_free(c,s):
-    hr=HOMEROOM[c]
-    if DAY_NAMES[s[0]] in DAYS_OFF2.get(hr,[]): return False
-    if s in (UNAVAIL2.get(hr,[])+EVENTS2.get(hr,[])): return False
-    if hr in MAGAMA.get(s,[]): return False
-    return True
-hsplit={}
-for c in YAEL_CLS:
-    _partner=[t for t in TLN_PAIR[c] if t!="יעל"][0]
+CAND={c:list(dict.fromkeys(list(TLN_PAIR[c])+[HOMEROOM[c],"ליאור"])) for c in FLEX_CLS}
+tp={}
+for c in FLEX_CLS:
     for s in NONFRI:
         if (c,s,'תל"ן') not in x: continue
-        b2=m.NewBoolVar(f"hsp{c}{s}"); hsplit[(c,s)]=b2
-        m.Add(b2<=x[(c,s,'תל"ן')])
-        if not _home_free(c,s): m.Add(b2==0)                    # המחנך/ת לא זמין/ה
-        if not _sub_free(_partner,s): m.Add(b2==x[(c,s,'תל"ן')]) # השותפה לא זמינה -> חייב פיצול
-        for c2 in CLASSES:                                      # המחנך/ת עם חצי הכיתה, לא במקום אחר
-            k2=(c2,s,HOMEROOM[c])
-            if c2!=c and k2 in x: m.Add(x[k2]+b2<=1)
+        for t in CAND[c]:
+            v=m.NewBoolVar(f"tp{c}{s}{t}"); tp[(c,s,t)]=v
+            if not _tln_free(t,s): m.Add(v==0)
+        m.Add(sum(tp[(c,s,t)] for t in CAND[c])==2*x[(c,s,'תל"ן')])   # שתי מורות לכל שעת תל"ן
+        for t in CAND[c]:                       # מורה שאינה תל"ן: לא מלמדת במקביל
+            if t in TLN_OFF2: continue
+            for c2 in CLASSES:
+                k2=(c2,s,t)
+                if c2!=c and k2 in x: m.Add(x[k2]+tp[(c,s,t)]<=1)
+for s in NONFRI:                                # אף מורה לא בשתי כיתות תל"ן בו-זמנית
+    for t in set(sum(CAND.values(),[])):
+        v=[tp[(c,s,t)] for c in FLEX_CLS if (c,s,t) in tp]
+        if len(v)>1: m.Add(sum(v)<=1)
+_YQ=[tp[k] for k in tp if k[2]=="יעל"]
+m.Add(sum(_YQ)>=10)                             # יעל: לפחות 10 שעות תל"ן (השאר לשותפה/מחנך)
+_FQ=[tp[k] for k in tp if k[2]=="יפעת"]
+_AF=[alef_sub[("יפעת",c,s2)] for c in ALEF for s2 in NONFRI if ("יפעת",c,s2) in alef_sub]
+m.Add(sum(_FQ)+sum(_AF)>=12)                    # יפעת: לפחות 12 שעות
+for _d5 in range(5):                            # יפעת: יום עבודה = 0 או 3-6 שעות (בלי יום של שעה אחת)
+    _fd=[tp[(c,(_d5,h),"יפעת")] for c in FLEX_CLS for h in range(1,DAY_HOURS[_d5]+1)
+         if (c,(_d5,h),"יפעת") in tp]
+    _fd+=[alef_sub[("יפעת",c,(_d5,h))] for c in ALEF for h in range(1,DAY_HOURS[_d5]+1)
+          if ("יפעת",c,(_d5,h)) in alef_sub]
+    if _fd:
+        _on=m.NewBoolVar(f"yfday{_d5}")
+        m.Add(sum(_fd)<=6*_on); m.Add(sum(_fd)>=3*_on)
+_LIOR=[tp[k] for k in tp if k[2]=="ליאור"]      # עדיפות: מחנך/ת לפני ליאור
+_YSUN=[tp[(c,(0,h),"יעל")] for c in FLEX_CLS for h in range(1,DAY_HOURS[0]+1)
+       if (c,(0,h),"יעל") in tp]
+m.Add(sum(_YSUN)==0)                            # יעל: לא מלמדת בראשון
+_YWED=[tp[(c,(3,h),"יעל")] for c in FLEX_CLS for h in range(1,DAY_HOURS[3]+1)
+       if (c,(3,h),"יעל") in tp]                # עדיפות לחמישי על פני רביעי
 
 for s in NONFRI:
     for t in set(list(rem)+list(POOL)):
@@ -334,12 +358,12 @@ for s in NONFRI:
         fx=sum(1 for c in CLASSES if fixed.get((c,s))==t)
         if v: m.Add(sum(v)<=1-fx)
     for sub,cs in subs.items():
-        v=[x[(c,s,'תל"ן')]-hsplit[(c,s)] if (sub!="יעל" and c in YAEL_CLS and (c,s) in hsplit)
-           else x[(c,s,'תל"ן')] for c in cs if (c,s,'תל"ן') in x]
+        v=[tp[(c,s,sub)] if (c in YAEL_CLS and (c,s,sub) in tp) else x[(c,s,'תל"ן')]
+           for c in cs if (c,s,'תל"ן') in x]
         if v: m.Add(sum(v)<=1)
     # הילית: כיתות רגילות + לכל היותר אחת מכיתות א באותה שעה
     for sub,base in (("הילית",HL_CLASSES),("יפעת",YF_CLASSES)):
-        vv=[x[(c,s,'תל"ן')]-hsplit[(c,s)] if (c in YAEL_CLS and (c,s) in hsplit) else x[(c,s,'תל"ן')]
+        vv=[tp[(c,s,sub)] if (c in YAEL_CLS and (c,s,sub) in tp) else x[(c,s,'תל"ן')]
             for c in base if (c,s,'תל"ן') in x]
         aa=[alef_sub[(sub,c,s)] for c in ALEF if (sub,c,s) in alef_sub]
         if vv or aa: m.Add(sum(vv)+sum(aa)<=1)
@@ -949,14 +973,7 @@ for _c in CLASSES:
 # עידוד תל"ן בשלישי אחה"צ - יפעת יכולה לכסות את שעות המחסור
 _tln_tue=[x[(c,(2,h),'תל"ן')] for c in CLASSES for h in (3,4,5,6)
           if (c,(2,h),'תל"ן') in x]
-_YS=[x[(c,(0,h),'תל"ן')] for c in YAEL_CLS for h in range(1,DAY_HOURS[0]+1) if (c,(0,h),'תל"ן') in x]
-for _d4 in range(5):                                   # יפעת: עד 6 שעות ביום (פיזור)
-    _yf=[x[(c,(_d4,h),'תל"ן')] for c in YF_CLASSES for h in range(1,DAY_HOURS[_d4]+1)
-         if (c,(_d4,h),'תל"ן') in x]
-    _yf+=[alef_sub[("יפעת",c,(_d4,h))] for c in ALEF for h in range(1,DAY_HOURS[_d4]+1)
-          if ("יפעת",c,(_d4,h)) in alef_sub]
-    if _yf: m.Add(sum(_yf)<=6)
-m.Minimize(OBJ_E + OBJ_H + 6000*sum(_sp_pen) - 1500*sum(_tln_tue) + 40*sum(hsplit.values()) + 500000*sum(_YS))
+m.Minimize(OBJ_E + OBJ_H + 6000*sum(_sp_pen) - 1500*sum(_tln_tue) + 300*sum(_YWED) + 500000*sum(_YSUN))
 sol=cp_model.CpSolver()
 import os as _os
 sol.parameters.max_time_in_seconds=float(_os.environ.get("TL","150"))
@@ -966,9 +983,13 @@ st=sol.Solve(m)
 print("status:", sol.StatusName(st))
 try:
     if st in (cp_model.OPTIMAL,cp_model.FEASIBLE):
+        print("DBG יעל: ראשון",sum(sol.Value(v) for v in _YSUN),"| רביעי",sum(sol.Value(v) for v in _YWED))
+except Exception as _e: print("dbgerr",_e)
+try:
+    if st in (cp_model.OPTIMAL,cp_model.FEASIBLE):
         print("DBG יעל ראשון:",sum(sol.Value(v) for v in _YS),
               "| פיצולים:",sum(sol.Value(v) for v in hsplit.values()),
-              "| איפה בראשון:",[ (c,h) for c in YAEL_CLS for h in range(1,DAY_HOURS[0]+1)
+              "| איפה בראשון:",[ (c,h) for c in FLEX_CLS for h in range(1,DAY_HOURS[0]+1)
                     if (c,(0,h),'תל"ן') in x and sol.Value(x[(c,(0,h),'תל"ן')])])
 except Exception as _e: print("dbgerr",_e)
 
@@ -995,8 +1016,9 @@ if st in (cp_model.OPTIMAL,cp_model.FEASIBLE):
                     other=[sub for sub in ("הילית","יפעת") if sol.Value(alef_sub[(sub,c,s2)])]
                     tlnmap[f"{c}|{s2[0]},{s2[1]}"]="חגית + "+(other[0] if other else "?")
                 else:
-                    if (c,s2) in hsplit and sol.Value(hsplit[(c,s2)]):
-                        tlnmap[f"{c}|{s2[0]},{s2[1]}"]="יעל + "+HOMEROOM[c]+" (פיצול כיתה)"
+                    if c in FLEX_CLS:
+                        _pr=[t for t in CAND[c] if (c,s2,t) in tp and sol.Value(tp[(c,s2,t)])]
+                        tlnmap[f"{c}|{s2[0]},{s2[1]}"]=" + ".join(_pr) if _pr else " + ".join(TLN_PAIR[c])
                     else:
                         tlnmap[f"{c}|{s2[0]},{s2[1]}"]=" + ".join(TLN_PAIR[c])
     io.open("tln_map.json","w",encoding="utf-8").write(json.dumps(tlnmap,ensure_ascii=False,indent=1))
