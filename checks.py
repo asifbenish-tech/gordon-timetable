@@ -47,12 +47,17 @@ for c in HCLASSES:
             if not H[c][f"{d},{h}"]: seen2 = True
             elif seen2: errors.append(f"חלון {c} {DAY_NAMES[d]} ש{h}")
 
-# 4. שישי יסודי = מחנך בלבד
+# 4. שישי יסודי = מחנך בלבד (למעט ההחלפה המתוכננת בין דני לתניה)
+FRI_SWAP = {("ה דני", 3): "תניה", ("ה תניה", 3): "דני"}
 for c in CLASSES:
     for h in range(1, 5):
         t = S[c][f"5,{h}"]
-        if t and t != FRIDAY_TEACHER.get(c, HOMEROOM[c]):
+        if t and t != FRI_SWAP.get((c, h), FRIDAY_TEACHER.get(c, HOMEROOM[c])):
             errors.append(f"שישי {c} ש{h}: {t}")
+# ההחלפה בשישי חייבת להיות הדדית - אחרת מורה נמצא/ת בשתי כיתות בו-זמנית
+for (c, h), t in FRI_SWAP.items():
+    if S[c][f"5,{h}"] != t:
+        errors.append(f"החלפת שישי חסרה: {c} ש{h} אמור להיות {t}")
 
 # 5. מורות תל"ן לא בכיתות
 for c in CLASSES:
