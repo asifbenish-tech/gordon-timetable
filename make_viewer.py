@@ -58,7 +58,7 @@ for c in CLASSES:
         if t and t!='תל"ן' and _tk in TLN and TLN[_tk].startswith("חצי"):
             _tu=TLN[_tk].split('חצי תל"ן ')[1].split(" · ")[0]
             cell["co"]='½ הכיתה בתל"ן · '+_tu
-            cell["s"]=(cell.get("s") or "")+("  " if cell.get("s") else "")+"חצי כיתה"
+            cell["k"]="half"
         cells[k]=cell
     _ED={"ה דני":3,"ה תניה":0,"ו אורנה":2,"ו שרית":1}
     if c in _ED:

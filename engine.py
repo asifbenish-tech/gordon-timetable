@@ -315,6 +315,19 @@ for s in NONFRI:
         aa=[alef_sub[(sub,c,s)] for c in ALEF if (sub,c,s) in alef_sub]
         if vv or aa: m.Add(sum(vv)+sum(aa)<=1)
 
+# פאני: יום שני מתחיל בבוקר ומסתיים בשעה 4
+for _c7 in CLASSES:
+    for _h7 in range(5,DAY_HOURS[1]+1):
+        _k7=(_c7,(1,_h7),"פאני")
+        if _k7 in x: m.Add(x[_k7]==0)
+# מורה שאינו/ה המחנך/ת: לא יותר משעתיים רצוף באותה כיתה
+for _c8 in CLASSES:
+    for _t8 in allowed[_c8]:
+        if _t8=='תל"ן' or _t8==HOMEROOM[_c8]: continue
+        for _d8 in range(5):
+            for _h8 in range(1,DAY_HOURS[_d8]-1):
+                _w=[x[(_c8,(_d8,_h8+i),_t8)] for i in range(3) if (_c8,(_d8,_h8+i),_t8) in x]
+                if len(_w)==3: m.Add(sum(_w)<=2)
 # ספורט יסודי (פאני+חסן): שיעור אחד ליום לכל היותר
 for c in CLASSES:
     for d in range(5):

@@ -38,6 +38,7 @@ td .aw { display: block; color: #8A6D3B; font-size: 9px; font-style: italic; }
 .k-fill { background: #D7EEF2; font-weight: 700; }
 .k-hole { background: #FBE4E1; color: #990000; font-weight: 700; }
 .k-off { background: #F4F2EC; }
+.k-half { background: linear-gradient(90deg,#E4F0DF 0 50%,#E3EEF7 50% 100%); }
 .sed { background: #F6F4EE; color: #6B7A88; font-style: italic; }
 .pagebreak { page-break-before: always; }
 .legend { font-size: 10px; color: #6B7A88; text-align: center; margin: 6px 0 12px; }

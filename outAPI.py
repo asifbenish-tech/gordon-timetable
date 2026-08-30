@@ -77,5 +77,45 @@ out = {
     },
     "holes": holes,
 }
+
+# ---- רשימה שטוחה ואחידה: כל שיעור עם מקצוע, מורה ומזהי האפליקציה ----
+_AM = out["app_map"]
+def _norm(level, cls, key, cell):
+    d, h = map(int, key.split(","))
+    k = cell.get("k") or ""
+    t = cell.get("t") or ""
+    sub = cell.get("s") or ""
+    if level == "junior":
+        subject, teacher = t, sub
+        if k == "mag": teacher = ""
+    else:                                   # יסודי: t = שם המורה
+        teacher, subject = t, ""
+        if k == "tln":
+            subject, teacher = 'תל"ן', t.replace('תל"ן · ', "")
+        elif k == "half":
+            subject, teacher = "שיעור (½ כיתה) + תל\"ן (½ כיתה)", t
+        elif k == "hole":
+            subject, teacher = "", t
+        elif sub and sub != "חצי כיתה":
+            subject = sub
+    if not teacher and not subject: return None
+    return {
+        "level": level, "class": cls,
+        "class_app_id": (_AM["classes"].get(cls) or {}).get("app_id"),
+        "day": d, "day_name": DAY_NAMES[d], "hour": h,
+        "subject": subject, "teacher": teacher,
+        "teacher_app_id": (_AM["teachers"].get(teacher) or {}).get("app_id"),
+        "kind": k or "regular",
+        "note": cell.get("co") or "",
+        "temporary": k == "hole",
+    }
+lessons = []
+for lvl, src in (("elementary", out["elementary"]), ("junior", out["junior"])):
+    for cls, info in src.items():
+        for key, cell in info["cells"].items():
+            r = _norm(lvl, cls, key, cell)
+            if r: lessons.append(r)
+lessons.sort(key=lambda z: (z["level"], z["class"], z["day"], z["hour"]))
+out["lessons"] = lessons
 io.open("timetable.json", "w", encoding="utf-8").write(json.dumps(out, ensure_ascii=False, indent=1))
 print("timetable.json נוצר,", len(out["elementary"]) + len(out["junior"]), "כיתות,", len(out["teachers"]), "מורים")
