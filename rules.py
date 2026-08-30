@@ -105,6 +105,16 @@ def r_tln_ines_sunday(c):
         m.Add(x[k] == 0)
 
 
+def r_naomi_sifrut_asif(c):
+    """ספרות בט אסיף — שעה אחת עם נעמי במהלך השבוע, לא בשישי."""
+    m, hx, HSLOTS = c["m"], c["hx"], c["HSLOTS"]
+    v = [hx[("ט אסיף", s2, "ספרות", "נעמי")] for s2 in HSLOTS
+         if ("ט אסיף", s2, "ספרות", "נעמי") in hx and s2[0] != 5]
+    if v: m.Add(sum(v) == 1)
+    for k in [k for k in hx if k[0] == "ט אסיף" and k[2] == "ספרות" and k[1][0] == 5]:
+        m.Add(hx[k] == 0)
+
+
 def r_naomi_sifrut_tet(c):
     """ספרות בט תמיר — נעמי בעצמה, לא חסר מורה."""
     m, hx, HSLOTS = c["m"], c["hx"], c["HSLOTS"]
@@ -143,6 +153,8 @@ RULES = [
      "desc": "אין חסר מורה בט תמיר ביום שלישי."},
     {"id": "aravit_tamir", "name": "ערבית ט תמיר מאוישת", "active": True, "fn": r_aravit_tamir,
      "desc": "שתי שעות הערבית של ט תמיר — עם מרים, בלי חסר מורה."},
+    {"id": "naomi_sifrut_asif", "name": "ספרות בט אסיף עם נעמי", "active": True, "fn": r_naomi_sifrut_asif,
+     "desc": "שעת הספרות של ט אסיף — עם נעמי, במהלך השבוע ולא בשישי."},
     {"id": "naomi_sifrut_tet", "name": "נעמי מלמדת ספרות בט תמיר", "active": True, "fn": r_naomi_sifrut_tet,
      "desc": "שעת הספרות של ט תמיר — אצל נעמי, לא חסר מורה."},
     {"id": "zayin_friday_full", "name": "שישי מלא בכיתות ז", "active": True, "fn": r_zayin_friday_full,
