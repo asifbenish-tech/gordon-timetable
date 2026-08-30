@@ -103,6 +103,8 @@ for c in HCLASSES:
             elif subj=="שעת גיבוש": cell={"t":"שעת גיבוש","s":"שתי כיתות ט יחד","k":"mag"}
             elif t=="שרית + חסן": cell={"t":subj,"s":"שרית + חסן (שכבתי)","k":"pe"}
             elif t=="חסר מורה": cell={"t":subj,"s":"חסר מורה","k":"hole"}
+            elif t=="צבי" and d==5:
+                cell={"t":"צבי","s":"ממלא מקום"}      # שישי בט אסיף - בלי מקצוע
             else:
                 cell={"t":subj,"s":t}
                 if t==HHOME[c]: cell["k"]="home"

@@ -117,5 +117,29 @@ for lvl, src in (("elementary", out["elementary"]), ("junior", out["junior"])):
             if r: lessons.append(r)
 lessons.sort(key=lambda z: (z["level"], z["class"], z["day"], z["hour"]))
 out["lessons"] = lessons
+
+# ---- index: רשימת המערכות שאפשר למשוך (לתפריט בחירה באפליקציה) ----
+_HOUSES = [("A", "בית א", "כיתות א-ג", [c for c in CLASSES if c[0] in "אבג"]),
+           ("B", "בית ב", "כיתות ד-ו", [c for c in CLASSES if c[0] in "דהו"]),
+           ("C", "בית ג", "חטיבה ז-ט", list(HCLASSES))]
+_FN = out["full_names"]
+index = [{"id": "all", "type": "all", "label": f"כל המערכות ({len(lessons)} שיעורים)",
+          "count": len(lessons)}]
+for hk, hname, hgrades, hcls in _HOUSES:
+    n = sum(1 for L in lessons if L["class"] in hcls)
+    index.append({"id": f"house:{hk}", "type": "house", "label": f"{hname} ({hgrades})",
+                  "classes": hcls, "count": n})
+for lvl, src in (("elementary", out["elementary"]), ("junior", out["junior"])):
+    for cls in src:
+        index.append({"id": f"class:{cls}", "type": "class", "label": f"כיתה {cls}",
+                      "level": lvl, "class": cls,
+                      "app_id": (_AM["classes"].get(cls) or {}).get("app_id"),
+                      "count": sum(1 for L in lessons if L["class"] == cls)})
+for t in sorted(out["teachers"]):
+    index.append({"id": f"teacher:{t}", "type": "teacher",
+                  "label": "מורה: " + _FN.get(t, t), "teacher": t,
+                  "app_id": (_AM["teachers"].get(t) or {}).get("app_id"),
+                  "count": sum(1 for L in lessons if L["teacher"] == t)})
+out["index"] = index
 io.open("timetable.json", "w", encoding="utf-8").write(json.dumps(out, ensure_ascii=False, indent=1))
 print("timetable.json נוצר,", len(out["elementary"]) + len(out["junior"]), "כיתות,", len(out["teachers"]), "מורים")

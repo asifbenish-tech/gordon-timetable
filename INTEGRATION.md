@@ -25,6 +25,31 @@ https://raw.githubusercontent.com/asifbenish-tech/gordon-timetable/master/timeta
 ← וזה בדיוק ה-id של הכיתה ב-Firestore שלה (`classes[].id`). אותו דבר למורים.
 אין לנסות להשוות שמות טקסטואלית.
 
+## 📋 `index` — תפריט "איזו מערכת למשוך?"
+
+לפני הייבוא, האפליקציה מציגה למשתמש רשימת בחירה. הרשימה מוכנה בשדה `index`
+(60 פריטים): הכול · 3 בתים · 18 כיתות · 38 מורים.
+
+```json
+{ "id": "class:ד אינס", "type": "class", "label": "כיתה ד אינס",
+  "level": "elementary", "class": "ד אינס",
+  "app_id": "c_1783243540346", "count": 32 }
+```
+
+```js
+const tt = await (await fetch(URL)).json();
+showPicker(tt.index);                         // המשתמש בוחר פריט אחד
+
+function lessonsFor(sel) {                    // מסננים את lessons לפי הבחירה
+  if (sel.type === "all")     return tt.lessons;
+  if (sel.type === "house")   return tt.lessons.filter(L => sel.classes.includes(L.class));
+  if (sel.type === "class")   return tt.lessons.filter(L => L.class   === sel.class);
+  if (sel.type === "teacher") return tt.lessons.filter(L => L.teacher === sel.teacher);
+}
+```
+
+`count` = כמה שיעורים ייובאו — נוח להצגה ("ייובאו 32 שיעורים, להמשיך?").
+
 ## ⭐ הדרך הפשוטה: `lessons` — רשימה שטוחה ואחידה
 
 **זה מה שכדאי לאפליקציה לקרוא.** מערך אחד, 576 שורות, **אותו מבנה בדיוק ליסודי ולחטיבה**:

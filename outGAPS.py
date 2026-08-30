@@ -53,6 +53,7 @@ def grid(ws,title,home,cells,dayhours,hdr,away,cls=None):
                     cell.value="חסר מורה"
                 cell.fill=PatternFill("solid",fgColor="FF9999"); cell.font=Font(bold=True,color="990000")
                 cell.border=BO; continue
+            if v.endswith("– צבי") and d==5: v="צבי"    # שישי בט אסיף - בלי מקצוע
             cell.value=v
             if cls is not None and (cls,(d,h)) in FILLMAP:
                 cell.fill=FILLFILL; cell.font=Font(bold=True,color="FFFFFF")
