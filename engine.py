@@ -407,6 +407,22 @@ for s in NONFRI:                                    # מורת תל"ן - בכי�
         if u=="חגית": v+=[x[(c,s,'תל"ן')] for c in ALEF if (c,s,'תל"ן') in x]
         if u in ("הילית","יפעת"): v+=[alef_sub[(u,c,s)] for c in ALEF if (u,c,s) in alef_sub]
         if len(v)>1: m.Add(sum(v)<=1)
+# ---- תל"ן ביום קבוע: שעתיים מלאות רצופות, בלי פיצול חצי-כיתה ----
+# ה תניה: יעל + הילית ביחד בשני; ו שרית: יעל + יפעת ביחד בשלישי
+# (במקום הפיצולים של חצי כיתה שהיו בשני)
+TLN_FIXED_DAY={"ה תניה":1,"ו שרית":2}
+for _cf,_df in TLN_FIXED_DAY.items():
+    for _s in NONFRI:
+        if _s[0]!=_df and (_cf,_s,'תל"ן') in x: m.Add(x[(_cf,_s,'תל"ן')]==0)
+    for _kf in [k for k in hf if k[0]==_cf]: m.Add(hf[_kf]==0)
+    _adj=[]
+    for _hf2 in range(1,DAY_HOURS[_df]):
+        _a2,_b3=(_cf,(_df,_hf2),'תל"ן'),(_cf,(_df,_hf2+1),'תל"ן')
+        if _a2 in x and _b3 in x:
+            _pf=m.NewBoolVar(f"tfd{_cf}{_hf2}")
+            m.Add(x[_a2]+x[_b3]==2).OnlyEnforceIf(_pf); _adj.append(_pf)
+    if _adj: m.Add(sum(_adj)>=1)
+
 # אינס: 2 מדעים ברצף - כל יום חוץ משלישי (יום החופש החדש שלה)
 for c in ("ה דני","ה תניה"):
     ps=[]
