@@ -504,7 +504,7 @@ function render(){
   if(_ac2) names=names.filter(n=>_ac2.includes(n));
   M.innerHTML=names.map(n=>grid(n,src[n],src[n].duty)).join("");
 }
-$q("#stamp").textContent="עודכן "+new Date().toLocaleDateString("he-IL");
+$q("#stamp").textContent="עודכן "+(DATA.built||"");
 (function(){
   if(!Object.keys(ACCESS).length){render();return;}
   const saved=LS("gordon_auth");

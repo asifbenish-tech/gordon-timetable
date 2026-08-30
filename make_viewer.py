@@ -352,6 +352,14 @@ _TEACH_SUBJ={
  "אנה":"מחנכת א אנה","פנינה":"מחנכת א פנינה","אביטל":"מחנכת ב אביטל","יערה":"מחנכת ב יערה","דליה":"מחנכת ג דליה",
  "מירי":"מחנכת ד מירי","אינס":"מחנכת ד אינס","תניה":"מחנכת ה תניה (ראשון+רביעי מ-10:00)","אורנה":"מחנכת ו אורנה","סימה":"יסודי",
  "יעל":"תל\"ן בישול (ד-ו) · מגמה","חגית":"תל\"ן אומנות (א+ד) · מגמה","הילית":"תל\"ן פיסול","יפעת":"תל\"ן חינוך סביבתי","רובי":"מגמת אומנויות (שלישי בלבד)"}
+def _now():   # שעון ישראל, כדי שחותמת העדכון תהיה מובנת
+    import datetime
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.datetime.now(ZoneInfo("Asia/Jerusalem"))
+    except Exception:
+        return datetime.datetime.utcnow()+datetime.timedelta(hours=3)
+
 TR=[]
 for t,subj in _TEACH_SUBJ.items():
     off=_DO.get(t) or _HO.get(t) or []
@@ -370,9 +378,19 @@ for _hk,_hv in _HOUSES.items():
     _HT[_hk]=sorted(_ts)
 data={"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"sol":SOLUTIONS,"elem":elem,"jun":jun,"teachers":{k:sorted(v,key=lambda z:(z[1],z[2])) for k,v in sorted(teachers.items())},"commit":commit,
       "days":DAY_NAMES,"legend_sed":{k:v for k,v in SED.items() if "קבוצת" not in k},
-      "full_names":_FULLN,"access":_ACCESS,"houses":_HOUSES,"house_teachers":_HT}
+      "full_names":_FULLN,"access":_ACCESS,"houses":_HOUSES,"house_teachers":_HT,
+      "built":_now().strftime("%d.%m.%Y %H:%M")}
 
 html = io.open("viewer_template.html", encoding="utf-8").read()
 html = html.replace("/*__DATA__*/", "const DATA="+json.dumps(data,ensure_ascii=False)+";")
 io.open("viewer.html","w",encoding="utf-8").write(html)
-print("viewer.html נוצר,", len(html)//1024, "KB")
+# index.html - הפניה עם חותמת גרסה, כדי שהדפדפן לא יגיש עותק ישן מהמטמון
+_v=_now().strftime("%Y%m%d%H%M")
+io.open("index.html","w",encoding="utf-8").write(
+ '<!doctype html>\n<html lang="he" dir="rtl">\n<head>\n<meta charset="utf-8">\n'
+ '<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">\n'
+ '<meta http-equiv="refresh" content="0; url=viewer.html?v=%s">\n<title>לוח גורדון</title>\n'
+ '</head>\n<body>\n<p style="font-family:sans-serif;text-align:center;margin-top:3rem">\n'
+ 'מעביר ללוח המערכות\u2026 <a href="viewer.html?v=%s">לחצו כאן אם לא הועברתם</a>\n</p>\n'
+ '</body>\n</html>\n' % (_v,_v))
+print("viewer.html נוצר,", len(html)//1024, "KB | index.html v="+_v)
