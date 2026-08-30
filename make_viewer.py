@@ -54,6 +54,11 @@ for c in CLASSES:
         elif f"{c}|{k}" in FIL: cell["k"]="fill"
         if t=="אלי" and c.startswith("ו "): cell["s"]="היסטוריה"
         elif t==HOMEROOM[c]: cell["k"]="home"
+        _tk=f"{c}|{k}"
+        if t and t!='תל"ן' and _tk in TLN and TLN[_tk].startswith("חצי"):
+            _tu=TLN[_tk].split('חצי תל"ן ')[1].split(" · ")[0]
+            cell["co"]='½ הכיתה בתל"ן · '+_tu
+            cell["s"]=(cell.get("s") or "")+("  " if cell.get("s") else "")+"חצי כיתה"
         cells[k]=cell
     _ED={"ה דני":3,"ה תניה":0,"ו אורנה":2,"ו שרית":1}
     if c in _ED:
@@ -78,8 +83,9 @@ for c in CLASSES:
     _planned={t:q[c] for t,q in QUOTA.items() if c in q}
     for t in sorted(set(_planned)|set(_actual), key=lambda z:-(_planned.get(z,0))):
         _plan.append({"n":t,"want":_planned.get(t,0),"got":_actual.get(t,0)})
-    _tln=sum(1 for (d,h) in SLOTS if S[c][f"{d},{h}"]=='תל"ן')
-    _plan.append({"n":'תל"ן',"want":2,"got":_tln})
+    _full=sum(1 for (d,h) in SLOTS if S[c][f"{d},{h}"]=='תל"ן')
+    _halfs=sum(1 for (d,h) in SLOTS if TLN.get(f"{c}|{d},{h}","").startswith("חצי"))
+    _plan.append({"n":'תל"ן (לכל תלמיד/ה)',"want":2,"got":_full+_halfs//2})
     elem[c]={"home":HOMEROOM[c],"cells":cells,"hours":DAY_HOURS,"plan":_plan}
 
 try: GJ=json.load(io.open("galit_erez.json",encoding="utf-8"))
@@ -132,7 +138,11 @@ for c in CLASSES:
         if t and t!='תל"ן': add_t(t,"יסודי",d,h,c)
 for k,v in TLN.items():
     c,sl=k.split("|"); d,h=map(int,sl.split(","))
-    for sub in v.split(" + "): add_t(sub,"תל\"ן",d,h,c)
+    if v.startswith("חצי"):
+        _u=v.split('חצי תל"ן ')[1].split(" · ")[0]
+        add_t(_u,"תל\"ן",d,h,c+" (חצי כיתה)")
+    else:
+        for sub in v.split(" + "): add_t(sub,"תל\"ן",d,h,c)
 for c in HCLASSES:
     for (d,h) in HSLOTS:
         v=H[c][f"{d},{h}"]

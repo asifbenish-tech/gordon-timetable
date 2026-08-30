@@ -76,6 +76,12 @@ def grid(ws,title,home,cells,dayhours,hdr,away,cls=None):
                 cell.fill=TL
                 _tk=f"{cls}|{d},{h}" if cls else None
                 if _tk and _tk in TLNMAP: cell.value='תל"ן – '+TLNMAP[_tk]
+            else:
+                _tk2=f"{cls}|{d},{h}" if cls else None
+                if _tk2 and _tk2 in TLNMAP and TLNMAP[_tk2].startswith("חצי"):
+                    _u2=TLNMAP[_tk2].split('חצי תל"ן ')[1].split(" · ")[0]
+                    cell.value=v+'  (½ כיתה בתל"ן – '+_u2+")"
+                    cell.fill=TL
     ws.column_dimensions["A"].width=8
     for d in range(6): ws.column_dimensions[get_column_letter(2+d)].width=22
 
