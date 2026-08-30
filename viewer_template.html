@@ -28,6 +28,7 @@
   --away:#3D2E1F; --chip:#242E39;
 }
 *{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}   /* גובר על display:flex בסגנון המוטבע - אחרת התפריטים נשארים פתוחים */
 body{background:var(--bg);color:var(--ink);font:16px/1.5 Heebo,"Segoe UI",Arial,sans-serif;direction:rtl}
 header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:.9rem 1.2rem .7rem}
 h1{font:700 1.5rem "Frank Ruhl Libre",Heebo,serif;letter-spacing:.01em}
@@ -149,8 +150,10 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
     <button data-v="rules" aria-pressed="false">אילוצים</button>
     <button data-v="trules" aria-pressed="false">אילוצי מורים</button>
     <span style="position:relative;margin-inline-start:auto">
-      <button id="pdfbtn" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent)">📄 יצירת PDF</button>
+      <button id="expbtn" title="קובץ לייבוא למערכת אחרת" style="background:var(--fill);border-color:var(--fill-b)">📤 ייצוא קובץ</button>
+      <button id="pdfbtn" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent);margin-inline-start:.3rem">📄 יצירת PDF</button>
       <button id="logoutbtn" onclick="logout()" title="החלפת משתמש" style="margin-inline-start:.3rem">🚪 יציאה</button>
+      <div id="expmenu" hidden style="position:absolute;top:110%;inset-inline-end:0;z-index:9;background:var(--surface);border:1px solid var(--line);border-radius:.6rem;padding:.4rem;min-width:17rem;box-shadow:0 6px 20px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:.25rem"></div>
       <div id="pdfmenu" hidden style="position:absolute;top:110%;inset-inline-end:0;z-index:9;background:var(--surface);border:1px solid var(--line);border-radius:.6rem;padding:.4rem;min-width:15rem;box-shadow:0 6px 20px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:.25rem"></div>
     </span>
   </nav>
@@ -208,11 +211,111 @@ function tabBtns(){ const av=allowedViews();
     pr.style.cssText="border:none;background:none;color:var(--accent);cursor:pointer;padding:.35rem .6rem;text-align:right;font:700 .88rem Heebo;border-top:1px solid var(--line);margin-top:.15rem";
     pr.onclick=()=>{pm.hidden=true;try{window.print();}catch(e){alert("להדפסה: Ctrl+P ואז 'שמירה כ-PDF'");}};
     pm.appendChild(pr);
-    pb.onclick=(e)=>{e.stopPropagation();pm.hidden=!pm.hidden;};
+    pb.onclick=(e)=>{e.stopPropagation();pm.hidden=!pm.hidden;
+      const em=document.getElementById("expmenu"); if(em) em.hidden=true;};
     document.addEventListener("click",(e)=>{if(!pm.hidden&&!pm.contains(e.target))pm.hidden=true;});
   }
+  expMenu();
 }
 const FN=t=>(DATA.full_names&&DATA.full_names[t])||t;
+
+/* ---- ייצוא קובץ: בונה כאן בדפדפן את רשימת השיעורים מתוך אותם נתונים
+   שמוצגים על המסך, ומוריד קובץ JSON / CSV לייבוא במערכת אחרת.
+   אין תלות ברשת, ב-Git או בהרשאות - מה שרואים זה מה שיוצא.       ---- */
+const EXP_COLS=[["level","רמה"],["class","כיתה"],["class_app_id","מזהה כיתה באפליקציה"],
+  ["day","יום"],["day_name","שם היום"],["hour","שעה"],["subject","מקצוע"],
+  ["teacher","מורה"],["teacher_full","שם מלא"],["teacher_app_id","מזהה מורה באפליקציה"],
+  ["kind","סוג"],["note","הערה"],["temporary","זמני"]];
+function expRow(level,cls,key,cell){
+  const p=key.split(","), d=+p[0], h=+p[1];
+  const k=cell.k||"", t=cell.t||"", sub=cell.s||"";
+  let subject,teacher;
+  if(level==="junior"){ subject=t; teacher=(k==="mag")?"":sub; }
+  else{
+    teacher=t; subject="";
+    if(k==="tln"){ subject='תל"ן'; teacher=t.replace('תל"ן · ',""); }
+    else if(k==="half"){ subject='שיעור (½ כיתה) + תל"ן (½ כיתה)'; }
+    else if(k==="hole"){ subject=""; }
+    else if(sub&&sub!=="חצי כיתה"){ subject=sub; }
+  }
+  if(!teacher&&!subject) return null;
+  const AM=DATA.app_map||{classes:{},teachers:{}};
+  return {level:level, class:cls, class_app_id:(AM.classes[cls]||{}).app_id||null,
+    day:d, day_name:DAYS[d], hour:h, subject:subject, teacher:teacher,
+    teacher_full:teacher?FN(teacher):"", teacher_app_id:(AM.teachers[teacher]||{}).app_id||null,
+    kind:k||"regular", note:cell.co||"", temporary:k==="hole"};
+}
+function expLessons(){
+  const rows=[];
+  [["elementary",DATA.elem,"elem"],["junior",DATA.jun,"jun"]].forEach(([level,src,kind])=>{
+    const allow=allowedClasses(kind);           // null = הכל
+    for(const cls in src){
+      const mine=(allow===null)||allow.includes(cls);
+      for(const key in src[cls].cells){
+        const r=expRow(level,cls,key,src[cls].cells[key]);
+        if(!r) continue;
+        // מורה שאינו מחנך מקבל את השיעורים שהוא עצמו מלמד
+        if(!mine && !(USER&&r.teacher===USER.n)) continue;
+        rows.push(r);
+      }
+    }
+  });
+  rows.sort((a,b)=>a.level.localeCompare(b.level)||a.class.localeCompare(b.class,"he")||a.day-b.day||a.hour-b.hour);
+  return rows;
+}
+function expJSON(){
+  return JSON.stringify({generated:DATA.built,source:"לוח גורדון",days:DAYS,
+    app_map:DATA.app_map||{},full_names:DATA.full_names||{},lessons:expLessons()},null,1);
+}
+function expCSV(){
+  const q=v=>{v=(v===null||v===undefined)?"":(v===true?"כן":(v===false?"":String(v)));
+              return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const rows=expLessons();
+  return "﻿"+[EXP_COLS.map(c=>q(c[1])).join(",")]
+    .concat(rows.map(r=>EXP_COLS.map(c=>q(r[c[0]])).join(","))).join("\r\n")+"\r\n";
+}
+function expDownload(name,text,mime){
+  try{
+    const url=URL.createObjectURL(new Blob([text],{type:mime+";charset=utf-8"}));
+    const a=document.createElement("a"); a.href=url; a.download=name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+  }catch(e){ alert("ההורדה נחסמה בדפדפן. אפשר להשתמש ב'העתקה ללוח' מאותו תפריט."); }
+}
+function expMenu(){
+  const eb=document.getElementById("expbtn"), em=document.getElementById("expmenu");
+  if(!eb||!em||em.dataset.ready) return;
+  em.dataset.ready="1";
+  const note=document.createElement("div");
+  note.style.cssText="padding:.2rem .6rem .4rem;color:var(--muted);font:500 .76rem Heebo;border-bottom:1px solid var(--line);margin-bottom:.15rem";
+  em.appendChild(note);
+  const item=(label,sub,fn2)=>{const b=document.createElement("button");
+    b.innerHTML='<span style="font:700 .88rem Heebo">'+label+'</span>'+
+      '<span style="display:block;color:var(--muted);font:400 .74rem Heebo;margin-top:.1rem">'+sub+'</span>';
+    b.style.cssText="border:none;background:none;color:var(--ink);cursor:pointer;padding:.4rem .6rem;text-align:right;border-radius:.4rem";
+    b.onmouseenter=()=>b.style.background="var(--chip)";b.onmouseleave=()=>b.style.background="";
+    b.onclick=()=>{em.hidden=true;fn2();};
+    em.appendChild(b);};
+  const stamp=()=>(DATA.built||"").replace(/[^\d]/g,"").slice(0,8);
+  item("📥 קובץ JSON לאפליקציה","המבנה המלא, כולל מזהי הכיתות והמורים באתר",
+       ()=>expDownload("gordon-timetable-"+stamp()+".json",expJSON(),"application/json"));
+  item("📥 קובץ CSV (אקסל / כל מערכת)","טבלה שטוחה: כיתה · יום · שעה · מקצוע · מורה",
+       ()=>expDownload("gordon-timetable-"+stamp()+".csv",expCSV(),"text/csv"));
+  item("📋 העתקת ה-JSON ללוח","אם ההורדה חסומה - להדביק ישירות באפליקציה",
+       ()=>{const txt=expJSON();
+            (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject())
+              .then(()=>alert("הועתק ללוח - "+expLessons().length+" שיעורים"))
+              .catch(()=>{const ta=document.createElement("textarea");ta.value=txt;
+                document.body.appendChild(ta);ta.select();
+                try{document.execCommand("copy");alert("הועתק ללוח");}catch(e){alert("לא ניתן להעתיק - יש להשתמש בהורדת הקובץ");}
+                ta.remove();});});
+  eb.onclick=(e)=>{e.stopPropagation();
+    note.textContent="ייוצאו "+expLessons().length+" שיעורים · עודכן "+(DATA.built||"");
+    em.hidden=!em.hidden;
+    const pm=document.getElementById("pdfmenu"); if(pm) pm.hidden=true;};
+  document.addEventListener("click",(e)=>{if(!em.hidden&&!em.contains(e.target))em.hidden=true;});
+}
+
 // ================= הזדהות לפי תעודת זהות =================
 const ACCESS=DATA.access||{}; let USER=null;
 const LS=(k,v)=>{try{return v===undefined?localStorage.getItem(k):(v===null?localStorage.removeItem(k):localStorage.setItem(k,v));}catch(e){return null;}};

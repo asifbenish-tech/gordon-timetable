@@ -352,6 +352,33 @@ _TEACH_SUBJ={
  "אנה":"מחנכת א אנה","פנינה":"מחנכת א פנינה","אביטל":"מחנכת ב אביטל","יערה":"מחנכת ב יערה","דליה":"מחנכת ג דליה",
  "מירי":"מחנכת ד מירי","אינס":"מחנכת ד אינס","תניה":"מחנכת ה תניה (ראשון+רביעי מ-10:00)","אורנה":"מחנכת ו אורנה","סימה":"יסודי",
  "יעל":"תל\"ן בישול (ד-ו) · מגמה","חגית":"תל\"ן אומנות (א+ד) · מגמה","הילית":"תל\"ן פיסול","יפעת":"תל\"ן חינוך סביבתי","רובי":"מגמת אומנויות (שלישי בלבד)"}
+# ---- מיפוי לאפליקציה (school-gordon): כיתות ומורים -> המזהים באתר ----
+def _build_app_map():
+    try:
+        AC = json.load(io.open("app_data/v10_2026-2027_classes.json", encoding="utf-8"))["value"]
+        AT = json.load(io.open("app_data/v10_2026-2027_teachers.json", encoding="utf-8"))["value"]
+    except Exception:
+        return {"classes": {}, "teachers": {}}
+    alias = {"\u05d7\u05e1\u05df": "\u05d7\u05e1\u05d0\u05df"}   # שם בפותר -> שם באפליקציה
+    cmap = {}
+    for c in list(HOMEROOM) + list(HHOME.keys()):
+        grade, home = c.split(" ", 1)
+        first = alias.get(home, home).split()[0]
+        for ac in AC:
+            if ac.get("grade") == grade and (ac.get("name") or "").split()[0] == first:
+                cmap[c] = {"app_id": ac["id"], "app_name": ac.get("name"), "grade": grade}
+                break
+    tmap = {}
+    for t in set(list(HOMEROOM.values()) + list(HHOME.values())) | set(teachers):
+        first = alias.get(t, t)
+        for at in AT:
+            if (at.get("name") or "").strip().split()[0:1] == [first]:
+                tmap[t] = {"app_id": at["id"],
+                           "full_name": " ".join(((at.get("name") or "") + " " + (at.get("lastName") or "")).split())}
+                break
+    return {"classes": cmap, "teachers": tmap}
+APP_MAP = _build_app_map()
+
 def _now():   # שעון ישראל, כדי שחותמת העדכון תהיה מובנת
     import datetime
     try:
@@ -378,7 +405,7 @@ for _hk,_hv in _HOUSES.items():
     _HT[_hk]=sorted(_ts)
 data={"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"sol":SOLUTIONS,"elem":elem,"jun":jun,"teachers":{k:sorted(v,key=lambda z:(z[1],z[2])) for k,v in sorted(teachers.items())},"commit":commit,
       "days":DAY_NAMES,"legend_sed":{k:v for k,v in SED.items() if "קבוצת" not in k},
-      "full_names":_FULLN,"access":_ACCESS,"houses":_HOUSES,"house_teachers":_HT,
+      "full_names":_FULLN,"access":_ACCESS,"houses":_HOUSES,"house_teachers":_HT,"app_map":APP_MAP,
       "built":_now().strftime("%d.%m.%Y %H:%M")}
 
 html = io.open("viewer_template.html", encoding="utf-8").read()

@@ -33,30 +33,8 @@ holes = [{"class": c, "day": d, "hour": h, "cover": HOMEROOM[c] + " (זמני)"}
 
 try:    NAMES = json.load(io.open("names_map.json", encoding="utf-8"))
 except Exception: NAMES = {}
-# מיפוי לזיהוי באפליקציה (school-gordon): התאמת כיתות ומורים למזהים של האתר
-def _app_map():
-    try:
-        AC = json.load(io.open("app_data/v10_2026-2027_classes.json", encoding="utf-8"))["value"]
-        AT = json.load(io.open("app_data/v10_2026-2027_teachers.json", encoding="utf-8"))["value"]
-    except Exception:
-        return {"classes": {}, "teachers": {}}
-    alias = {"חסן": "חסאן"}   # שם בפותר -> שם באפליקציה
-    cmap = {}
-    for c in list(HOMEROOM) + list(HHOME.keys()):
-        grade, home = c.split(" ", 1)
-        first = alias.get(home, home).split()[0]
-        for ac in AC:
-            if ac.get("grade") == grade and (ac.get("name") or "").split()[0] == first:
-                cmap[c] = {"app_id": ac["id"], "app_name": ac.get("name"), "grade": grade}
-                break
-    tmap = {}
-    for t in set(list(HOMEROOM.values()) + list(HHOME.values())) | set(mv.teachers):
-        first = alias.get(t, t)
-        for at in AT:
-            if (at.get("name") or "").strip().split()[0:1] == [first]:
-                tmap[t] = {"app_id": at["id"], "full_name": " ".join(((at.get("name") or "") + " " + (at.get("lastName") or "")).split())}
-                break
-    return {"classes": cmap, "teachers": tmap}
+# מיפוי לזיהוי באפליקציה (school-gordon) - נבנה פעם אחת ב-make_viewer
+def _app_map(): return mv.APP_MAP
 
 out = {
     "generated": datetime.datetime.now().isoformat(timespec="seconds"),
@@ -143,3 +121,18 @@ for t in sorted(out["teachers"]):
 out["index"] = index
 io.open("timetable.json", "w", encoding="utf-8").write(json.dumps(out, ensure_ascii=False, indent=1))
 print("timetable.json נוצר,", len(out["elementary"]) + len(out["junior"]), "כיתות,", len(out["teachers"]), "מורים")
+
+# ---- timetable.csv: אותם שיעורים בדיוק, כטבלה שטוחה שכל מערכת יודעת לקרוא ----
+import csv
+_COLS = [("level","רמה"), ("class","כיתה"), ("class_app_id","מזהה כיתה באפליקציה"),
+         ("day","יום"), ("day_name","שם היום"), ("hour","שעה"),
+         ("subject","מקצוע"), ("teacher","מורה"), ("teacher_full","שם מלא"), ("teacher_app_id","מזהה מורה באפליקציה"),
+         ("kind","סוג"), ("note","הערה"), ("temporary","זמני")]
+with io.open("timetable.csv", "w", encoding="utf-8-sig", newline="") as _f:
+    _w = csv.writer(_f)
+    _w.writerow([h for _, h in _COLS])
+    for L in lessons:
+        L = dict(L, teacher_full=NAMES.get(L["teacher"], "") if L["teacher"] else "")
+        _w.writerow(["" if L.get(k) is None else ("כן" if L[k] is True else ("" if L[k] is False else L[k]))
+                     for k, _ in _COLS])
+print("timetable.csv נוצר,", len(lessons), "שורות")
