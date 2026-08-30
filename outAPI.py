@@ -33,9 +33,35 @@ holes = [{"class": c, "day": d, "hour": h, "cover": HOMEROOM[c] + " (זמני)"}
 
 try:    NAMES = json.load(io.open("names_map.json", encoding="utf-8"))
 except Exception: NAMES = {}
+# מיפוי לזיהוי באפליקציה (school-gordon): התאמת כיתות ומורים למזהים של האתר
+def _app_map():
+    try:
+        AC = json.load(io.open("app_data/v10_2026-2027_classes.json", encoding="utf-8"))["value"]
+        AT = json.load(io.open("app_data/v10_2026-2027_teachers.json", encoding="utf-8"))["value"]
+    except Exception:
+        return {"classes": {}, "teachers": {}}
+    alias = {"חסן": "חסאן"}   # שם בפותר -> שם באפליקציה
+    cmap = {}
+    for c in list(HOMEROOM) + list(HHOME.keys()):
+        grade, home = c.split(" ", 1)
+        first = alias.get(home, home).split()[0]
+        for ac in AC:
+            if ac.get("grade") == grade and (ac.get("name") or "").split()[0] == first:
+                cmap[c] = {"app_id": ac["id"], "app_name": ac.get("name"), "grade": grade}
+                break
+    tmap = {}
+    for t in set(list(HOMEROOM.values()) + list(HHOME.values())) | set(mv.teachers):
+        first = alias.get(t, t)
+        for at in AT:
+            if (at.get("name") or "").strip().split()[0:1] == [first]:
+                tmap[t] = {"app_id": at["id"], "full_name": " ".join(((at.get("name") or "") + " " + (at.get("lastName") or "")).split())}
+                break
+    return {"classes": cmap, "teachers": tmap}
+
 out = {
     "generated": datetime.datetime.now().isoformat(timespec="seconds"),
     "days": DAY_NAMES,
+    "app_map": _app_map(),
     "full_names": {k: v for k, v in NAMES.items() if v},   # שם פרטי -> שם מלא (מתוך names_map.json)
     "elementary": {c: {"home": v["home"], "hours": DAY_HOURS, "cells": v["cells"]}
                    for c, v in mv.elem.items()},
