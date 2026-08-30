@@ -408,11 +408,13 @@ for s in NONFRI:                                    # מורת תל"ן - בכי�
         if u in ("הילית","יפעת"): v+=[alef_sub[(u,c,s)] for c in ALEF if (u,c,s) in alef_sub]
         if len(v)>1: m.Add(sum(v)<=1)
 # ---- תל"ן: שעתיים מלאות רצופות, בלי פיצול חצי-כיתה ----
-# ה תניה: יעל + הילית ביחד, ביום שני (יום קבוע לפי בקשה).
-# ה דני ו-ו שרית: אותו דבר, אבל היום נבחר ע"י הפותר - קיבוע ו שרית לשלישי
-# יחד עם הרצף של ה דני מייצר חוסר רביעי, ובלי הקיבוע נשארים 3 חוסרים.
-TLN_FIXED_DAY={"ה תניה":1}                  # כיתה -> יום קבוע
-TLN_FULL_CONSEC=["ה דני","ו שרית"]          # שעתיים רצוף, היום פתוח לפותר
+# כל כיתה של יעל מקבלת אותה כבלוק של שעתיים רצופות - חוץ מ-ד אינס, שבה
+# בלוק מלא אינו פתיר (נבדק גם לבדה), ולכן היא נשארת בפיצול חצי-כיתה.
+# בשני יעל מלמדת רק בלוקים מלאים, ולכן היום שלה מתחלק לשלוש כיתות
+# בשעות 1-2 / 3-4 / 5-6. ה תניה מקובעת לשני; שאר הימים לבחירת הפותר.
+TLN_FIXED_DAY={"ה תניה":1}                                     # כיתה -> יום קבוע
+TLN_FULL_CONSEC=[c for c in CLASSES
+                 if "יעל" in TLN_PAIR.get(c,()) and c!="ד אינס"]   # שעתיים רצוף
 for _cf,_df in list(TLN_FIXED_DAY.items())+[(c,None) for c in TLN_FULL_CONSEC]:
     if _df is not None:
         for _s in NONFRI:
@@ -426,6 +428,17 @@ for _cf,_df in list(TLN_FIXED_DAY.items())+[(c,None) for c in TLN_FULL_CONSEC]:
                 _pf=m.NewBoolVar(f"tfd{_cf}{_dd}{_hf2}")
                 m.Add(x[_a2]+x[_b3]==2).OnlyEnforceIf(_pf); _adj.append(_pf)
     if _adj: m.Add(sum(_adj)>=1)                                 # השעתיים ברצף
+# בשני: יעל רק בבלוקים מלאים, בלי חצאי כיתה - כך היום נחלק לשלוש כיתות
+for _ky in [k for k in hf if k[2]=="יעל" and k[1][0]==1]: m.Add(hf[_ky]==0)
+# ד אינס: גם שתי שעות החצי-כיתה של יעל תהיינה רצופות
+_iad=[]
+for _di in range(5):
+    for _hi in range(1,DAY_HOURS[_di]):
+        _k1,_k2=("ד אינס",(_di,_hi),"יעל"),("ד אינס",(_di,_hi+1),"יעל")
+        if _k1 in hf and _k2 in hf:
+            _pi=m.NewBoolVar(f"iad{_di}{_hi}")
+            m.Add(hf[_k1]+hf[_k2]==2).OnlyEnforceIf(_pi); _iad.append(_pi)
+if _iad: m.Add(sum(_iad)>=1)
 
 # אינס: 2 מדעים ברצף - כל יום חוץ משלישי (יום החופש החדש שלה)
 for c in ("ה דני","ה תניה"):
