@@ -172,6 +172,10 @@ const DAYS=DATA.days;
 function tabBtns(){ const av=allowedViews();
   document.querySelectorAll("#tabs button[data-v]").forEach(b=>{
   b.style.display=av.includes(b.dataset.v)?"":"none";
+  if(b.dataset.v==="teach"){
+    b.textContent = (!USER||USER.r==="admin") ? "מערכות מורים"
+      : (USER.r==="coordinator" ? "מערכות מורי הבית" : "📋 המערכת האישית שלי");
+  }
   b.setAttribute("aria-pressed", b.dataset.v===view ? "true":"false");
   b.onclick=()=>{view=b.dataset.v; pick=null; render();};
 });
