@@ -301,6 +301,17 @@ function expMenu(){
        ()=>expDownload("gordon-timetable-"+stamp()+".json",expJSON(),"application/json"));
   item("📥 קובץ CSV (אקסל / כל מערכת)","טבלה שטוחה: כיתה · יום · שעה · מקצוע · מורה",
        ()=>expDownload("gordon-timetable-"+stamp()+".csv",expCSV(),"text/csv"));
+  const raw=(fn3,label,sub)=>{const a3=document.createElement("a");
+    a3.innerHTML='<span style="font:700 .88rem Heebo">'+label+'</span>'+
+      '<span style="display:block;color:var(--muted);font:400 .74rem Heebo;margin-top:.1rem">'+sub+'</span>';
+    a3.href="https://raw.githubusercontent.com/asifbenish-tech/gordon-timetable/master/"+fn3;
+    a3.target="_blank"; a3.rel="noopener"; a3.download=fn3;
+    a3.style.cssText="padding:.4rem .6rem;border-radius:.4rem;color:var(--ink);text-decoration:none;border-top:1px solid var(--line);margin-top:.15rem";
+    a3.onmouseenter=()=>a3.style.background="var(--chip)";a3.onmouseleave=()=>a3.style.background="";
+    a3.onclick=()=>{em.hidden=true;};
+    em.appendChild(a3);};
+  raw("timetable.json","🔗 פתיחת ה-JSON המלא","עובד גם כשההורדה בדפדפן חסומה");
+  raw("timetable.csv","🔗 פתיחת ה-CSV המלא","הקובץ המלא של כל בית החינוך");
   item("📋 העתקת ה-JSON ללוח","אם ההורדה חסומה - להדביק ישירות באפליקציה",
        ()=>{const txt=expJSON();
             (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject())

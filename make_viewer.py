@@ -134,17 +134,27 @@ for c in HCLASSES:
 teachers={}
 def add_t(t,side,d,h,label):
     teachers.setdefault(t,[]).append([side,d,h,label])
+# כשכיתה מתפצלת או מלמדים בה שניים - כל מורה רואה במערכת שלו עם מי
+def _half_tln(c,d,h):        # מורת התל"ן שלוקחת חצי כיתה בתא הזה, אם יש
+    v=TLN.get(f"{c}|{d},{h}","")
+    return v.split('חצי תל"ן ')[1].split(" · ")[0] if v.startswith("חצי") else None
 for c in CLASSES:
     for (d,h) in SLOTS:
         t=S[c][f"{d},{h}"]
-        if t and t!='תל"ן': add_t(t,"יסודי",d,h,c)
+        if t and t!='תל"ן':
+            _u=_half_tln(c,d,h)
+            add_t(t,"יסודי",d,h,f"{c} · חצי כיתה עם {_u}" if _u else c)
 for k,v in TLN.items():
     c,sl=k.split("|"); d,h=map(int,sl.split(","))
     if v.startswith("חצי"):
         _u=v.split('חצי תל"ן ')[1].split(" · ")[0]
-        add_t(_u,"תל\"ן",d,h,c+" (חצי כיתה)")
+        _with=S[c].get(f"{d},{h}") or HOMEROOM[c]
+        add_t(_u,"תל\"ן",d,h,f"{c} · חצי כיתה עם {_with}")
     else:
-        for sub in v.split(" + "): add_t(sub,"תל\"ן",d,h,c)
+        _pair=v.split(" + ")
+        for sub in _pair:
+            _oth=[z for z in _pair if z!=sub]
+            add_t(sub,"תל\"ן",d,h,f"{c} · עם {' · '.join(_oth)}" if _oth else c)
 for c in HCLASSES:
     for (d,h) in HSLOTS:
         v=H[c][f"{d},{h}"]
@@ -156,6 +166,14 @@ for c in HCLASSES:
             else: add_t(t,"חטיבה",d,h,f"{c} · {subj}")
 
 add_t("תניה","יסודי",0,3,"שיעור הדרכה")   # שעת הוראה לכל דבר (לא בכיתה)
+# צופיה מצטרפת לשיעור (לא מחליפה) - שתי המורות רואות זו את זו במערכת
+for _ck,_cls,_home in (("anna","א אנה","אנה"),("pnina","א פנינה","פנינה")):
+    for _key in CO:
+        if not _key.startswith(_ck): continue
+        _d4,_h4=map(int,_key.split("|")[1].split(","))
+        add_t("צופיה","יסודי",_d4,_h4,f"{_cls} · עם {_home}")
+        for _ev in teachers.get(_home,[]):      # להוסיף לתווית הקיימת, לא לשכפל שעה
+            if _ev[1]==_d4 and _ev[2]==_h4 and _ev[3]==_cls: _ev[3]=f"{_cls} · עם צופיה"
 # ---------- מגמות: שעות המורים המובילים ----------
 for k2 in GJ:
     c2,sl=k2.split("|"); d2,h2=map(int,sl.split(","))
@@ -188,7 +206,9 @@ for _t,_d,_h,_lbl in _COMMIT:
     add_t(_t,"סדירות",_d,_h,_lbl)
 for k,lst in MAGROLES.items():
     d,h=map(int,k.split(","))
-    for t,role in lst: add_t(t,"מגמות",d,h,"מגמת "+role)
+    for t,role in lst:
+        _oth=[f"{z} ({r})" for z,r in lst if z!=t]
+        add_t(t,"מגמות",d,h,"מגמת "+role+(" · במקביל: "+" · ".join(_oth) if _oth else ""))
 # אסיפת צוות: ראשון 6-7, כל המורים
 for _t in list(teachers):
     add_t(_t,"סדירות",0,6,"אסיפת צוות"); add_t(_t,"סדירות",0,7,"אסיפת צוות")
