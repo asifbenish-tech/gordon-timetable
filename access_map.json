@@ -3,6 +3,14 @@
   "n": "דאפי",
   "r": "admin"
  },
+ "4f1f03059b956ad5ae4f39d8450235266fe8d49dd2612f874a44ff3ccf54c537": {
+  "n": "אנה",
+  "r": "teacher"
+ },
+ "41f9510f74c6f9b8cbce9d8e4e8935e07529928654e13e3261cd25397b4c2794": {
+  "n": "אסיף",
+  "r": "admin"
+ },
  "93ae8d816d5af1a7afdbdb9b320353f37dba66cc8ab6ff964bea4cd53bdc5ea8": {
   "n": "צבי",
   "r": "teacher"
@@ -75,6 +83,18 @@
  },
  "2f329f9931aa056e84748478fba93a07952eb49a797fff08509f8fdf0c0064d7": {
   "n": "יפעת",
+  "r": "teacher"
+ },
+ "768d24e7c4cb25f4904ec34f580262e9ac7ffeabe23d040cfb79359f0b2cd0d9": {
+  "n": "אביטל",
+  "r": "teacher"
+ },
+ "db51d89eb9d3f4f42de2f388e805ee13e9de4c6b6f67777ffe71a41f3f049af0": {
+  "n": "ליאור",
+  "r": "teacher"
+ },
+ "d4d39b26a42e666a981ef66050c9f4f14faa2b913f1d7936cbd9ee31e5c366ea": {
+  "n": "חגית",
   "r": "teacher"
  }
 }
