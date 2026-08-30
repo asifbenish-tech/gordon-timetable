@@ -1,0 +1,80 @@
+{
+ "69066cdc3a4b4403955b542200bb83cdbeb7c836c0218bd3af760a450b86e48c": {
+  "n": "דאפי",
+  "r": "admin"
+ },
+ "93ae8d816d5af1a7afdbdb9b320353f37dba66cc8ab6ff964bea4cd53bdc5ea8": {
+  "n": "צבי",
+  "r": "teacher"
+ },
+ "747da302af4c5f1c00abc6e7a39034bded1dea31cb4a7809e6e9432b91578b81": {
+  "n": "דליה",
+  "r": "teacher"
+ },
+ "dda49f1f48ed5887af5c71a579859d01e1301403c7fea3d221d16e1a0459e1e4": {
+  "n": "לייה",
+  "r": "coordinator",
+  "h": "A"
+ },
+ "efe093ff38221415de5b763c9ebf6fbbe37b738772eaf8d65a3fb3c41678c449": {
+  "n": "פנינה",
+  "r": "teacher"
+ },
+ "8b9461d24173362443b6758ad8ad2f6ddc07b0c0115a8d56555b1934d194c116": {
+  "n": "שרית",
+  "r": "coordinator",
+  "h": "B"
+ },
+ "fd30e81f46f9746482f15584c88a7aced93518cbbae8cc6205396d65ad92c167": {
+  "n": "הילית",
+  "r": "teacher"
+ },
+ "5a9d790a6c0438ac3c798d56b273b0be2c93acfde23b183607949b309e2c3b6c": {
+  "n": "תניה",
+  "r": "teacher"
+ },
+ "7abce64cfce6d1f7a5580311b526b0f3e863720b442b13a22ba33fa66317dc75": {
+  "n": "יערה",
+  "r": "teacher"
+ },
+ "ccaf01c5db9cdbd5c1be6968d17210a14b61b08bed9dcab1bc5763bf8326547a": {
+  "n": "דני",
+  "r": "teacher"
+ },
+ "ee8a40e75c148199aaabcb526191c7f5571eec8a3ac8f8e57f3a623aa7ff52cf": {
+  "n": "גלית",
+  "r": "teacher"
+ },
+ "7f64b013c41a0b23b470c9f37625b675b24a5e8088919a780f80e4fa42f8c7ee": {
+  "n": "אורנה",
+  "r": "teacher"
+ },
+ "bae69d4ac9266645631894a6e96d4c4e3af6bea45a02c3712e66452d7fe19dd0": {
+  "n": "צופיה",
+  "r": "teacher"
+ },
+ "d1e760c88529d7175b5a54328af5b9ba01651ea8234526e84b52efab47de8fad": {
+  "n": "פאני",
+  "r": "teacher"
+ },
+ "34b967d48a025748415a1ab2c54c3b5396cd4d5668ca2ac924cb0962ef0f6fad": {
+  "n": "תמיר",
+  "r": "teacher"
+ },
+ "3bee0d9de2e40ebbde87609f7102c46ba9b00e84edd5e9b67cf54d1249525c16": {
+  "n": "מירי",
+  "r": "teacher"
+ },
+ "282f0bb0bd1665a0d56d06e4884856107ad88b5435467d872ff6e8d6377ba9f3": {
+  "n": "אינס",
+  "r": "teacher"
+ },
+ "63195511f2a5d37ee21bd3abf1d19645e687c5bef6d437e6212d2cf80ea0217a": {
+  "n": "משה",
+  "r": "teacher"
+ },
+ "2f329f9931aa056e84748478fba93a07952eb49a797fff08509f8fdf0c0064d7": {
+  "n": "יפעת",
+  "r": "teacher"
+ }
+}

@@ -6,6 +6,8 @@ from hdata import HCLASSES, HSLOTS, HDAY, HHOME, NEED, GRADE
 
 try: _FULLN={k:v for k,v in json.load(io.open("names_map.json",encoding="utf-8")).items() if v}
 except Exception: _FULLN={}
+try: _ACCESS=json.load(io.open("access_map.json",encoding="utf-8"))
+except Exception: _ACCESS={}
 S   = json.load(io.open("sol_J.json",  encoding="utf-8"))
 H   = json.load(io.open("sol_hat.json",encoding="utf-8"))
 TLN = json.load(io.open("tln_map.json",encoding="utf-8"))
@@ -342,9 +344,20 @@ for t,subj in _TEACH_SUBJ.items():
     off=_DO.get(t) or _HO.get(t) or []
     ev=teachers.get(t,[])
     TR.append({"t":t,"off":", ".join(off) if off else "—","subj":subj,"n":len(ev)})
+_HOUSES={"A":{"name":"בית א","kind":"elem","classes":[c for c in CLASSES if c[0] in "אבג"]},
+         "B":{"name":"בית ב","kind":"elem","classes":[c for c in CLASSES if c[0] in "דהו"]},
+         "C":{"name":"בית ג","kind":"jun","classes":list(HCLASSES)}}
+_HT={}
+for _hk,_hv in _HOUSES.items():
+    _cset=set(_hv["classes"]); _ts=set()
+    for _t2,_evs in teachers.items():
+        for _side,_d3,_h3,_lbl in _evs:
+            _cls=_lbl.split(" · ")[0] if _side=="חטיבה" else _lbl
+            if _side in ("יסודי","חטיבה",'תל"ן') and _cls in _cset: _ts.add(_t2); break
+    _HT[_hk]=sorted(_ts)
 data={"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"sol":SOLUTIONS,"elem":elem,"jun":jun,"teachers":{k:sorted(v,key=lambda z:(z[1],z[2])) for k,v in sorted(teachers.items())},"commit":commit,
       "days":DAY_NAMES,"legend_sed":{k:v for k,v in SED.items() if "קבוצת" not in k},
-      "full_names":_FULLN}
+      "full_names":_FULLN,"access":_ACCESS,"houses":_HOUSES,"house_teachers":_HT}
 
 html = io.open("viewer_template.html", encoding="utf-8").read()
 html = html.replace("/*__DATA__*/", "const DATA="+json.dumps(data,ensure_ascii=False)+";")

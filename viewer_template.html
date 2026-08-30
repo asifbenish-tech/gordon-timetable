@@ -148,6 +148,7 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
     <button data-v="trules" aria-pressed="false">אילוצי מורים</button>
     <span style="position:relative;margin-inline-start:auto">
       <button id="pdfbtn" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent)">📄 יצירת PDF</button>
+      <button id="logoutbtn" onclick="logout()" title="החלפת משתמש" style="margin-inline-start:.3rem">🚪 יציאה</button>
       <div id="pdfmenu" hidden style="position:absolute;top:110%;inset-inline-end:0;z-index:9;background:var(--surface);border:1px solid var(--line);border-radius:.6rem;padding:.4rem;min-width:15rem;box-shadow:0 6px 20px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:.25rem"></div>
     </span>
   </nav>
@@ -168,10 +169,14 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
 const $q=s=>document.querySelector(s);
 let view="elem", pick=null;
 const DAYS=DATA.days;
-function tabBtns(){ document.querySelectorAll("#tabs button[data-v]").forEach(b=>{
+function tabBtns(){ const av=allowedViews();
+  document.querySelectorAll("#tabs button[data-v]").forEach(b=>{
+  b.style.display=av.includes(b.dataset.v)?"":"none";
   b.setAttribute("aria-pressed", b.dataset.v===view ? "true":"false");
   b.onclick=()=>{view=b.dataset.v; pick=null; render();};
 });
+  const lo=document.getElementById("logoutbtn");
+  if(lo) lo.style.display=USER?"":"none";
   const pb=document.getElementById("pdfbtn"), pm=document.getElementById("pdfmenu");
   if(pb&&pm&&!pm.dataset.ready){
     pm.dataset.ready="1";
@@ -181,7 +186,9 @@ function tabBtns(){ document.querySelectorAll("#tabs button[data-v]").forEach(b=
       a2.style.cssText="padding:.35rem .6rem;border-radius:.4rem;color:var(--ink);text-decoration:none;font:500 .88rem Heebo";
       a2.onmouseenter=()=>a2.style.background="var(--chip)";a2.onmouseleave=()=>a2.style.background="";
       pm.appendChild(a2);};
-    item("📥 כל מערכות המורים (PDF)","מערכות שעות מורים.pdf");
+    if(!USER||USER.r==="admin") item("📥 כל מערכות המורים (PDF)","מערכות שעות מורים.pdf");
+    if(USER&&USER.r==="coordinator") item("📥 מערכות "+DATA.houses[USER.h].name+" (PDF)","מערכות "+DATA.houses[USER.h].name+".pdf");
+    if(!USER||USER.r==="admin"){
     item("📥 מערכות בית א (PDF)","מערכות בית א.pdf");
     item("📥 מערכות בית ב (PDF)","מערכות בית ב.pdf");
     item("📥 מערכות בית ג (PDF)","מערכות בית ג.pdf");
@@ -190,6 +197,7 @@ function tabBtns(){ document.querySelectorAll("#tabs button[data-v]").forEach(b=
     item("📥 לוח סדירויות (PDF)","לוח סדירויות.pdf");
     item("📥 אילוצים (PDF)","אילוצים.pdf");
     item("📥 אילוצי מורים (PDF)","אילוצי מורים.pdf");
+    }
     const pr=document.createElement("button");pr.textContent="🖨 הדפסת התצוגה הנוכחית";
     pr.style.cssText="border:none;background:none;color:var(--accent);cursor:pointer;padding:.35rem .6rem;text-align:right;font:700 .88rem Heebo;border-top:1px solid var(--line);margin-top:.15rem";
     pr.onclick=()=>{pm.hidden=true;try{window.print();}catch(e){alert("להדפסה: Ctrl+P ואז 'שמירה כ-PDF'");}};
@@ -199,20 +207,83 @@ function tabBtns(){ document.querySelectorAll("#tabs button[data-v]").forEach(b=
   }
 }
 const FN=t=>(DATA.full_names&&DATA.full_names[t])||t;
+// ================= הזדהות לפי תעודת זהות =================
+const ACCESS=DATA.access||{}; let USER=null;
+const LS=(k,v)=>{try{return v===undefined?localStorage.getItem(k):(v===null?localStorage.removeItem(k):localStorage.setItem(k,v));}catch(e){return null;}};
+async function idHash(raw){
+  const id=(raw||"").replace(/\D/g,"").padStart(9,"0");
+  const enc=new TextEncoder();
+  const key=await crypto.subtle.importKey("raw",enc.encode(id),"PBKDF2",false,["deriveBits"]);
+  const bits=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:enc.encode("gordon-lohot-2026"),iterations:100000},key,256);
+  return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function homeClassOf(name){
+  for(const c in DATA.elem) if(DATA.elem[c].home===name) return ["elem",c];
+  for(const c in DATA.jun)  if(DATA.jun[c].home===name)  return ["jun",c];
+  return null;
+}
+function allowedViews(){
+  if(!USER||USER.r==="admin") return ["elem","jun","teach","gaps","util","commit","rules","trules"];
+  if(USER.r==="coordinator"){const k=DATA.houses[USER.h].kind;return [k,"teach","commit"];}
+  return homeClassOf(USER.n)?[homeClassOf(USER.n)[0],"teach"]:["teach"];
+}
+function allowedClasses(kind){
+  if(!USER||USER.r==="admin") return null;
+  if(USER.r==="coordinator"){const hh=DATA.houses[USER.h];return hh.kind===kind?hh.classes:[];}
+  const hc=homeClassOf(USER.n);
+  return (hc&&hc[0]===kind)?[hc[1]]:[];
+}
+function allowedTeachers(){
+  if(!USER||USER.r==="admin") return Object.keys(DATA.teachers);
+  if(USER.r==="coordinator"){const l=(DATA.house_teachers||{})[USER.h]||[];return l.includes(USER.n)?l:[USER.n,...l];}
+  return DATA.teachers[USER.n]?[USER.n]:[];
+}
+function showLogin(msg){
+  let ov=document.getElementById("loginov");
+  if(!ov){
+    ov=document.createElement("div");
+    ov.id="loginov";
+    ov.style.cssText="position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;align-items:center;justify-content:center";
+    ov.innerHTML='<div style="background:var(--surface);border:1px solid var(--line);border-radius:1rem;padding:2rem 2.2rem;max-width:22rem;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.12)">'
+      +'<div style="font-size:2rem">📅</div><h2 style="margin:.4rem 0">לוח גורדון</h2>'
+      +'<div style="color:var(--muted);font-size:.9rem;margin-bottom:1rem">הזינו תעודת זהות לצפייה במערכת שלכם</div>'
+      +'<input id="loginid" inputmode="numeric" autocomplete="off" placeholder="תעודת זהות" style="width:100%;padding:.55rem .8rem;border:1px solid var(--line);border-radius:.5rem;background:var(--bg);color:var(--ink);font-size:1.05rem;text-align:center;letter-spacing:.1em">'
+      +'<button id="loginbtn" style="width:100%;margin-top:.8rem;padding:.55rem;border:none;border-radius:.5rem;background:var(--accent);color:var(--accent-ink);font:700 1rem Heebo;cursor:pointer">כניסה</button>'
+      +'<div id="loginerr" style="color:#B3261E;font-size:.85rem;margin-top:.6rem;min-height:1.2em"></div></div>';
+    document.body.appendChild(ov);
+    const go=async()=>{
+      const btn=document.getElementById("loginbtn");btn.textContent="בודק…";btn.disabled=true;
+      try{
+        const hsh=await idHash(document.getElementById("loginid").value);
+        const e=ACCESS[hsh];
+        if(e){USER=e;LS("gordon_auth",hsh);ov.remove();render();}
+        else{document.getElementById("loginerr").textContent="תעודת זהות לא מוכרת - פנו למנהל/ת";}
+      }catch(err){document.getElementById("loginerr").textContent="שגיאה בהזדהות: "+err;}
+      btn.textContent="כניסה";btn.disabled=false;
+    };
+    document.getElementById("loginbtn").onclick=go;
+    document.getElementById("loginid").onkeydown=e=>{if(e.key==="Enter")go();};
+  }
+  if(msg) document.getElementById("loginerr").textContent=msg;
+  document.getElementById("loginid").focus();
+}
+function logout(){USER=null;LS("gordon_auth",null);showLogin();render();}
 function chipRow(){
   const box=$q("#chips"); box.innerHTML="";
   if(view==="util"||view==="gaps"||view==="rules"||view==="trules"||view==="commit"){ return; }
   if(view==="teach"){
     const sel=document.createElement("select");
     let opts='<option value="">בחר/י מורה…</option>';
-    for(const t of Object.keys(DATA.teachers)){
+    for(const t of allowedTeachers()){
       opts+='<option value="'+t+'"'+(t===pick?' selected':'')+'>'+FN(t)+'</option>';
     }
     sel.innerHTML=opts;
     sel.onchange=()=>{pick=sel.value||null; render();};
     box.appendChild(sel); return;
   }
-  const names=Object.keys(view==="elem"?DATA.elem:DATA.jun);
+  let names=Object.keys(view==="elem"?DATA.elem:DATA.jun);
+  const _ac=allowedClasses(view);
+  if(_ac) names=names.filter(n=>_ac.includes(n));
   const all=document.createElement("button");
   all.textContent="הכל"; all.setAttribute("aria-pressed", pick? "false":"true");
   all.onclick=()=>{pick=null;render();}; box.appendChild(all);
@@ -399,6 +470,10 @@ function trulesView(){
     '<div class="tblwrap"><table><tr><th>מורה</th><th>ימים חופשיים</th><th>מה מלמד/ת</th><th>שעות</th></tr>'+rows+'</table></div></section>';
 }
 function render(){
+  if(Object.keys(ACCESS).length&&!USER){showLogin();return;}
+  const av=allowedViews();
+  if(!av.includes(view)) view=av[0];
+  if(view==="teach"&&!pick&&USER&&USER.r!=="admin"&&DATA.teachers[USER.n]) pick=USER.n;
   tabBtns(); chipRow();
   const M=$q("#main"); M.innerHTML="";
   if(view==="util"){ M.innerHTML=utilView(); return; }
@@ -418,9 +493,16 @@ function render(){
     return;
   }
   const src=view==="elem"?DATA.elem:DATA.jun;
-  const names=pick?[pick]:Object.keys(src);
+  let names=pick?[pick]:Object.keys(src);
+  const _ac2=allowedClasses(view);
+  if(_ac2) names=names.filter(n=>_ac2.includes(n));
   M.innerHTML=names.map(n=>grid(n,src[n],src[n].duty)).join("");
 }
 $q("#stamp").textContent="עודכן "+new Date().toLocaleDateString("he-IL");
-render();
+(function(){
+  if(!Object.keys(ACCESS).length){render();return;}
+  const saved=LS("gordon_auth");
+  if(saved&&ACCESS[saved]){USER=ACCESS[saved];render();}
+  else{showLogin();}
+})();
 </script>
