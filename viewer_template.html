@@ -274,13 +274,50 @@ function expCSV(){
   return "﻿"+[EXP_COLS.map(c=>q(c[1])).join(",")]
     .concat(rows.map(r=>EXP_COLS.map(c=>q(r[c[0]])).join(","))).join("\r\n")+"\r\n";
 }
+/* הורדה שעובדת גם בנייד וגם כשהדפדפן חוסם: מנסה להוריד, ואם לא -
+   פותח חלון עם תוכן הקובץ להעתקה ידנית. תמיד יש דרך להגיע לקובץ. */
+function expShow(name,text){
+  const ov=document.createElement("div");
+  ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;display:flex;align-items:center;justify-content:center;padding:1rem";
+  const box=document.createElement("div");
+  box.style.cssText="background:var(--surface);border:1px solid var(--line);border-radius:.75rem;padding:1rem;max-width:46rem;width:100%;max-height:86vh;display:flex;flex-direction:column;gap:.6rem";
+  const head=document.createElement("div");
+  head.style.cssText="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap";
+  head.innerHTML='<b style="font:700 1rem Heebo">'+name+'</b>'+
+    '<span style="color:var(--muted);font:400 .8rem Heebo">'+Math.round(text.length/1024)+' KB</span>';
+  const ta=document.createElement("textarea");
+  ta.value=text; ta.readOnly=true;
+  ta.style.cssText="flex:1;min-height:14rem;width:100%;direction:ltr;text-align:left;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--line);border-radius:.5rem;padding:.6rem;background:var(--bg);color:var(--ink);resize:vertical";
+  const bar=document.createElement("div");
+  bar.style.cssText="display:flex;gap:.4rem;flex-wrap:wrap";
+  const mk=(label,fn3,primary)=>{const b=document.createElement("button");b.textContent=label;
+    b.style.cssText="border:1px solid "+(primary?"var(--accent)":"var(--line)")+";background:"+(primary?"var(--accent)":"var(--surface)")+
+      ";color:"+(primary?"var(--accent-ink)":"var(--ink)")+";padding:.4rem .9rem;border-radius:.5rem;font:700 .88rem Heebo;cursor:pointer";
+    b.onclick=fn3; bar.appendChild(b); return b;};
+  mk("📋 העתקת הכול",()=>{ta.focus();ta.select();
+      const done=()=>{const o=bar.firstChild.textContent;bar.firstChild.textContent="✓ הועתק";
+                      setTimeout(()=>{bar.firstChild.textContent=o;},1600);};
+      (navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject())
+        .then(done).catch(()=>{try{document.execCommand("copy");done();}catch(e){alert("בחרו הכול והעתיקו ידנית");}});},true);
+  mk("🔗 פתיחה בלשונית חדשה",()=>{
+      try{ const u=URL.createObjectURL(new Blob([text],{type:"text/plain;charset=utf-8"}));
+           window.open(u,"_blank"); setTimeout(()=>URL.revokeObjectURL(u),20000); }
+      catch(e){ alert("הדפדפן חסם את הפתיחה - אפשר להעתיק מכאן"); }});
+  mk("סגירה",()=>ov.remove());
+  box.appendChild(head); box.appendChild(ta); box.appendChild(bar); ov.appendChild(box);
+  ov.onclick=e=>{if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov); ta.focus(); ta.select();
+}
 function expDownload(name,text,mime){
+  let ok=false;
   try{
     const url=URL.createObjectURL(new Blob([text],{type:mime+";charset=utf-8"}));
-    const a=document.createElement("a"); a.href=url; a.download=name;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),2000);
-  }catch(e){ alert("ההורדה נחסמה בדפדפן. אפשר להשתמש ב'העתקה ללוח' מאותו תפריט."); }
+    const a=document.createElement("a"); a.href=url; a.download=name; a.rel="noopener";
+    document.body.appendChild(a); a.click(); a.remove(); ok=true;
+    setTimeout(()=>URL.revokeObjectURL(url),20000);
+  }catch(e){ ok=false; }
+  // אם ההורדה לא נתמכת (נייד, תצוגה מוגבלת) - להציג את הקובץ להעתקה
+  if(!ok||!("download" in document.createElement("a"))) expShow(name,text);
 }
 function expMenu(){
   const eb=document.getElementById("expbtn"), em=document.getElementById("expmenu");
@@ -312,6 +349,10 @@ function expMenu(){
     em.appendChild(a3);};
   raw("timetable.json","🔗 פתיחת ה-JSON המלא","עובד גם כשההורדה בדפדפן חסומה");
   raw("timetable.csv","🔗 פתיחת ה-CSV המלא","הקובץ המלא של כל בית החינוך");
+  item("👁 הצגת ה-JSON להעתקה","עובד תמיד - גם בנייד וגם כשההורדה חסומה",
+       ()=>expShow("gordon-timetable-"+stamp()+".json",expJSON()));
+  item("👁 הצגת ה-CSV להעתקה","אותו דבר, בפורמט טבלה",
+       ()=>expShow("gordon-timetable-"+stamp()+".csv",expCSV()));
   item("📋 העתקת ה-JSON ללוח","אם ההורדה חסומה - להדביק ישירות באפליקציה",
        ()=>{const txt=expJSON();
             (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject())
