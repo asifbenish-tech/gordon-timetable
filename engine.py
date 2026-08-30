@@ -337,19 +337,24 @@ for c in CLASSES:
     for s in NONFRI:
         _reg=[x[(c,s,t)] for t in allowed[c] if t!='תל"ן' and (c,s,t) in x]
         if not _reg: continue
-        for u in TLN_T:
+        for u in TLN_PAIR[c]:                        # רק מורות התל"ן של הכיתה
             if not _tfree(u,s): continue
             v=m.NewBoolVar(f"hf{c}{s}{u}"); hf[(c,s,u)]=v
             m.Add(v<=sum(_reg))                     # חצי הכיתה בשיעור רגיל
-        _hs=[hf[(c,s,u)] for u in TLN_T if (c,s,u) in hf]
+        _hs=[hf[(c,s,u)] for u in TLN_PAIR[c] if (c,s,u) in hf]
         if _hs: m.Add(sum(_hs)<=1)                  # מורת תל"ן אחת לכל שעה חצויה
 for c in CLASSES:
     full=[x[(c,s,'תל"ן')] for s in NONFRI if (c,s,'תל"ן') in x]
     halves=[hf[(c,s,u)] for s in NONFRI for u in TLN_T if (c,s,u) in hf]
-    if full or halves: m.Add(2*sum(full)+sum(halves)==4)
+    if c in ALEF:
+        if full: m.Add(sum(full)==2)                # כיתות א: חגית שעתיים + משלימה
+    else:
+        for u in TLN_PAIR[c]:                       # שעתיים מכל מורת תל"ן של הכיתה
+            hu=[hf[(c,s,u)] for s in NONFRI if (c,s,u) in hf]
+            m.Add(sum(full)+sum(hu)==2)
     if halves:                                      # שעה חצויה = אין תל"ן מלא באותה שעה
         for s in NONFRI:
-            _h2=[hf[(c,s,u)] for u in TLN_T if (c,s,u) in hf]
+            _h2=[hf[(c,s,u)] for u in TLN_PAIR.get(c,()) if (c,s,u) in hf]
             if _h2 and (c,s,'תל"ן') in x: m.Add(sum(_h2)+x[(c,s,'תל"ן')]<=1)
     ps=[]
     for d in range(5):
