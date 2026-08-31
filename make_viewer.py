@@ -43,6 +43,18 @@ def away_map(hr):
         for h in SED["ישיבת ניהול שלישי"]: out[f"2,{h}"]="ישיבת מרכזי בית חינוך"
     return out
 
+def _home_busy(hr, c, d, h):
+    """האם מחנך/ת הכיתה תפוס/ה במקום אחר באותה שעה? מחזיר את הסיבה, או None.
+       בלי הבדיקה הזו תא של חוסר הציג את המחנך/ת ככיסוי גם כשהיא מלמדת
+       כיתה אחרת באותו רגע - כלומר שיבץ אותה בשתי כיתות בו-זמנית."""
+    for c2 in CLASSES:
+        if c2 != c and S[c2].get(f"{d},{h}") == hr: return c2
+    for c2 in HCLASSES:
+        v = H[c2].get(f"{d},{h}") or ""
+        if v.split(" – ")[-1] == hr: return c2
+    a = away_map(hr).get(f"{d},{h}")
+    return a or None
+
 elem={}
 for c in CLASSES:
     cells={}
@@ -50,7 +62,10 @@ for c in CLASSES:
         k=f"{d},{h}"; t=S[c][k]; cell={"t":t}
         if t=='תל"ן' and f"{c}|{k}" in TLN: cell["t"]='תל"ן · '+TLN[f"{c}|{k}"]; cell["k"]="tln"
         elif t=='תל"ן': cell["k"]="tln"
-        elif not t: cell["t"]=HOMEROOM[c]; cell["s"]="מחנך/ת הכיתה - זמני"; cell["k"]="hole"
+        elif not t:
+            _bz=_home_busy(HOMEROOM[c],c,d,h)
+            if _bz: cell["t"]="חסר מורה"; cell["s"]=f"{HOMEROOM[c]} ב{_bz}"; cell["k"]="hole"
+            else:   cell["t"]=HOMEROOM[c]; cell["s"]="מחנך/ת הכיתה - זמני"; cell["k"]="hole"
         elif f"{c}|{k}" in FIL: cell["k"]="fill"
         if t=="אלי" and c.startswith("ו "): cell["s"]="היסטוריה"
         elif t==HOMEROOM[c]: cell["k"]="home"

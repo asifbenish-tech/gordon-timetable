@@ -28,8 +28,17 @@ from hdata import HHOME, HDAY, HCLASSES
 
 S = json.load(io.open("sol_J.json", encoding="utf-8"))
 SED = json.load(io.open("sed_J.json", encoding="utf-8"))
-holes = [{"class": c, "day": d, "hour": h, "cover": HOMEROOM[c] + " (זמני)"}
-         for c in CLASSES for (d, h) in SLOTS if not S[c][f"{d},{h}"]]
+# הכיסוי נלקח מהתא עצמו: כשהמחנך/ת תפוס/ה במקום אחר אין לה כיסוי,
+# וסימון "המחנך/ת נכנס/ת" היה משבץ אותה לשתי כיתות באותה שעה.
+holes = []
+for c in CLASSES:
+    for (d, h) in SLOTS:
+        if S[c][f"{d},{h}"]: continue
+        _cell = mv.elem[c]["cells"].get(f"{d},{h}", {})
+        _cov = _cell.get("t", "")
+        holes.append({"class": c, "day": d, "hour": h,
+                      "cover": "" if _cov == "חסר מורה" else _cov + " (זמני)",
+                      "why": _cell.get("s", "")})
 
 try:    NAMES = json.load(io.open("names_map.json", encoding="utf-8"))
 except Exception: NAMES = {}
