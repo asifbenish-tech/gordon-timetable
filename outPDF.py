@@ -136,16 +136,21 @@ with sync_playwright() as p:
         page.pdf(path=f"{name}.pdf", format="A4", print_background=True)
         print(f"{name}.pdf נוצר, {os.path.getsize(name + '.pdf')//1024} KB")
     # לשוניות הלוח: מרונדרות ע"י הצופה עצמו ומודפסות
-    TABS = [("staff", "צוות - ניצול ואילוצים"), ("gaps", "חוסרים"),
-            ("commit", "לוח סדירויות"), ("rules", "אילוצים")]
+    # (מפתח, שם קובץ, לרוחב?) - טבלת הצוות רחבה מדי ל-A4 לאורך ונחתכת
+    TABS = [("staff", "צוות - ניצול ואילוצים", True), ("gaps", "חוסרים", False),
+            ("commit", "לוח סדירויות", False), ("rules", "אילוצים", False)]
     vpath = os.path.abspath("viewer.html")
     if os.path.exists(vpath):
         page.goto("file://" + vpath)
         page.wait_for_timeout(400)
+        # לעקוף את מסך ההזדהות: בלי זה render() עוצר על הלוגין וכל
+        # קובצי הלשוניות יוצאים זהים - תמונה של מסך הכניסה בלבד.
+        page.evaluate("USER={n:'הנהלה',r:'admin'};"
+                      "const _ov=document.getElementById('loginov'); if(_ov) _ov.remove();")
         page.emulate_media(media="print")
-        for vkey, vname in TABS:
+        for vkey, vname, land in TABS:
             page.evaluate(f"view='{vkey}'; pick=null; render();")
             page.wait_for_timeout(150)
-            page.pdf(path=f"{vname}.pdf", format="A4", print_background=True)
+            page.pdf(path=f"{vname}.pdf", format="A4", landscape=land, print_background=True)
             print(f"{vname}.pdf נוצר, {os.path.getsize(vname + '.pdf')//1024} KB")
     browser.close()
