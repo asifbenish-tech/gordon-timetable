@@ -101,8 +101,8 @@ for t in ("חסן","פאני"):
         v=[x[(c,s,t)] for s in NONFRI if (c,s,t) in x]
         if v: m.Add(sum(v)==rem.get(t,{}).get(c,0))
 
-# מגבלות ימי עבודה: לי-אור 2 (לפי בקשתה), שחר 3, טלי 2
-for _t,_maxd in (("לי-אור",2),("שחר",3),("טלי",2)):
+# מגבלות ימי עבודה (MAXDAYS ב-data2 - אותו מקור גם ל-fill2)
+for _t,_maxd in MAXDAYS.items():
     _dv=[]
     for d in range(5):
         b=m.NewBoolVar(f"wd_{_t}_{d}"); _dv.append(b)
