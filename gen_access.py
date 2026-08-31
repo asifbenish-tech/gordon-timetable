@@ -8,12 +8,13 @@
    שרית (בית ב), אלי (בית ג); מנהלים רואים הכל.
    שימוש: python pull_app.py && python gen_access.py"""
 import json, hashlib, io, sys
+from data2 import APP_ALIAS as ALIAS
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 SALT = b"gordon-lohot-2026"
 COORDINATORS = {"לייה": "A", "שרית": "B", "אלי": "C"}
 ADMINS = {"אסיף", "דאפי", "חסן", "מיכל"}   # מיכל - מזכירת בית החינוך, רואה הכל
-ALIAS = {"חסאן": "חסן", "ליאור": "לי-אור"}   # שם באפליקציה -> שם בפותר
+# ALIAS מגיע מ-data2 (מקור אחד)
 # ת"ז שאינן באפליקציה נשמרות ב-ids_local.json, שאינו נכנס לגיט (הריפו ציבורי).
 # מבנה: {"שם": ["תעודת זהות", ...]} - אפשר יותר מאחת לאותו אדם.
 try:

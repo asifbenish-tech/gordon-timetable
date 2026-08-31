@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """מייצר viewer.html - צופה מערכות אינטראקטיבי מנתוני הפתרון."""
 import io, json
-from data2 import CLASSES, SLOTS, DAY_NAMES, DAY_HOURS, HOMEROOM, QUOTA
+from data2 import CLASSES, SLOTS, DAY_NAMES, DAY_HOURS, HOMEROOM, QUOTA, APP_ALIAS
 from hdata import HCLASSES, HSLOTS, HDAY, HHOME, NEED, GRADE
 
 try: _FULLN={k:v for k,v in json.load(io.open("names_map.json",encoding="utf-8")).items() if v}
@@ -382,7 +382,7 @@ def _build_app_map():
         AT = json.load(io.open("app_data/v10_2026-2027_teachers.json", encoding="utf-8"))["value"]
     except Exception:
         return {"classes": {}, "teachers": {}}
-    alias = {"חסן": "חסאן", "לי-אור": "ליאור"}   # שם בפותר -> שם באפליקציה
+    alias = {v: k for k, v in APP_ALIAS.items()}   # שם בפותר -> שם באפליקציה
     cmap = {}
     for c in list(HOMEROOM) + list(HHOME.keys()):
         grade, home = c.split(" ", 1)

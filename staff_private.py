@@ -3,7 +3,7 @@
 
    הקובץ מכיל תעודות זהות ולכן הוא *לא* נכנס לגיט ולא מתפרסם בלוח -
    הלוח מתפרסם בכתובת ציבורית, וכל מה שמוטמע בו גלוי לכל מי שיש לו הקישור.
-   הרצה: python staff_private.py   ->   'צוות - פרטים.xlsx' + 'צוות - פרטים.pdf'
+   הרצה: python staff_private.py   ->   'צוות - פרטים' ב-xlsx, pdf ו-csv
 """
 import json, io, sys, importlib.util
 import openpyxl
@@ -22,7 +22,7 @@ def _load(path, default):
 ids = {}
 for name, v in _load("ids_local.json", {}).items():
     if not name.startswith("_"): ids[name] = list(v) if isinstance(v, list) else [v]
-ALIAS = {"חסאן": "חסן"}
+from data2 import APP_ALIAS as ALIAS   # מקור אחד - אחרת שינוי שם מנתק מורה מהת"ז
 for t in _load("app_data/v10_2026-2027_teachers.json", {"value": []})["value"]:
     n = (t.get("name") or "").strip().split()
     if n and t.get("tz"):
@@ -133,6 +133,20 @@ tfoot td {{ background:#EFECE4; font-weight:700; }}
 <tbody>{''.join(trs)}</tbody>
 <tfoot><tr><td colspan="6">סה״כ</td><td colspan="4"></td><td>{tot}</td><td>{quo}</td><td>{quo-tot}</td></tr></tfoot>
 </table></body></html>"""
+
+# ---- CSV (UTF-8 עם BOM, כדי שאקסל יציג עברית נכון) ----
+import csv as _csv
+with io.open("צוות - פרטים.csv", "w", encoding="utf-8-sig", newline="") as _f:
+    _w = _csv.writer(_f)
+    _w.writerow(HEAD)
+    for t in names:
+        u, r = UT.get(t, {}), TR.get(t, {})
+        role = HNAME.get(HOUSE.get(t)) if t in HOUSE else RNAME.get(ROLE.get(t), "— אין הרשאה —")
+        _w.writerow([mv._FULLN.get(t, t), t, " · ".join(ids.get(t, [])) or "— חסרה —", role,
+                     r.get("off", ""), r.get("subj", ""),
+                     u.get("ye") or "", u.get("ch") or "", u.get("tl") or "", u.get("mg") or "",
+                     u.get("tot", ""), u.get("q", ""), u.get("left", "")])
+print(f"צוות - פרטים.csv נוצר: {len(names)} שורות")
 
 io.open("צוות - פרטים.html", "w", encoding="utf-8").write(HTML)
 try:
