@@ -8,10 +8,11 @@ SED=json.load(io.open('sed_J.json',encoding='utf-8'))
 F=json.load(io.open('fills.json',encoding='utf-8'))
 def tof(v): return v.split(' – ')[1] if ' – ' in v else None
 CM={'שני':1,'שלישי':2}
-CAPS={'מרים':13,'צופיה':13,'טלי':10,'ליאור':10,'שחר':12,'דניאל':23,'דני':20,'אינס':23,
+CAPS={'מרים':13,'צופיה':13,'טלי':10,'לי-אור':10,'שחר':12,'דניאל':23,'דני':20,'אינס':23,
       'מירי':23,'אנה':24,'פנינה':23,'אביטל':23,'יערה':21,'לייה':21,'דליה':24,'תניה':18,
       'אורנה':18,'סימה':24,'פאני':16,'חסן':16,'שרית':16}
 CAPS.pop('צבי',None)
+MAXDAYS={'לי-אור':2,'שחר':3,'טלי':2}   # זהה למגבלות שב-engine.py
 def load():
     L=collections.Counter()
     for c in CLASSES:
@@ -24,6 +25,11 @@ def ok(t,c,d,h):
     if L.get(t,0)>=CAPS.get(t,0): return False
     off=list(DAYS_OFF2.get(t) or [])
     if t=='צופיה': off.append('חמישי')
+    # מגבלת ימי עבודה - חייבת להתאים למנוע, אחרת המילוי מוסיף יום שלישי/רביעי
+    md=MAXDAYS.get(t)
+    if md:
+        days={dd for cc in CLASSES for (dd,hh) in SLOTS if S[cc][f'{dd},{hh}']==t}
+        if d not in days and len(days)>=md: return False
     if t=='טלי' and DAY_NAMES[d] not in ('שני','שלישי'): return False
     if t=='שחר' and DAY_NAMES[d] not in ('שני','שלישי','רביעי'): return False
     if t=='שחר' and h==DAY_HOURS[d]: return False

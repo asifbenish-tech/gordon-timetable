@@ -14,7 +14,7 @@ from data2 import *
 NONFRI=[s for s in SLOTS if s[0]!=5]; FRI=[s for s in SLOTS if s[0]==5]
 DEU=[c for c in CLASSES if c[0] in "דהו"]; B_CL=[c for c in CLASSES if c.startswith("ב ")]
 G_CL=[c for c in CLASSES if c[0]=="ג"]
-POOL={"אלי":(4,["ו אורנה","ו שרית"]),"אופיר":(3,["ו אורנה","ו שרית"]),"יערה":(7,CLASSES),"דני":(0,CLASSES),"דניאל":(5,CLASSES),"אנה":(2,CLASSES),"אביטל":(4,CLASSES),"לייה":(4,CLASSES),"אינס":(1,CLASSES),"אורנה":(1,CLASSES),"טלי":(3,B_CL),"ליאור":(6,CLASSES),"מרים":(15,CLASSES),"צופיה":(8,[c for c in CLASSES if c[0] in "אבג"]),"שחר":(2,[c for c in CLASSES if c[0] in "אבג"])}
+POOL={"אלי":(4,["ו אורנה","ו שרית"]),"אופיר":(3,["ו אורנה","ו שרית"]),"יערה":(7,CLASSES),"דני":(0,CLASSES),"דניאל":(5,CLASSES),"אנה":(2,CLASSES),"אביטל":(4,CLASSES),"לייה":(4,CLASSES),"אינס":(1,CLASSES),"אורנה":(1,CLASSES),"טלי":(3,B_CL),"לי-אור":(6,CLASSES),"מרים":(15,CLASSES),"צופיה":(8,[c for c in CLASSES if c[0] in "אבג"]),"שחר":(2,[c for c in CLASSES if c[0] in "אבג"])}
 TLN_OFF2={"הילית":["חמישי","שישי"],"חגית":["רביעי","חמישי"],"יפעת":["חמישי","שישי"],"יעל":[]}
 TLN_UN2={"הילית":[(2,h) for h in range(4,9)],"חגית":[],"יפעת":[],"יעל":[]}   # תל"ן גמיש על 4 ימים
 
@@ -101,8 +101,8 @@ for t in ("חסן","פאני"):
         v=[x[(c,s,t)] for s in NONFRI if (c,s,t) in x]
         if v: m.Add(sum(v)==rem.get(t,{}).get(c,0))
 
-# מגבלות ימי עבודה לפי הקובץ: ליאור 3, שחר 3, טלי 2
-for _t,_maxd in (("ליאור",3),("שחר",3),("טלי",2)):
+# מגבלות ימי עבודה: לי-אור 2 (לפי בקשתה), שחר 3, טלי 2
+for _t,_maxd in (("לי-אור",2),("שחר",3),("טלי",2)):
     _dv=[]
     for d in range(5):
         b=m.NewBoolVar(f"wd_{_t}_{d}"); _dv.append(b)
