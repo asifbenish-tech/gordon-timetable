@@ -136,8 +136,8 @@ with sync_playwright() as p:
         page.pdf(path=f"{name}.pdf", format="A4", print_background=True)
         print(f"{name}.pdf נוצר, {os.path.getsize(name + '.pdf')//1024} KB")
     # לשוניות הלוח: מרונדרות ע"י הצופה עצמו ומודפסות
-    TABS = [("util", "ניצול שעות"), ("gaps", "חוסרים"), ("commit", "לוח סדירויות"),
-            ("rules", "אילוצים"), ("trules", "אילוצי מורים")]
+    TABS = [("staff", "צוות - ניצול ואילוצים"), ("gaps", "חוסרים"),
+            ("commit", "לוח סדירויות"), ("rules", "אילוצים")]
     vpath = os.path.abspath("viewer.html")
     if os.path.exists(vpath):
         page.goto("file://" + vpath)

@@ -145,10 +145,9 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
     <button data-v="jun" aria-pressed="false">חטיבה ז׳–ט׳</button>
     <button data-v="teach" aria-pressed="false">מערכות מורים</button>
     <button data-v="gaps" aria-pressed="false">חוסרים</button>
-    <button data-v="util" aria-pressed="false">ניצול שעות</button>
+    <button data-v="staff" aria-pressed="false">צוות – ניצול ואילוצים</button>
     <button data-v="commit" aria-pressed="false">לוח סדירויות</button>
     <button data-v="rules" aria-pressed="false">אילוצים</button>
-    <button data-v="trules" aria-pressed="false">אילוצי מורים</button>
     <span style="position:relative;margin-inline-start:auto">
       <button id="expbtn" title="קובץ לייבוא למערכת אחרת" style="background:var(--fill);border-color:var(--fill-b)">📤 ייצוא קובץ</button>
       <button id="pdfbtn" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent);margin-inline-start:.3rem">📄 יצירת PDF</button>
@@ -201,11 +200,10 @@ function tabBtns(){ const av=allowedViews();
     item("📥 מערכות בית א (PDF)","מערכות בית א.pdf");
     item("📥 מערכות בית ב (PDF)","מערכות בית ב.pdf");
     item("📥 מערכות בית ג (PDF)","מערכות בית ג.pdf");
-    item("📥 ניצול שעות (PDF)","ניצול שעות.pdf");
+    item("📥 צוות – ניצול ואילוצים (PDF)","צוות - ניצול ואילוצים.pdf");
     item("📥 חוסרים (PDF)","חוסרים.pdf");
     item("📥 לוח סדירויות (PDF)","לוח סדירויות.pdf");
     item("📥 אילוצים (PDF)","אילוצים.pdf");
-    item("📥 אילוצי מורים (PDF)","אילוצי מורים.pdf");
     }
     const pr=document.createElement("button");pr.textContent="🖨 הדפסת התצוגה הנוכחית";
     pr.style.cssText="border:none;background:none;color:var(--accent);cursor:pointer;padding:.35rem .6rem;text-align:right;font:700 .88rem Heebo;border-top:1px solid var(--line);margin-top:.15rem";
@@ -384,7 +382,7 @@ function homeClassOf(name){
   return null;
 }
 function allowedViews(){
-  if(!USER||USER.r==="admin") return ["elem","jun","teach","gaps","util","commit","rules","trules"];
+  if(!USER||USER.r==="admin") return ["elem","jun","teach","gaps","staff","commit","rules"];
   if(USER.r==="coordinator"){const k=DATA.houses[USER.h].kind;return [k,"teach","commit"];}
   return homeClassOf(USER.n)?[homeClassOf(USER.n)[0],"teach"]:["teach"];
 }
@@ -431,7 +429,7 @@ function showLogin(msg){
 function logout(){USER=null;LS("gordon_auth",null);showLogin();render();}
 function chipRow(){
   const box=$q("#chips"); box.innerHTML="";
-  if(view==="util"||view==="gaps"||view==="rules"||view==="trules"||view==="commit"){ return; }
+  if(view==="staff"||view==="gaps"||view==="rules"||view==="commit"){ return; }
   if(view==="teach"){
     const sel=document.createElement("select");
     let opts='<option value="">בחר/י מורה…</option>';
@@ -523,19 +521,31 @@ function teacherGrid(t){
   return '<section class="card"><h2>'+FN(t)+'</h2><div class="sub">'+sub+'</div>'+
     '<div class="tblwrap"><table>'+head+rows+'</table></div></section>';
 }
-function utilView(){
-  let rows="";
-  DATA.util.forEach(u=>{
-    const cls=u.left<0?"over":(u.left===0?"full":"");
-    rows+='<tr><td class="name">'+u.t+'</td>'+
-      ['ye','ch','tl','mg'].map(k=>'<td class="num">'+(u[k]||"")+'</td>').join("")+
-      '<td class="num"><b>'+u.tot+'</b></td><td class="num">'+u.q+'</td>'+
-      '<td class="num '+cls+'">'+u.left+'</td></tr>';
-  });
+function staffView(){
+  const TR={}; DATA.trules.forEach(r=>{TR[r.t]=r;});
+  const seen=new Set(); let rows="";
+  const line=(t,u)=>{
+    seen.add(t);
+    const r=TR[t]||{off:"—",subj:""};
+    const cls=u?(u.left<0?"over":(u.left===0?"full":"")):"";
+    return '<tr><td class="name">'+FN(t)+'</td>'+
+      '<td>'+(r.off||"—")+'</td>'+
+      '<td style="text-align:right">'+(r.subj||"")+'</td>'+
+      (u?['ye','ch','tl','mg'].map(k=>'<td class="num">'+(u[k]||"")+'</td>').join("")+
+          '<td class="num"><b>'+u.tot+'</b></td><td class="num">'+u.q+'</td>'+
+          '<td class="num '+cls+'">'+u.left+'</td>'
+        :'<td class="num" colspan="7" style="color:var(--muted)">—</td>')+
+      '</tr>';
+  };
+  DATA.util.forEach(u=>{rows+=line(u.t,u);});
+  DATA.trules.forEach(r=>{ if(!seen.has(r.t)) rows+=line(r.t,null); });
   const st=DATA.util.reduce((a,u)=>{a.t+=u.tot;a.q+=u.q;return a;},{t:0,q:0});
-  return '<section class="card"><h2>ניצול שעות מול מכסה</h2>'+
-    '<div class="sub">אדום = חריגה מהמכסה · ירוק = מכסה מלאה. סה״כ משובץ '+st.t+' מתוך '+st.q+' שעות מכסה.</div>'+
-    '<div class="tblwrap"><table><tr><th>מורה</th><th>יסודי</th><th>חטיבה</th><th>תל״ן</th><th>מגמות</th>'+
+  return '<section class="card"><h2>צוות – ניצול שעות ואילוצים</h2>'+
+    '<div class="sub">כל מורה בשורה אחת: ימים חופשיים, מה מלמד/ת, ופירוט השעות מול המכסה. '+
+    'אדום = חריגה · ירוק = מכסה מלאה. סה״כ משובץ '+st.t+' מתוך '+st.q+' שעות מכסה.</div>'+
+    '<div class="tblwrap"><table style="min-width:900px">'+
+    '<tr><th>מורה</th><th>ימים חופשיים</th><th>מה מלמד/ת</th>'+
+    '<th>יסודי</th><th>חטיבה</th><th>תל״ן</th><th>מגמות</th>'+
     '<th>סה״כ</th><th>מכסה</th><th>נותר</th></tr>'+rows+'</table></div></section>';
 }
 function gapsView(){
@@ -621,15 +631,6 @@ function rulesView(){
     '<div class="sub">הכללים הקבועים שהפותר מציית להם בכל ריצה.</div>'+
     '<div class="sollist">'+rows+'</div></section>';
 }
-function trulesView(){
-  let rows="";
-  DATA.trules.forEach(r=>{
-    rows+='<tr><td class="name">'+r.t+'</td><td>'+r.off+'</td><td style="text-align:right">'+r.subj+'</td><td class="num">'+r.n+'</td></tr>';
-  });
-  return '<section class="card"><h2>אילוצי מורים</h2>'+
-    '<div class="sub">ימים חופשיים, תפקידים ותחומי הוראה של כל מורה.</div>'+
-    '<div class="tblwrap"><table><tr><th>מורה</th><th>ימים חופשיים</th><th>מה מלמד/ת</th><th>שעות</th></tr>'+rows+'</table></div></section>';
-}
 function render(){
   if(Object.keys(ACCESS).length&&!USER){showLogin();return;}
   const av=allowedViews();
@@ -637,10 +638,9 @@ function render(){
   if(view==="teach"&&!pick&&USER&&USER.r!=="admin"&&DATA.teachers[USER.n]) pick=USER.n;
   tabBtns(); chipRow();
   const M=$q("#main"); M.innerHTML="";
-  if(view==="util"){ M.innerHTML=utilView(); return; }
+  if(view==="staff"){ M.innerHTML=staffView(); return; }
   if(view==="commit"){ M.innerHTML=commitView(); return; }
   if(view==="rules"){ M.innerHTML=rulesView(); return; }
-  if(view==="trules"){ M.innerHTML=trulesView(); return; }
   if(view==="gaps"){
     M.innerHTML=gapsView();
     M.querySelectorAll(".jump").forEach(b=>{
