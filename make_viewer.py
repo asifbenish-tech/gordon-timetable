@@ -81,7 +81,8 @@ for c in CLASSES:
         t=S[c][f"{d},{h}"]
         if t and t!='תל"ן': _actual[t]=_actual.get(t,0)+1
     _planned={t:q[c] for t,q in QUOTA.items() if c in q}
-    for t in sorted(set(_planned)|set(_actual), key=lambda z:-(_planned.get(z,0))):
+    # שם כשובר-שוויון: בלי זה הסדר משתנה בין ריצות ויוצר הבדל מדומה בקובץ
+    for t in sorted(set(_planned)|set(_actual), key=lambda z:(-(_planned.get(z,0)), z)):
         _plan.append({"n":t,"want":_planned.get(t,0),"got":_actual.get(t,0)})
     _full=sum(1 for (d,h) in SLOTS if S[c][f"{d},{h}"]=='תל"ן')
     _halfs=sum(1 for (d,h) in SLOTS if TLN.get(f"{c}|{d},{h}","").startswith("חצי"))
@@ -391,7 +392,8 @@ def _build_app_map():
                 cmap[c] = {"app_id": ac["id"], "app_name": ac.get("name"), "grade": grade}
                 break
     tmap = {}
-    for t in set(list(HOMEROOM.values()) + list(HHOME.values())) | set(teachers):
+    # ממוין: איטרציה על set משנה סדר בין ריצות ויוצרת הבדל מדומה בקובץ
+    for t in sorted(set(list(HOMEROOM.values()) + list(HHOME.values())) | set(teachers)):
         first = alias.get(t, t)
         for at in AT:
             if (at.get("name") or "").strip().split()[0:1] == [first]:
