@@ -641,6 +641,19 @@ for _c in [c for c in HCLASSES if GRADE[c]=="ז"]:
         _v=[hx[(_c,(_d,h),"אנגלית","ארז")] for h in range(1,HDAY[_d]+1) if (_c,(_d,h),"אנגלית","ארז") in hx]
         if _v: m.Add(sum(_v)==2)
 
+# ארז: ארבע שעותיו בכל יום ירוכזו - בלי חלון גדול באמצע היום
+EREZ_SPAN=4                      # 4 שעות בתוך 4 משבצות = בלי חלון כלל
+for _de in (3,4):
+    _bz={}
+    for _he in range(1,HDAY[_de]+1):
+        _ve=[hx[(_ce,(_de,_he),"אנגלית","ארז")] for _ce in HCLASSES
+             if (_ce,(_de,_he),"אנגלית","ארז") in hx]
+        if not _ve: continue
+        _be=m.NewBoolVar(f"ez{_de}{_he}"); m.AddMaxEquality(_be,_ve); _bz[_he]=_be
+    for _h1 in _bz:
+        for _h2 in _bz:
+            if _h2-_h1+1>EREZ_SPAN: m.Add(_bz[_h1]+_bz[_h2]<=1)
+
 # שיר: מחליפה את אלי עם כיתתו בשישי (מגיעה רק ביום זה)
 shir_fri=[hx[("ז אלי",(5,h),sj,"שיר")] for h in range(1,5)
           for (sj,t) in pairs["ז אלי"] if t=="שיר" and ("ז אלי",(5,h),sj,"שיר") in hx]
