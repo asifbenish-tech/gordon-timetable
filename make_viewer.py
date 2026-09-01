@@ -451,13 +451,20 @@ data={"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"sol":SOLUTIONS,"ele
 html = io.open("viewer_template.html", encoding="utf-8").read()
 html = html.replace("/*__DATA__*/", "const DATA="+json.dumps(data,ensure_ascii=False)+";")
 io.open("viewer.html","w",encoding="utf-8").write(html)
-# index.html - הפניה עם חותמת גרסה, כדי שהדפדפן לא יגיש עותק ישן מהמטמון
-_v=_now().strftime("%Y%m%d%H%M")
-io.open("index.html","w",encoding="utf-8").write(
+# index.html - הפניה עם חותמת גרסה שנקבעת בזמן הריצה (Date.now).
+# קודם החותמת הוטבעה כאן בזמן הבנייה, ולכן דפדפן ששמר את index.html
+# במטמון המשיך להפנות לגרסה הישנה - וזו בדיוק הסיבה שמורה יכול היה
+# לראות מערכת לא מעודכנת. עכשיו התוכן של index.html קבוע (אפשר
+# לשמור אותו במטמון בלי נזק) והכתובת של הלוח ייחודית בכל כניסה.
+_v = _now().strftime("%Y%m%d%H%M")
+io.open("index.html", "w", encoding="utf-8").write(
  '<!doctype html>\n<html lang="he" dir="rtl">\n<head>\n<meta charset="utf-8">\n'
- '<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">\n'
- '<meta http-equiv="refresh" content="0; url=viewer.html?v=%s">\n<title>לוח גורדון</title>\n'
+ '<title>\u05dc\u05d5\u05d7 \u05d2\u05d5\u05e8\u05d3\u05d5\u05df</title>\n'
+ '<script>location.replace("viewer.html?v=" + Date.now());</script>\n'
+ '<noscript><meta http-equiv="refresh" content="0; url=viewer.html?v=' + _v + '"></noscript>\n'
  '</head>\n<body>\n<p style="font-family:sans-serif;text-align:center;margin-top:3rem">\n'
- 'מעביר ללוח המערכות\u2026 <a href="viewer.html?v=%s">לחצו כאן אם לא הועברתם</a>\n</p>\n'
- '</body>\n</html>\n' % (_v,_v))
+ '\u05de\u05e2\u05d1\u05d9\u05e8 \u05dc\u05dc\u05d5\u05d7 \u05d4\u05de\u05e2\u05e8\u05db\u05d5\u05ea\u2026 '
+ '<a href="viewer.html?v=' + _v + '">\u05dc\u05d7\u05e6\u05d5 \u05db\u05d0\u05df \u05d0\u05dd '
+ '\u05dc\u05d0 \u05d4\u05d5\u05e2\u05d1\u05e8\u05ea\u05dd</a>\n</p>\n'
+ '</body>\n</html>\n')
 print("viewer.html נוצר,", len(html)//1024, "KB | index.html v="+_v)
