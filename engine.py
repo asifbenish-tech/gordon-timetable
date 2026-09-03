@@ -840,6 +840,10 @@ for c in HCLASSES:
 
 # (הבלוקים הועברו ל-rules.py: tamir_subjects, leah, het_monday5, track_day, sifrut_historia, thursday_67)
 
+# תמיר: לא מלמד שעה שביעית ביום שני (בקשת המנהל 03.09)
+for _kt7 in [k for k in hx if k[3]=="תמיר" and k[1]==(1,7)]:
+    m.Add(hx[_kt7]==0)
+
 # תמיר בשישי: רק עם הכיתה שלו
 for _kt in [k for k in hx if k[3]=="תמיר" and k[1][0]==5 and k[0]!="ט תמיר"]:
     m.Add(hx[_kt]==0)
