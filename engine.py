@@ -14,7 +14,7 @@ from data2 import *
 NONFRI=[s for s in SLOTS if s[0]!=5]; FRI=[s for s in SLOTS if s[0]==5]
 DEU=[c for c in CLASSES if c[0] in "דהו"]; B_CL=[c for c in CLASSES if c.startswith("ב ")]
 G_CL=[c for c in CLASSES if c[0]=="ג"]
-POOL={"אלי":(4,["ו אורנה","ו שרית"]),"אופיר":(3,["ו אורנה","ו שרית"]),"יערה":(7,CLASSES),"דני":(0,CLASSES),"דניאל":(5,CLASSES),"אנה":(2,CLASSES),"אביטל":(4,CLASSES),"לייה":(4,CLASSES),"אינס":(1,CLASSES),"אורנה":(1,CLASSES),"טלי":(3,B_CL),"לי-אור":(6,CLASSES),"מרים":(15,CLASSES),"צופיה":(8,[c for c in CLASSES if c[0] in "אבג"]),"שחר":(2,[c for c in CLASSES if c[0] in "אבג"])}
+POOL={"אופיר":(3,["ו אורנה","ו שרית"]),"יערה":(7,CLASSES),"דני":(0,CLASSES),"דניאל":(5,CLASSES),"אנה":(2,CLASSES),"אביטל":(4,CLASSES),"לייה":(4,CLASSES),"אינס":(0,CLASSES),"אורנה":(1,CLASSES),"טלי":(3,B_CL),"לי-אור":(6,CLASSES),"מרים":(15,CLASSES),"צופיה":(8,[c for c in CLASSES if c[0] in "אבג"]),"שחר":(2,[c for c in CLASSES if c[0] in "אבג"])}
 TLN_OFF2={"הילית":["חמישי","שישי"],"חגית":["רביעי","חמישי"],"יפעת":["חמישי","שישי"],"יעל":[]}
 TLN_UN2={"הילית":[(2,h) for h in range(4,9)],"חגית":[],"יפעת":[],"יעל":[]}   # תל"ן גמיש על 4 ימים
 
@@ -253,7 +253,7 @@ orna=[x[("ו אורנה",s,"אורנה")] for s in NONFRI if ("ו אורנה",s,
 for c in CLASSES:
     for s2 in NONFRI:
         if s2[0]==1 and (c,s2,"אסיף") in x: m.Add(x[(c,s2,"אסיף")]==0)   # שני = חופש
-        if s2[0] not in (0,1) and (c,s2,"תמיר") in x: m.Add(x[(c,s2,"תמיר")]==0)
+        # תמיר: הנעילה לראשון/שני הוסרה - הוא ממלא את שעות אלי בו', בלי חלונות (NOGAP_CROSS)
 
 # מרים סטאז עברית (miriam_staj): כל 15 שעות היסודי מנוצלות, לפחות 7 בשכבות א-ג
 _mv=[x[k] for k in x if k[2]=="מרים"]
@@ -461,6 +461,13 @@ for _kh in [k for k in hf if k[0]=="ד אינס"]:
     if _kr in x: m.Add(hf[_kh]<=x[_kr])
     else:        m.Add(hf[_kh]==0)
 
+# ראשון ש2 = הדרכת שפה (קטיה): אנה, פנינה וצופיה בהדרכה, ולכן א אנה זקוקה
+# למורה מבחוץ. אינס לא נכנסת לשם (בקשת המנהל 03.09) - מירי מחליפה אותה,
+# ואינס לוקחת במקום את השעה בכיתתה שלה.
+if ("א אנה",(0,2),"אינס") in x: m.Add(x[("א אנה",(0,2),"אינס")]==0)
+if ("א אנה",(0,2),"מירי") in x: m.Add(x[("א אנה",(0,2),"מירי")]==1)
+if ("ד אינס",(0,2),"אינס") in x: m.Add(x[("ד אינס",(0,2),"אינס")]==1)
+
 # אינס: 2 מדעים ברצף - כל יום חוץ משלישי (יום החופש החדש שלה)
 for c in ("ה דני","ה תניה"):
     ps=[]
@@ -481,7 +488,7 @@ for t in ("אסיף","תמיר"):
     for c in CLASSES:
         v=[x[(c,s,t)] for s in NONFRI if (c,s,t) in x]
         if v:
-            if c.startswith("ו "): m.Add(sum(v)==(1 if t=="אסיף" else 0))   # תמיר יצא מכיתות ו
+            if c.startswith("ו ") and (t+"V") not in set(os.environ.get("REL","").split(",")): m.Add(sum(v)==(0 if t=="אסיף" else 2))   # אסיף יצא; תמיר 2 בכל כיתת ו (במקום אלי)
             else: m.Add(sum(v)==0)
 # חווה חקלאית: מחנכות ג' עם הכיתה בשני ש1-2 (רך)
 farm=[]
@@ -647,6 +654,20 @@ for _c in [c for c in HCLASSES if GRADE[c]=="ז"]:
         _v=[hx[(_c,(_d,h),"אנגלית","ארז")] for h in range(1,HDAY[_d]+1) if (_c,(_d,h),"אנגלית","ארז") in hx]
         if _v: m.Add(sum(_v)==2)
 
+# נעמי: רווח באמצע היום - לא יותר מ-3 שעות הוראה ברצף (א'-ה'); שישי 4 שעות מלאות
+_nb={}
+for _dn in range(6):
+    for _hn in range(1,HDAY[_dn]+1):
+        _vn=[hx[k] for k in hx if k[3]=="נעמי" and k[1]==(_dn,_hn)]
+        if not _vn: continue
+        _b=m.NewBoolVar(f"nm{_dn}{_hn}"); m.AddMaxEquality(_b,_vn); _nb[(_dn,_hn)]=_b
+for _dn in range(5):
+    for _hn in range(1,HDAY[_dn]-2):
+        _w=[_nb[(_dn,_hn+i)] for i in range(4) if (_dn,_hn+i) in _nb]
+        if len(_w)==4 and "NB" not in set(os.environ.get("REL","").split(",")): m.Add(sum(_w)<=3)
+_fri=[_nb[(5,_hn)] for _hn in range(1,HDAY[5]+1) if (5,_hn) in _nb]
+if _fri and "NB" not in set(os.environ.get("REL","").split(",")): m.Add(sum(_fri)==4)
+
 # ארז: ארבע שעותיו בכל יום ירוכזו - בלי חלון גדול באמצע היום
 EREZ_SPAN=4                      # 4 שעות בתוך 4 משבצות = בלי חלון כלל
 for _de in (3,4):
@@ -694,7 +715,11 @@ eli_own=[hx[("ז אלי",s2,sj,"אלי")] for s2 in HSLOTS
          and ("ז אלי",s2,sj,"אלי") in hx]
 _all_eli=[hx[(c,s2,sj,"אלי")] for c in HCLASSES for s2 in HSLOTS
           for (sj,t) in pairs[c] if t=="אלי" and (c,s2,sj,"אלי") in hx]
-if _all_eli: m.Add(sum(_all_eli)>=8)   # ירד מ-12: שכבת ט סגורה בפניו
+# אלי: 8 שעות בכיתתו, 6 בז נעמי (תנ"ך+היסטוריה), 4 בח גלית, 2 מגמות = 20
+_eli_own=[hx[("ז אלי",s2,sj,"אלי")] for s2 in HSLOTS for (sj,t) in pairs["ז אלי"] if t=="אלי" and ("ז אלי",s2,sj,"אלי") in hx]
+_eli_nmi=[hx[("ז נעמי",s2,sj,"אלי")] for s2 in HSLOTS for (sj,t) in pairs["ז נעמי"] if t=="אלי" and ("ז נעמי",s2,sj,"אלי") in hx]
+_REL=set(os.environ.get("REL","").split(","))
+if "ELI" not in _REL: m.Add(sum(_eli_own)==8); m.Add(sum(_eli_nmi)==6)
 _ch=[hx[("ז אלי",s2,"חינוך","אלי")] for s2 in HSLOTS if ("ז אלי",s2,"חינוך","אלי") in hx]
 
 _tn=[hx[("ז אלי",s2,'תנ"ך',"אלי")] for s2 in HSLOTS if ("ז אלי",s2,'תנ"ך',"אלי") in hx]
