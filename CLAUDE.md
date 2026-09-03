@@ -33,6 +33,7 @@
 | כינויי שמות מול האפליקציה | `APP_ALIAS` ב-`data2.py` |
 | המערכת המפורסמת (ליציבות) | `baseline_J.json`, `baseline_hat.json` |
 | מכסות לתצוגה | `QUOTA_FILE` ב-`make_viewer.py` |
+| חריגי תוכנית לימודים | `OVR` ב-`hdata.py` (engine + checks קוראים משם) |
 
 לא ליצור עותק חדש של אף אחד מאלה בקובץ אחר.
 

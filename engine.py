@@ -607,8 +607,7 @@ for c in HCLASSES:
     for subj,per in NEED.items():
         if per[g]==0: continue
         v=[hx[(c,s,subj,t)] for s in HSLOTS for (sj,t) in pairs[c] if sj==subj and (c,s,subj,t) in hx]
-        _ovr={("ט אסיף","חינוך"):3,("ט אסיף","מתמטיקה"):5,("ט תמיר","חינוך"):3}   # מתמטיקה חוזרת ל-4
-        m.Add(sum(v)==_ovr.get((c,subj),per[g]))
+        m.Add(sum(v)==OVR.get((c,subj),per[g]))   # OVR ב-hdata: מקור אחד
 
 # מגמות: בלוקים קבועים
 for c in HCLASSES:
@@ -779,6 +778,9 @@ for _k in [k for k in hx if k[3]=="חסר מורה" and k[2] in ("אנגלית",
     m.Add(hx[_k]==0)
 # שעת גיבוש שכבת ט: שישי ש1, שתי כיתות ט יחד - אין שיעור רגיל במשבצת
 for _c9g in T9: m.Add(hfree[(_c9g,(5,1))]==1)
+# ט תמיר: שישי מלא - ש2-4 מאוישות (עם הגיבוש בש1 = 4 שעות, גם אחרי שהכיתה
+# ויתרה על שעה שבועית). כך ההורדה נופלת באמצע השבוע ולא בשישי.
+for _h9 in (3,4): m.Add(hfree[("ט תמיר",(5,_h9))]==0)
 _miss_fri=[hx[k] for k in hx if k[3]=="חסר מורה" and k[0]==_MC and k[1][0]==5]
 if _miss_fri: m.Add(sum(_miss_fri)==3)   # שישי ט אסיף: ש1 גיבוש, ש2-4 צבי נכנס (נרשם כחסר מורה במודל)
 for _k in [k for k in hx if k[3]=="חסר מורה" and k[1][0]==5 and k[0]!=_MC]:
@@ -1026,8 +1028,11 @@ for _g,_cs in _bygrade.items():
         _v=[hx[k] for k in hx if k[0]==_c]
         _iv=m.NewIntVar(0,45,f"pq_{_c}")
         m.Add(_iv==sum(_v)); _tot.append(_iv)
+    # ההפרש המותר = ההפרש בין תוכניות הלימודים של הכיתות (ט תמיר: שעה אחת פחות)
+    _plan={_c:sum(OVR.get((_c,_sj),_per[_g]) for _sj,_per in NEED.items() if _per[_g] or (_c,_sj) in OVR)
+           for _c in _cs}
     for _i in range(1,len(_tot)):
-        m.Add(_tot[0]==_tot[_i]); _neq+=1
+        m.Add(_tot[_i]-_tot[0]==_plan[_cs[_i]]-_plan[_cs[0]]); _neq+=1
 print(f"שוויון מקבילות: {_neq} אילוצים")
 
 # ---- WARM START: רמז מהפתרון הקודם -> פתרון מהיר בהרבה ----
@@ -1165,7 +1170,8 @@ if st in (cp_model.OPTIMAL,cp_model.FEASIBLE):
         for s in HSLOTS:
             got=[(sj,t) for (sj,t) in pairs[c] if (c,s,sj,t) in hx and sol.Value(hx[(c,s,sj,t)])]
             out[c][f"{s[0]},{s[1]}"]= (f"{got[0][0]} – {got[0][1]}" if got else "")
-    for _c9g in T9: out[_c9g]["5,1"]="שעת גיבוש – שכבת ט יחד"   # שתי כיתות ט ביחד
+    for _c9g in T9:                                              # שתי כיתות ט ביחד
+        out[_c9g]["5,1"]="שעת גיבוש – "+("תמיר" if _c9g=="ט תמיר" else "שכבת ט יחד")
     for _h5 in (2,3,4):                                          # צבי נכנס לכיתת אסיף בשישי
         _v5=out[_MC][f"5,{_h5}"]
         if "חסר מורה" in _v5: out[_MC][f"5,{_h5}"]=_v5.replace("חסר מורה","צבי")

@@ -3,7 +3,7 @@
 import io, json, collections, sys
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from data2 import CLASSES, SLOTS, DAY_NAMES, DAYS_OFF2, HOMEROOM, FRIDAY_TEACHER
-from hdata import HCLASSES, HSLOTS, HDAY, GRADE, NEED, HOFF
+from hdata import HCLASSES, HSLOTS, HDAY, GRADE, NEED, HOFF, OVR
 
 S = json.load(io.open("sol_J.json", encoding="utf-8"))
 H = json.load(io.open("sol_hat.json", encoding="utf-8"))
@@ -30,7 +30,6 @@ for (d, h) in SLOTS:
                 errors.append(f"{t} (חטיבה) ביום חופש {DAY_NAMES[d]}")
 
 # 2. תוכניות לימודים חטיבה
-OVR = {("ט אסיף", "חינוך"): 3, ("ט אסיף", "מתמטיקה"): 5, ("ט תמיר", "חינוך"): 3}
 for c in HCLASSES:
     g = GRADE[c]
     cnt = collections.Counter(sof(H[c][f"{d},{h}"]) for (d, h) in HSLOTS if H[c][f"{d},{h}"])
