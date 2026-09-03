@@ -1069,22 +1069,6 @@ for _t in ("תמיר",):
                     elif _t2 is None: m.Add(_t1-_e3<=0)
                     else: m.Add(_t1+_t2-_e3<=1)
 
-# ---- MAXGAP: חלון של עד שעתיים (לא יותר) - הילה, על פני שני בתי הספר ----
-for _d in range(6):
-    _busy2={}
-    for _h in range(1,8):
-        _v2=[x[k] for k in x if k[2]=="הילה" and k[1]==(_d,_h)]
-        _v2+=[hx[k] for k in hx if k[3]=="הילה" and k[1]==(_d,_h)]
-        if not _v2: continue
-        _b2=m.NewBoolVar(f"mg_{_d}_{_h}"); m.AddMaxEquality(_b2,_v2); _busy2[_h]=_b2
-    _hs2=sorted(_busy2)
-    for _i2 in range(len(_hs2)):
-        for _j2 in range(_i2+1,len(_hs2)):
-            _gaplen=_hs2[_j2]-_hs2[_i2]-1
-            if _gaplen<3: continue          # חלון מותר עד שעתיים
-            _between=[_busy2[_hs2[_k2]] for _k2 in range(_i2+1,_j2)]
-            m.Add(_busy2[_hs2[_i2]]+_busy2[_hs2[_j2]]-sum(_between)<=1)
-
 # ---- PARALLEL_EQ: כיתות מקבילות - אותו סך שעות שבועי (לא חייבות לסיים יחד) ----
 import collections as _cl
 _bygrade=_cl.defaultdict(list)
