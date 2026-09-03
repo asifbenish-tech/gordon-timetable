@@ -51,7 +51,7 @@ def _home_busy(hr, c, d, h):
         if c2 != c and S[c2].get(f"{d},{h}") == hr: return c2
     for c2 in HCLASSES:
         v = H[c2].get(f"{d},{h}") or ""
-        if v.split(" – ")[-1] == hr: return c2
+        if hr in v.split(" – ")[-1].split(" + "): return c2   # 'שרית + חסן' = שניהם תפוסים
     a = away_map(hr).get(f"{d},{h}")
     return a or None
 

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import io,json,collections
 from data2 import *
-from hdata import HCLASSES,HSLOTS,HDAY,HOFF,HEV
+from hdata import HCLASSES,HSLOTS,HDAY,HOFF,HEV,PE_BLOCKS   # PE_BLOCKS: מקור אחד (pe_blocks.json)
 S=json.load(io.open('sol_J.json',encoding='utf-8'))
 H=json.load(io.open('sol_hat.json',encoding='utf-8'))
 SED=json.load(io.open('sed_J.json',encoding='utf-8'))
 F=json.load(io.open('fills.json',encoding='utf-8'))
-def tof(v): return v.split(' – ')[1] if ' – ' in v else None
+def tof(v): return v.split(' – ')[1].split(' + ') if ' – ' in v else []   # 'שרית + חסן' = שניהם עסוקים
 CM={'שני':1,'שלישי':2}
 CAPS={'מרים':13,'צופיה':13,'טלי':10,'לי-אור':10,'שחר':12,'דניאל':23,'דני':20,'אינס':23,
       'מירי':23,'אנה':24,'פנינה':23,'אביטל':23,'יערה':21,'לייה':21,'דליה':24,'תניה':18,
@@ -39,11 +39,11 @@ def ok(t,c,d,h):
     if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+HEV.get(t,[])): return False
     if t in MAGAMA.get((d,h),[]): return False
     if any(S[cc][f'{d},{h}']==t for cc in CLASSES): return False
-    if h<=HDAY[d] and any(tof(H[cc][f'{d},{h}'])==t for cc in HCLASSES): return False
+    if h<=HDAY[d] and any(t in tof(H[cc][f'{d},{h}']) for cc in HCLASSES): return False
     for day in ('שני','שלישי'):
         if t in SED.get('קבוצת '+day,[]) and CM[day]==d and h in SED['מעגלי שיח '+day]: return False
     if t in ['לייה','שרית','יערה','צופיה','אסיף','אלי'] and d==2 and h in SED['ישיבת ניהול שלישי']: return False
-    if t in ('שרית','חסן') and ((d==0 and h in(1,2,3)) or (d==3 and h in(1,2,3))): return False
+    if t in ('שרית','חסן') and h in PE_BLOCKS.get(d,[]): return False   # ספורט חטיבה - היה עותק ישן (1-3) והכניס את חסן לשני מקומות
     return True
 gaps=[(c,d,h) for c in CLASSES for (d,h) in SLOTS if not S[c][f'{d},{h}']]
 # סדר: המשבצות עם הכי מעט מועמדים קודם
