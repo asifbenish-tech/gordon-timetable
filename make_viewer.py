@@ -116,7 +116,8 @@ for c in HCLASSES:
             subj,t=(v.split(" – ")+[""])[:2]
             if subj=="מגמות": cell={"t":"מגמות","s":MAGT.get(k,""),"k":"mag"}
             elif subj=="שירה בציבור": cell={"t":"שירה בציבור","s":"כל החטיבה","k":"mag"}
-            elif subj=="שעת גיבוש": cell={"t":"שעת גיבוש","s":"שתי כיתות ט יחד","k":"mag"}
+            elif subj=="שעת גיבוש": cell={"t":"שעת גיבוש","s":"שתי כיתות ט יחד","k":"mag"}   # כרגע לא בשימוש - ראו "ליווי"
+            elif subj=="ליווי": cell={"t":t}         # שישי ש1 זמני: כל כיתה עם המורה שלה, בלי כותרת
             elif t=="שרית + חסן": cell={"t":subj,"s":"שרית + חסן (שכבתי)","k":"pe"}
             elif t=="חסר מורה": cell={"t":subj,"s":"חסר מורה","k":"hole"}
             elif t=="צבי" and d==5 and subj not in ("שירה בציבור",):
@@ -181,7 +182,7 @@ for c in HCLASSES:
             if t=="שרית + חסן":
                 add_t("שרית","חטיבה",d,h,f"{c} · {subj}"); add_t("חסן","חטיבה",d,h,f"{c} · {subj}")
             else:
-                _lbl = c if (t=="צבי" and d==5 and subj not in ("שירה בציבור","שעת גיבוש")) else f"{c} · {subj}"
+                _lbl = c if (subj=="ליווי" or (t=="צבי" and d==5 and subj!="שירה בציבור")) else f"{c} · {subj}"
                 add_t(t,"חטיבה",d,h,_lbl)
 
 add_t("תניה","יסודי",0,3,"שיעור הדרכה")   # שעת הוראה לכל דבר (לא בכיתה)

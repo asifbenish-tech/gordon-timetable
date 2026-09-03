@@ -1,5 +1,5 @@
 {
- "generated": "2026-09-03T14:21:00",
+ "generated": "2026-09-03T14:25:26",
  "days": [
   "ראשון",
   "שני",
@@ -443,8 +443,7 @@
     },
     "0,3": {
      "t": "פנינה",
-     "k": "home",
-     "co": "+ צופיה"
+     "k": "home"
     },
     "0,4": {
      "t": "פנינה",
@@ -452,7 +451,8 @@
     },
     "0,5": {
      "t": "פנינה",
-     "k": "home"
+     "k": "home",
+     "co": "+ צופיה"
     },
     "1,1": {
      "t": "פאני"
@@ -573,8 +573,7 @@
    "cells": {
     "0,1": {
      "t": "אביטל",
-     "k": "half",
-     "co": "½ הכיתה בתל\"ן · הילית"
+     "k": "home"
     },
     "0,2": {
      "t": "אביטל",
@@ -611,7 +610,8 @@
     },
     "1,6": {
      "t": "אביטל",
-     "k": "home"
+     "k": "half",
+     "co": "½ הכיתה בתל\"ן · הילית"
     },
     "2,1": {
      "t": "אביטל",
@@ -1017,7 +1017,8 @@
     },
     "2,1": {
      "t": "דליה",
-     "k": "home"
+     "k": "half",
+     "co": "½ הכיתה בתל\"ן · יפעת"
     },
     "2,2": {
      "t": "דליה",
@@ -1029,8 +1030,7 @@
     },
     "2,4": {
      "t": "דליה",
-     "k": "half",
-     "co": "½ הכיתה בתל\"ן · יפעת"
+     "k": "home"
     },
     "2,5": {
      "t": "צבי",
@@ -2062,8 +2062,8 @@
      "s": "הדר"
     },
     "1,7": {
-     "t": "ערבית",
-     "s": "מרים"
+     "t": "",
+     "k": "off"
     },
     "2,1": {
      "t": "מגמות",
@@ -2151,8 +2151,8 @@
      "s": "הדר"
     },
     "4,7": {
-     "t": "",
-     "k": "off"
+     "t": "ערבית",
+     "s": "מרים"
     },
     "5,1": {
      "t": "ספרות",
@@ -2204,7 +2204,7 @@
      "s": "אסיף"
     },
     "0,5": {
-     "t": "תנ\"ך",
+     "t": "היסטוריה",
      "s": "אלי",
      "k": "home"
     },
@@ -2236,7 +2236,7 @@
      "k": "home"
     },
     "1,7": {
-     "t": "תנ\"ך",
+     "t": "היסטוריה",
      "s": "אלי",
      "k": "home"
     },
@@ -2271,12 +2271,12 @@
      "k": "off"
     },
     "3,1": {
-     "t": "היסטוריה",
+     "t": "תנ\"ך",
      "s": "אלי",
      "k": "home"
     },
     "3,2": {
-     "t": "היסטוריה",
+     "t": "תנ\"ך",
      "s": "אלי",
      "k": "home"
     },
@@ -2675,9 +2675,7 @@
      "k": "off"
     },
     "5,1": {
-     "t": "שעת גיבוש",
-     "s": "שתי כיתות ט יחד",
-     "k": "mag"
+     "t": "תמיר"
     },
     "5,2": {
      "t": "שירה בציבור",
@@ -2850,9 +2848,7 @@
      "k": "off"
     },
     "5,1": {
-     "t": "שעת גיבוש",
-     "s": "שתי כיתות ט יחד",
-     "k": "mag"
+     "t": "צבי"
     },
     "5,2": {
      "t": "שירה בציבור",
@@ -3437,7 +3433,7 @@
    [
     "יסודי",
     0,
-    3,
+    5,
     "א פנינה · עם פנינה"
    ],
    [
@@ -3482,7 +3478,7 @@
     "יסודי",
     0,
     3,
-    "א פנינה · עם צופיה"
+    "א פנינה"
    ],
    [
     "יסודי",
@@ -3494,7 +3490,7 @@
     "יסודי",
     0,
     5,
-    "א פנינה"
+    "א פנינה · עם צופיה"
    ],
    [
     "יסודי",
@@ -3720,7 +3716,7 @@
     "יסודי",
     0,
     1,
-    "ב אביטל · חצי כיתה עם הילית"
+    "ב אביטל"
    ],
    [
     "יסודי",
@@ -3762,7 +3758,7 @@
     "יסודי",
     1,
     6,
-    "ב אביטל"
+    "ב אביטל · חצי כיתה עם הילית"
    ],
    [
     "יסודי",
@@ -4046,7 +4042,7 @@
    ],
    [
     "חטיבה",
-    1,
+    4,
     7,
     "ז נעמי · ערבית"
    ],
@@ -4486,7 +4482,7 @@
     "חטיבה",
     5,
     1,
-    "ט אסיף · שעת גיבוש"
+    "ט אסיף"
    ],
    [
     "חטיבה",
@@ -4804,7 +4800,7 @@
     "יסודי",
     2,
     1,
-    "ג דליה"
+    "ג דליה · חצי כיתה עם יפעת"
    ],
    [
     "יסודי",
@@ -4816,7 +4812,7 @@
     "יסודי",
     2,
     4,
-    "ג דליה · חצי כיתה עם יפעת"
+    "ג דליה"
    ],
    [
     "יסודי",
@@ -5812,7 +5808,7 @@
     "חטיבה",
     5,
     1,
-    "ט תמיר · שעת גיבוש"
+    "ט תמיר"
    ],
    [
     "חטיבה",
@@ -6474,8 +6470,8 @@
    ],
    [
     "תל\"ן",
-    0,
     1,
+    6,
     "ב אביטל · חצי כיתה עם אביטל"
    ],
    [
@@ -6591,7 +6587,7 @@
    [
     "תל\"ן",
     2,
-    4,
+    1,
     "ג דליה · חצי כיתה עם דליה"
    ],
    [
@@ -6886,7 +6882,7 @@
     "חטיבה",
     0,
     5,
-    "ז אלי · תנ\"ך"
+    "ז אלי · היסטוריה"
    ],
    [
     "חטיבה",
@@ -6904,7 +6900,7 @@
     "חטיבה",
     1,
     7,
-    "ז אלי · תנ\"ך"
+    "ז אלי · היסטוריה"
    ],
    [
     "חטיבה",
@@ -6916,13 +6912,13 @@
     "חטיבה",
     3,
     1,
-    "ז אלי · היסטוריה"
+    "ז אלי · תנ\"ך"
    ],
    [
     "חטיבה",
     3,
     2,
-    "ז אלי · היסטוריה"
+    "ז אלי · תנ\"ך"
    ],
    [
     "חטיבה",
@@ -8231,7 +8227,7 @@
    "teacher": "פנינה",
    "teacher_app_id": "t1784696803095_4",
    "kind": "home",
-   "note": "+ צופיה",
+   "note": "",
    "temporary": false
   },
   {
@@ -8259,7 +8255,7 @@
    "teacher": "פנינה",
    "teacher_app_id": "t1784696803095_4",
    "kind": "home",
-   "note": "",
+   "note": "+ צופיה",
    "temporary": false
   },
   {
@@ -8647,6 +8643,146 @@
    "day": 0,
    "day_name": "ראשון",
    "hour": 1,
+   "subject": "",
+   "teacher": "אביטל",
+   "teacher_app_id": "t1784728889008_2",
+   "kind": "home",
+   "note": "",
+   "temporary": false
+  },
+  {
+   "level": "elementary",
+   "class": "ב אביטל",
+   "class_app_id": "c_1783243508027",
+   "day": 0,
+   "day_name": "ראשון",
+   "hour": 2,
+   "subject": "",
+   "teacher": "אביטל",
+   "teacher_app_id": "t1784728889008_2",
+   "kind": "home",
+   "note": "",
+   "temporary": false
+  },
+  {
+   "level": "elementary",
+   "class": "ב אביטל",
+   "class_app_id": "c_1783243508027",
+   "day": 0,
+   "day_name": "ראשון",
+   "hour": 3,
+   "subject": "",
+   "teacher": "פאני",
+   "teacher_app_id": "t1784696803096_16",
+   "kind": "regular",
+   "note": "",
+   "temporary": false
+  },
+  {
+   "level": "elementary",
+   "class": "ב אביטל",
+   "class_app_id": "c_1783243508027",
+   "day": 0,
+   "day_name": "ראשון",
+   "hour": 4,
+   "subject": "",
+   "teacher": "אביטל",
+   "teacher_app_id": "t1784728889008_2",
+   "kind": "home",
+   "note": "",
+   "temporary": false
+  },
+  {
+   "level": "elementary",
+   "class": "ב אביטל",
+   "class_app_id": "c_1783243508027",
+   "day": 0,
+   "day_name": "ראשון",
+   "hour": 5,
+   "subject": "",
+   "teacher": "אביטל",
+   "teacher_app_id": "t1784728889008_2",
+   "kind": "home",
+   "note": "",
+   "temporary": false
+  },
+  {
+   "level": "elementary",
+   "class": "ב אביטל",
+   "class_app_id": "c_1783243508027",
+   "day": 1,
+   "day_name": "שני",
+   "hour": 1,
+   "subject": "",
+   "teacher": "אביטל",
+   "teacher_app_id": "t1784728889008_2",
+   "kind": "home",
+   "note": "",
+   "temporary": false
+  },
+  {
+   "level": "elementary",
+   "class": "ב אביטל",
+   "class_app_id": "c_1783243508027",
+   "day": 1,
+   "day_name": "שני",
+   "hour": 2,
+   "subject": "",
+   "teacher": "טלי",
+   "teacher_app_id": "t1784728889008_27",
+   "kind": "regular",
+   "note": "",
+   "temporary": false
+  },
+  {
+   "level": "elementary",
+   "class": "ב אביטל",
+   "class_app_id": "c_1783243508027",
+   "day": 1,
+   "day_name": "שני",
+   "hour": 3,
+   "subject": "",
+   "teacher": "אביטל",
+   "teacher_app_id": "t1784728889008_2",
+   "kind": "home",
+   "note": "",
+   "temporary": false
+  },
+  {
+   "level": "elementary",
+   "class": "ב אביטל",
+   "class_app_id": "c_1783243508027",
+   "day": 1,
+   "day_name": "שני",
+   "hour": 4,
+   "subject": "",
+   "teacher": "טלי",
+   "teacher_app_id": "t1784728889008_27",
+   "kind": "regular",
+   "note": "",
+   "temporary": false
+  },
+  {
+   "level": "elementary",
+   "class": "ב אביטל",
+   "class_app_id": "c_1783243508027",
+   "day": 1,
+   "day_name": "שני",
+   "hour": 5,
+   "subject": "",
+   "teacher": "אביטל",
+   "teacher_app_id": "t1784728889008_2",
+   "kind": "home",
+   "note": "",
+   "temporary": false
+  },
+  {
+   "level": "elementary",
+   "class": "ב אביטל",
+   "class_app_id": "c_1783243508027",
+   "day": 1,
+   "day_name": "שני",
+   "hour": 6,
    "subject": "שיעור (½ כיתה) + תל\"ן (½ כיתה)",
    "teacher": "אביטל",
    "teacher_app_id": "t1784728889008_2",
@@ -8658,146 +8794,6 @@
    "level": "elementary",
    "class": "ב אביטל",
    "class_app_id": "c_1783243508027",
-   "day": 0,
-   "day_name": "ראשון",
-   "hour": 2,
-   "subject": "",
-   "teacher": "אביטל",
-   "teacher_app_id": "t1784728889008_2",
-   "kind": "home",
-   "note": "",
-   "temporary": false
-  },
-  {
-   "level": "elementary",
-   "class": "ב אביטל",
-   "class_app_id": "c_1783243508027",
-   "day": 0,
-   "day_name": "ראשון",
-   "hour": 3,
-   "subject": "",
-   "teacher": "פאני",
-   "teacher_app_id": "t1784696803096_16",
-   "kind": "regular",
-   "note": "",
-   "temporary": false
-  },
-  {
-   "level": "elementary",
-   "class": "ב אביטל",
-   "class_app_id": "c_1783243508027",
-   "day": 0,
-   "day_name": "ראשון",
-   "hour": 4,
-   "subject": "",
-   "teacher": "אביטל",
-   "teacher_app_id": "t1784728889008_2",
-   "kind": "home",
-   "note": "",
-   "temporary": false
-  },
-  {
-   "level": "elementary",
-   "class": "ב אביטל",
-   "class_app_id": "c_1783243508027",
-   "day": 0,
-   "day_name": "ראשון",
-   "hour": 5,
-   "subject": "",
-   "teacher": "אביטל",
-   "teacher_app_id": "t1784728889008_2",
-   "kind": "home",
-   "note": "",
-   "temporary": false
-  },
-  {
-   "level": "elementary",
-   "class": "ב אביטל",
-   "class_app_id": "c_1783243508027",
-   "day": 1,
-   "day_name": "שני",
-   "hour": 1,
-   "subject": "",
-   "teacher": "אביטל",
-   "teacher_app_id": "t1784728889008_2",
-   "kind": "home",
-   "note": "",
-   "temporary": false
-  },
-  {
-   "level": "elementary",
-   "class": "ב אביטל",
-   "class_app_id": "c_1783243508027",
-   "day": 1,
-   "day_name": "שני",
-   "hour": 2,
-   "subject": "",
-   "teacher": "טלי",
-   "teacher_app_id": "t1784728889008_27",
-   "kind": "regular",
-   "note": "",
-   "temporary": false
-  },
-  {
-   "level": "elementary",
-   "class": "ב אביטל",
-   "class_app_id": "c_1783243508027",
-   "day": 1,
-   "day_name": "שני",
-   "hour": 3,
-   "subject": "",
-   "teacher": "אביטל",
-   "teacher_app_id": "t1784728889008_2",
-   "kind": "home",
-   "note": "",
-   "temporary": false
-  },
-  {
-   "level": "elementary",
-   "class": "ב אביטל",
-   "class_app_id": "c_1783243508027",
-   "day": 1,
-   "day_name": "שני",
-   "hour": 4,
-   "subject": "",
-   "teacher": "טלי",
-   "teacher_app_id": "t1784728889008_27",
-   "kind": "regular",
-   "note": "",
-   "temporary": false
-  },
-  {
-   "level": "elementary",
-   "class": "ב אביטל",
-   "class_app_id": "c_1783243508027",
-   "day": 1,
-   "day_name": "שני",
-   "hour": 5,
-   "subject": "",
-   "teacher": "אביטל",
-   "teacher_app_id": "t1784728889008_2",
-   "kind": "home",
-   "note": "",
-   "temporary": false
-  },
-  {
-   "level": "elementary",
-   "class": "ב אביטל",
-   "class_app_id": "c_1783243508027",
-   "day": 1,
-   "day_name": "שני",
-   "hour": 6,
-   "subject": "",
-   "teacher": "אביטל",
-   "teacher_app_id": "t1784728889008_2",
-   "kind": "home",
-   "note": "",
-   "temporary": false
-  },
-  {
-   "level": "elementary",
-   "class": "ב אביטל",
-   "class_app_id": "c_1783243508027",
    "day": 2,
    "day_name": "שלישי",
    "hour": 1,
@@ -9697,11 +9693,11 @@
    "day": 2,
    "day_name": "שלישי",
    "hour": 1,
-   "subject": "",
+   "subject": "שיעור (½ כיתה) + תל\"ן (½ כיתה)",
    "teacher": "דליה",
    "teacher_app_id": "t1784696803095_2",
-   "kind": "home",
-   "note": "",
+   "kind": "half",
+   "note": "½ הכיתה בתל\"ן · יפעת",
    "temporary": false
   },
   {
@@ -9739,11 +9735,11 @@
    "day": 2,
    "day_name": "שלישי",
    "hour": 4,
-   "subject": "שיעור (½ כיתה) + תל\"ן (½ כיתה)",
+   "subject": "",
    "teacher": "דליה",
    "teacher_app_id": "t1784696803095_2",
-   "kind": "half",
-   "note": "½ הכיתה בתל\"ן · יפעת",
+   "kind": "home",
+   "note": "",
    "temporary": false
   },
   {
@@ -13631,7 +13627,7 @@
    "day": 0,
    "day_name": "ראשון",
    "hour": 5,
-   "subject": "תנ\"ך",
+   "subject": "היסטוריה",
    "teacher": "אלי",
    "teacher_app_id": "t1783490277379",
    "kind": "home",
@@ -13729,7 +13725,7 @@
    "day": 1,
    "day_name": "שני",
    "hour": 7,
-   "subject": "תנ\"ך",
+   "subject": "היסטוריה",
    "teacher": "אלי",
    "teacher_app_id": "t1783490277379",
    "kind": "home",
@@ -13813,7 +13809,7 @@
    "day": 3,
    "day_name": "רביעי",
    "hour": 1,
-   "subject": "היסטוריה",
+   "subject": "תנ\"ך",
    "teacher": "אלי",
    "teacher_app_id": "t1783490277379",
    "kind": "home",
@@ -13827,7 +13823,7 @@
    "day": 3,
    "day_name": "רביעי",
    "hour": 2,
-   "subject": "היסטוריה",
+   "subject": "תנ\"ך",
    "teacher": "אלי",
    "teacher_app_id": "t1783490277379",
    "kind": "home",
@@ -14174,20 +14170,6 @@
    "level": "junior",
    "class": "ז נעמי",
    "class_app_id": "c_1783243587949",
-   "day": 1,
-   "day_name": "שני",
-   "hour": 7,
-   "subject": "ערבית",
-   "teacher": "מרים",
-   "teacher_app_id": "t1784728889008_7",
-   "kind": "regular",
-   "note": "",
-   "temporary": false
-  },
-  {
-   "level": "junior",
-   "class": "ז נעמי",
-   "class_app_id": "c_1783243587949",
    "day": 2,
    "day_name": "שלישי",
    "hour": 1,
@@ -14404,6 +14386,20 @@
    "subject": "מתמטיקה",
    "teacher": "הדר",
    "teacher_app_id": "t1784728889008_21",
+   "kind": "regular",
+   "note": "",
+   "temporary": false
+  },
+  {
+   "level": "junior",
+   "class": "ז נעמי",
+   "class_app_id": "c_1783243587949",
+   "day": 4,
+   "day_name": "חמישי",
+   "hour": 7,
+   "subject": "ערבית",
+   "teacher": "מרים",
+   "teacher_app_id": "t1784728889008_7",
    "kind": "regular",
    "note": "",
    "temporary": false
@@ -15325,10 +15321,10 @@
    "day": 5,
    "day_name": "שישי",
    "hour": 1,
-   "subject": "שעת גיבוש",
+   "subject": "צבי",
    "teacher": "",
    "teacher_app_id": null,
-   "kind": "mag",
+   "kind": "regular",
    "note": "",
    "temporary": false
   },
@@ -15773,10 +15769,10 @@
    "day": 5,
    "day_name": "שישי",
    "hour": 1,
-   "subject": "שעת גיבוש",
+   "subject": "תמיר",
    "teacher": "",
    "teacher_app_id": null,
-   "kind": "mag",
+   "kind": "regular",
    "note": "",
    "temporary": false
   },

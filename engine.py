@@ -1219,8 +1219,8 @@ if st in (cp_model.OPTIMAL,cp_model.FEASIBLE):
         for s in HSLOTS:
             got=[(sj,t) for (sj,t) in pairs[c] if (c,s,sj,t) in hx and sol.Value(hx[(c,s,sj,t)])]
             out[c][f"{s[0]},{s[1]}"]= (f"{got[0][0]} – {got[0][1]}" if got else "")
-    for _c9g in T9:                                              # שתי כיתות ט ביחד
-        out[_c9g]["5,1"]="שעת גיבוש – "+("תמיר" if _c9g=="ט תמיר" else "צבי")
+    for _c9g in T9:                                              # שישי ש1: שעת הגיבוש עוד לא התחילה בפועל -
+        out[_c9g]["5,1"]="ליווי – "+("תמיר" if _c9g=="ט תמיר" else "צבי")   # זמנית: כל כיתה עם המורה שלה
     for _h5 in (2,3,4):                                          # צבי מלווה את כיתת אסיף בשישי
         _v5=out[_MC][f"5,{_h5}"]
         if "חסר מורה" in _v5: out[_MC][f"5,{_h5}"]=_v5.replace("חסר מורה","צבי")
