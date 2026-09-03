@@ -613,6 +613,7 @@ for _c9 in HCLASSES:
     for _sj in sorted({sj for (sj,_t) in pairs[_c9] if _t not in ("מגמות","שרית + חסן")}):
         if (_sj,"חסר מורה") not in pairs[_c9]: pairs[_c9].append((_sj,"חסר מורה"))
 
+
 hx={}
 for c in HCLASSES:
     for (subj,t) in pairs[c]:
@@ -825,7 +826,8 @@ for _c9g in T9: m.Add(hfree[(_c9g,(5,1))]==1)
 # ויתרה על שעה שבועית). כך ההורדה נופלת באמצע השבוע ולא בשישי.
 for _h9 in (3,4): m.Add(hfree[("ט תמיר",(5,_h9))]==0)
 _miss_fri=[hx[k] for k in hx if k[3]=="חסר מורה" and k[0]==_MC and k[1][0]==5]
-if _miss_fri: m.Add(sum(_miss_fri)==3)   # שישי ט אסיף: ש1 גיבוש, ש2-4 צבי נכנס (נרשם כחסר מורה במודל)
+if _miss_fri: m.Add(sum(_miss_fri)==3)   # שישי ט אסיף: ש1 גיבוש, ש2-4 צבי מלווה (נרשם כחסר מורה במודל,
+                                          # כדי שהשעות עדיין ייספרו לתוכנית הלימודים של הכיתה)
 for _k in [k for k in hx if k[3]=="חסר מורה" and k[1][0]==5 and k[0]!=_MC]:
     m.Add(hx[_k]==0)                      # בשאר הכיתות אין חוסר בשישי
 # שלישי: כל הכיתות עד שעה 6 - מותר "חסר מורה" בקנס
@@ -1218,8 +1220,8 @@ if st in (cp_model.OPTIMAL,cp_model.FEASIBLE):
             got=[(sj,t) for (sj,t) in pairs[c] if (c,s,sj,t) in hx and sol.Value(hx[(c,s,sj,t)])]
             out[c][f"{s[0]},{s[1]}"]= (f"{got[0][0]} – {got[0][1]}" if got else "")
     for _c9g in T9:                                              # שתי כיתות ט ביחד
-        out[_c9g]["5,1"]="שעת גיבוש – "+("תמיר" if _c9g=="ט תמיר" else "שכבת ט יחד")
-    for _h5 in (2,3,4):                                          # צבי נכנס לכיתת אסיף בשישי
+        out[_c9g]["5,1"]="שעת גיבוש – "+("תמיר" if _c9g=="ט תמיר" else "צבי")
+    for _h5 in (2,3,4):                                          # צבי מלווה את כיתת אסיף בשישי
         _v5=out[_MC][f"5,{_h5}"]
         if "חסר מורה" in _v5: out[_MC][f"5,{_h5}"]=_v5.replace("חסר מורה","צבי")
     io.open("sol_hat.json","w",encoding="utf-8").write(json.dumps(out,ensure_ascii=False,indent=1))
