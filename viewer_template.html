@@ -48,6 +48,8 @@ main{padding:1rem 1.2rem 3rem;max-width:1080px;margin:0 auto}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:.75rem;padding:1rem 1.1rem;margin-top:1rem}
 .card h2{font:700 1.15rem "Frank Ruhl Libre",Heebo,serif}
 .card .sub{color:var(--muted);font-size:.85rem;margin-top:.15rem}
+.tsum{font-size:.85rem;color:var(--muted);margin-top:.35rem;line-height:1.55}
+.tsum b{color:var(--ink)} .tsum+.tsum{margin-top:.1rem} .tsumwrap{margin-top:.6rem;border-top:1px dashed var(--line);padding-top:.5rem}
 .tblwrap{overflow-x:auto;margin-top:.7rem}
 table{border-collapse:collapse;width:100%;min-width:640px}
 th,td{border:1px solid var(--line);padding:.42rem .5rem;text-align:center;font-size:.86rem}
@@ -518,8 +520,24 @@ function teacherGrid(t){
                 (u.left===0?'<span class="full">מכסה מלאה</span>':'נותרו '+u.left);
     sub='משובץ '+u.tot+' מתוך '+u.q+' שעות משרה ('+pct+'%) · '+state;
   }
+  // סיכום מה המורה מלמד: "2 מדעים בז אלי", "5 שעות בא פנינה", תל"ן, מגמות וסדירויות
+  const sum={};
+  ev.forEach(e=>{const side=e[0],label=e[3]; const p=label.split(' · '); let k;
+    if(side==="סדירות") k=label;
+    else if(side==="מגמות") k=label.split(' · במקביל')[0];
+    else if(side==="חטיבה") k=(p[1]||'')+' ב'+p[0];
+    else if(side==='תל"ן') k='תל"ן ב'+p[0]+(p[1]?' ('+p[1]+')':'');
+    else k='ב'+p[0]+(p[1]?' ('+p[1]+')':'');
+    sum[side]=sum[side]||{}; sum[side][k]=(sum[side][k]||0)+1;});
+  let summ='';
+  ["יסודי","חטיבה",'תל"ן',"מגמות","סדירות"].forEach(sd=>{ if(!sum[sd]) return;
+    const items=Object.entries(sum[sd]).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'he'));
+    const tot=items.reduce((a,z)=>a+z[1],0);
+    const txt=items.map(z=>sd==="יסודי"?(z[1]+(z[1]===1?' שעה ':' שעות ')+z[0]):(z[1]+' '+z[0])).join(' · ');
+    summ+='<div class="tsum"><b>'+sd+' ('+tot+')</b>: '+txt+'</div>';});
   return '<section class="card"><h2>'+FN(t)+'</h2><div class="sub">'+sub+'</div>'+
-    '<div class="tblwrap"><table>'+head+rows+'</table></div></section>';
+    '<div class="tblwrap"><table>'+head+rows+'</table></div>'+
+    (summ?'<div class="tsumwrap">'+summ+'</div>':'')+'</section>';
 }
 function staffView(){
   const TR={}; DATA.trules.forEach(r=>{TR[r.t]=r;});
