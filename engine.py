@@ -737,6 +737,10 @@ _all_eli=[hx[(c,s2,sj,"אלי")] for c in HCLASSES for s2 in HSLOTS
 # אלי: 8 שעות בכיתתו, 6 בז נעמי (תנ"ך+היסטוריה), 4 בח גלית, 2 מגמות = 20
 _eli_own=[hx[("ז אלי",s2,sj,"אלי")] for s2 in HSLOTS for (sj,t) in pairs["ז אלי"] if t=="אלי" and ("ז אלי",s2,sj,"אלי") in hx]
 _eli_nmi=[hx[("ז נעמי",s2,sj,"אלי")] for s2 in HSLOTS for (sj,t) in pairs["ז נעמי"] if t=="אלי" and ("ז נעמי",s2,sj,"אלי") in hx]
+# אלי לא יכול להיות בח גלית בשעה שביעית (רביעי - גיאוגרפיה). עדיף שהשעה
+# תעבור ליום אחר (למשל חמישי) ולא שמורה שאינו מחנך ייכנס במקומו. בקשת המנהל 03.09.
+for _k7 in [k for k in hx if k[0]=="ח גלית" and k[3]=="אלי" and k[1][1]==7]:
+    m.Add(hx[_k7]==0)
 _REL=set(os.environ.get("REL","").split(","))
 if "ELI" not in _REL: m.Add(sum(_eli_own)==8); m.Add(sum(_eli_nmi)==6)
 _ch=[hx[("ז אלי",s2,"חינוך","אלי")] for s2 in HSLOTS if ("ז אלי",s2,"חינוך","אלי") in hx]
