@@ -7,7 +7,7 @@
 # ============================================================
 
 # -*- coding: utf-8 -*-
-import io, json, collections
+import io, json, collections, os
 from ortools.sat.python import cp_model
 from data2 import *
 
@@ -1039,6 +1039,27 @@ try:
 except Exception as _e:
     print("ללא warm start:",_e)
 
+# ================= יציבות: לשנות כמה שפחות מול המערכת המפורסמת =================
+# baseline_J/hat.json = הפתרון שהמורים רואים. כל תא שמאבד את המורה שהיה בו
+# עולה STAB נקודות. כך שינוי מבוקש מזיז רק מה שהכרחי, במקום לבנות הכול מחדש
+# (אילוץ קטן על ד' הזיז 132 תאים כשהפותר היה חופשי). הקובץ מתעדכן רק
+# באישור (approve.py). STAB=0 מבטל.
+STAB=int(os.environ.get("STAB","80"))
+_stab=[]
+if STAB:
+    try:
+        _bE=json.load(io.open("baseline_J.json",encoding="utf-8"))
+        for k,v in x.items():
+            _c,(_d,_h),_t=k
+            if _bE.get(_c,{}).get(f"{_d},{_h}")==_t: _stab.append(1-v)
+        _bH=json.load(io.open("baseline_hat.json",encoding="utf-8"))
+        for k,v in hx.items():
+            _c,(_d,_h),_sj,_t=k
+            if _bH.get(_c,{}).get(f"{_d},{_h}")==f"{_sj} – {_t}": _stab.append(1-v)
+        print(f"יציבות: {len(_stab)} תאים מהמערכת המפורסמת, משקל {STAB}")
+    except Exception as _e:
+        print("ללא יציבות:",_e); _stab=[]
+
 # ================= חוקי מדיניות (rules.py) =================
 import rules as _rules
 _rules.apply(globals())
@@ -1078,7 +1099,7 @@ for (c,s2,u),v in hf.items():
     if k3 in x:
         b3=m.NewBoolVar(f"hh{c}{s2}{u}")
         m.Add(b3<=v); m.Add(b3<=x[k3]); _HOMEHALF.append(b3)
-m.Minimize(OBJ_E + OBJ_H + 6000*sum(_sp_pen) - 1500*sum(_tln_tue) - 120*sum(_HOMEHALF))
+m.Minimize(OBJ_E + OBJ_H + 6000*sum(_sp_pen) - 1500*sum(_tln_tue) - 120*sum(_HOMEHALF) + STAB*sum(_stab))
 sol=cp_model.CpSolver()
 import os as _os
 sol.parameters.max_time_in_seconds=float(_os.environ.get("TL","150"))
