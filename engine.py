@@ -656,13 +656,13 @@ for c in HCLASSES:
         _k=(c,s2,"העשרה טכנולוגית","אופיר")
         if _k in hx and s2[0]!=2: m.Add(hx[_k]==0)
 
-# מורה חיצוני מתמטיקה: עד 3 ימי עבודה, לא ביום שישי
+# הילה מתמטיקה: עד 3 ימי עבודה, לא ביום שישי
 ext_days=[]
 for _d in range(6):
     _b=m.NewBoolVar(f"extm_{_d}"); ext_days.append(_b)
     for c in HCLASSES:
         for _h in range(1,HDAY[_d]+1):
-            _k=(c,(_d,_h),"מתמטיקה","מורה חיצוני")
+            _k=(c,(_d,_h),"מתמטיקה","הילה")
             if _k in hx: m.Add(hx[_k]<=_b)
 m.Add(sum(ext_days)<=3)
 m.Add(ext_days[5]==0)          # לא בשישי
@@ -1232,6 +1232,16 @@ if st in (cp_model.OPTIMAL,cp_model.FEASIBLE):
     io.open("pe_hat.json","w",encoding="utf-8").write(json.dumps(peo,ensure_ascii=False,indent=1))
     _gjo={f"{c}|{3},{h}":"גלית" for (c,h),b in gj.items() if sol.Value(b)}
     io.open("galit_erez.json","w",encoding="utf-8").write(json.dumps(_gjo,ensure_ascii=False))
+    # צבי: 15 שעות בתקן, 9 כבר משובצות (5 יסודי + 4 שישי). מצטרף (לא מחליף)
+    # לשיעורי הילה בימים שני ושלישי - רק בשעות שאינן מתנגשות עם השיעורים
+    # הקבועים שלו (FIXED_LESSONS ב-data.py). מתוך שעות הילה בשני-שלישי,
+    # שלוש מתנגשות (שני ש3-4 = ד אינס/ג לייה; שלישי ש3 = ג דניאל) ונשארו
+    # בחוץ. יוצא 5 שעות במקום 6 - ר' הערה למנהל.
+    ZVI_HILA=[("ח גלית",(1,1)),("ח גלית",(1,2)),
+              ("ט תמיר",(2,2)),("ט תמיר",(2,6)),("ט אסיף",(2,4))]
+    _zho={f"{_c}|{_s[0]},{_s[1]}":"צבי" for (_c,_s) in ZVI_HILA
+          if out[_c].get(f"{_s[0]},{_s[1]}","").endswith("– הילה")}   # רק אם באמת השיעור של הילה נשאר שם
+    io.open("zvi_hila.json","w",encoding="utf-8").write(json.dumps(_zho,ensure_ascii=False))
     _tjo=[{"day":ss[0],"hour":ss[1],"subj":sj} for (ss,sj),b in tjS.items() if sol.Value(b)]
     io.open("tj.json","w",encoding="utf-8").write(json.dumps(_tjo,ensure_ascii=False))
     io.open("viol_report.txt","w",encoding="utf-8").write(chr(10).join(
