@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """מייצר viewer.html - צופה מערכות אינטראקטיבי מנתוני הפתרון."""
 import io, json
-from data2 import CLASSES, SLOTS, DAY_NAMES, DAY_HOURS, HOMEROOM, QUOTA, APP_ALIAS
+from data2 import CLASSES, SLOTS, DAY_NAMES, DAY_HOURS, HOMEROOM, QUOTA, APP_ALIAS, LESSON_LABEL
 from hdata import HCLASSES, HSLOTS, HDAY, HHOME, NEED, GRADE
 
 try: _FULLN={k:v for k,v in json.load(io.open("names_map.json",encoding="utf-8")).items() if v}
@@ -68,6 +68,7 @@ for c in CLASSES:
             else:   cell["t"]=HOMEROOM[c]; cell["s"]="מחנך/ת הכיתה - זמני"; cell["k"]="hole"
         elif f"{c}|{k}" in FIL: cell["k"]="fill"
         if t==HOMEROOM[c]: cell["k"]="home"
+        if t and (c,(d,h)) in LESSON_LABEL: cell["s"]=LESSON_LABEL[(c,(d,h))]
         _tk=f"{c}|{k}"
         if t and t!='תל"ן' and _tk in TLN and TLN[_tk].startswith("חצי"):
             _tu=TLN[_tk].split('חצי תל"ן ')[1].split(" · ")[0]
@@ -158,7 +159,8 @@ for c in CLASSES:
         t=S[c][f"{d},{h}"]
         if t and t!='תל"ן':
             _u=_half_tln(c,d,h)
-            add_t(t,"יסודי",d,h,f"{c} · חצי כיתה עם {_u}" if _u else c)
+            _lb=LESSON_LABEL.get((c,(d,h)))
+            add_t(t,"יסודי",d,h,f"{c} · חצי כיתה עם {_u}" if _u else (f"{c} · {_lb}" if _lb else c))
 for k,v in TLN.items():
     c,sl=k.split("|"); d,h=map(int,sl.split(","))
     if v.startswith("חצי"):

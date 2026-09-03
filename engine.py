@@ -461,6 +461,15 @@ for _kh in [k for k in hf if k[0]=="ד אינס"]:
     if _kr in x: m.Add(hf[_kh]<=x[_kr])
     else:        m.Add(hf[_kh]==0)
 
+# שיעורים שהמנהל קבע ידנית (FIXED_LESSONS ב-data.py): מקובעים במקומם,
+# ואותם מורים לא מלמדים ביסודי בשום שעה אחרת - אחרת הפותר משתמש בהם
+# לסתימת חוסרים (צבי קיבל 7 שעות במקום 2).
+for (_fc,_fs),(_ft,_flbl) in FIXED_LESSONS.items():
+    if (_fc,_fs,_ft) in x: m.Add(x[(_fc,_fs,_ft)]==1)
+for _ft in {t for (t,_l) in FIXED_LESSONS.values()}:
+    for _k in [k for k in x if k[2]==_ft and (k[0],k[1]) not in FIXED_LESSONS]:
+        m.Add(x[_k]==0)
+
 # ראשון ש2 = הדרכת שפה (קטיה): אנה, פנינה וצופיה בהדרכה, ולכן א אנה זקוקה
 # למורה מבחוץ. אינס לא נכנסת לשם (בקשת המנהל 03.09) - מירי מחליפה אותה,
 # ואינס לוקחת במקום את השעה בכיתתה שלה.
