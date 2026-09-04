@@ -385,17 +385,19 @@ function homeClassOf(name){
 }
 function allowedViews(){
   if(!USER||USER.r==="admin") return ["elem","jun","teach","gaps","staff","commit","rules"];
+  if(USER.r==="classes") return ["elem","jun"];   // מערכות הכיתות בלבד
   if(USER.r==="coordinator"){const k=DATA.houses[USER.h].kind;return [k,"teach","commit"];}
   return homeClassOf(USER.n)?[homeClassOf(USER.n)[0],"teach"]:["teach"];
 }
 function allowedClasses(kind){
-  if(!USER||USER.r==="admin") return null;
+  if(!USER||USER.r==="admin"||USER.r==="classes") return null;   // null = כל הכיתות
   if(USER.r==="coordinator"){const hh=DATA.houses[USER.h];return hh.kind===kind?hh.classes:[];}
   const hc=homeClassOf(USER.n);
   return (hc&&hc[0]===kind)?[hc[1]]:[];
 }
 function allowedTeachers(){
   if(!USER||USER.r==="admin") return Object.keys(DATA.teachers);
+  if(USER.r==="classes") return [];
   if(USER.r==="coordinator"){const l=(DATA.house_teachers||{})[USER.h]||[];return l.includes(USER.n)?l:[USER.n,...l];}
   return DATA.teachers[USER.n]?[USER.n]:[];
 }

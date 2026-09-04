@@ -5,7 +5,8 @@
    לא נשמרת גלויה בריפו או בדף. ההזדהות בלוח משווה גיבוב מול גיבוב.
 
    תפקידים: מחנכים מזוהים אוטומטית; רכזי בתים: לייה (בית א),
-   שרית (בית ב), אלי (בית ג); מנהלים רואים הכל.
+   שרית (בית ב), אלי (בית ג); מנהלים רואים הכל; classes - מערכות
+   הכיתות בלבד (יסודי + חטיבה).
    שימוש: python pull_app.py && python gen_access.py"""
 import json, hashlib, io, sys
 from data2 import APP_ALIAS as ALIAS
@@ -14,6 +15,9 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 SALT = b"gordon-lohot-2026"
 COORDINATORS = {"לייה": "A", "שרית": "B", "אלי": "C"}
 ADMINS = {"אסיף", "דאפי", "חסן", "מיכל", "נועה"}   # מיכל - מזכירה; נועה - רואה הכל
+# רואים את מערכות הכיתות (יסודי + חטיבה) בלבד - בלי מערכות המורים,
+# בלי החוסרים ובלי גיליון הצוות.
+CLASSVIEW = {"לילך"}
 # ALIAS מגיע מ-data2 (מקור אחד)
 # ת"ז שאינן באפליקציה נשמרות ב-ids_local.json, שאינו נכנס לגיט (הריפו ציבורי).
 # מבנה: {"שם": ["תעודת זהות", ...]} - אפשר יותר מאחת לאותו אדם.
@@ -39,7 +43,8 @@ for t in T:      # ת"ז מהאפליקציה מתווספת ואינה דורס
 
 access = {}
 for n, idlist in ids.items():
-    role = "coordinator" if n in COORDINATORS else ("admin" if n in ADMINS else "teacher")
+    role = ("coordinator" if n in COORDINATORS else "admin" if n in ADMINS
+            else "classes" if n in CLASSVIEW else "teacher")
     e = {"n": n, "r": role}
     if role == "coordinator": e["h"] = COORDINATORS[n]
     for idn in idlist: access[hid(idn)] = e
