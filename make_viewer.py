@@ -199,11 +199,21 @@ for _ck,_cls,_home in (("anna","א אנה","אנה"),("pnina","א פנינה","�
         for _ev in teachers.get(_home,[]):      # להוסיף לתווית הקיימת, לא לשכפל שעה
             if _ev[1]==_d4 and _ev[2]==_h4 and _ev[3]==_cls: _ev[3]=f"{_cls} · עם צופיה"
 # ---------- מגמות: שעות המורים המובילים ----------
+# GJ ו-ZH נכתבים כקבצים נפרדים ולכן יכולים להתיישן מול sol_hat - ואז נצייר
+# מורה בכיתה שבה הוא בכלל לא נמצא. checks.py חוסם את זה בצינור; כאן מזהירים
+# גם כשמריצים make_viewer לבד. (גלית הופיעה ככה בט תמיר ובז נעמי יחד.)
+def _elsewhere(t,d,h):
+    out=[cc for cc in HCLASSES if h<=HDAY[d] and (H[cc][f"{d},{h}"] or "").endswith("– "+t)]
+    return out+[cc for cc in CLASSES if h<=DAY_HOURS[d] and S[cc][f"{d},{h}"]==t]
 for k2 in GJ:
     c2,sl=k2.split("|"); d2,h2=map(int,sl.split(","))
+    _w=[x for x in _elsewhere("גלית",d2,h2) if x!=c2]
+    if _w: print(f'אזהרה: galit_erez.json אומר גלית ב{c2} {DAY_NAMES[d2]} ש{h2}, אבל היא ב{" + ".join(_w)}')
     add_t("גלית","חטיבה",d2,h2,c2+" · אנגלית (עם ארז)")
 for k3 in ZH:
     c3,sl3=k3.split("|"); d3,h3=map(int,sl3.split(","))
+    _w=[x for x in _elsewhere("צבי",d3,h3) if x!=c3]
+    if _w: print(f'אזהרה: zvi_hila.json אומר צבי ב{c3} {DAY_NAMES[d3]} ש{h3}, אבל הוא ב{" + ".join(_w)}')
     add_t("צבי","חטיבה",d3,h3,c3+" · מתמטיקה (עם הילה)")
 # ---------- מחויבויות שאינן הוראה: מעגלים, ניהול, הדרכות, ישיבות ----------
 _CM2={"שני":1,"שלישי":2}

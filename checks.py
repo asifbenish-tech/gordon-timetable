@@ -64,6 +64,49 @@ for c in CLASSES:
         if S[c][f"{d},{h}"] in ("יעל", "חגית", "יפעת", "הילית", "מאמי"):
             errors.append(f'{S[c][f"{d},{h}"]} (תל"ן) בכיתה {c}')
 
+# 6. קבצי הצד (הצטרפות מורה לשיעור של מורה אחר/ת, ותל"ן חצוי) מול הפתרון.
+#    הקבצים האלה נכתבים בנפרד מ-sol_hat/sol_J, ולכן הם יכולים להתיישן מולם -
+#    למשל כשמשחזרים חלק מהקבצים מגיט. אז התצוגה מציירת מורה בכיתה שבה הוא
+#    בכלל לא נמצא, ובלי הבדיקה הזו זה עובר בשקט. (גלית הופיעה ככה בו-זמנית
+#    בט תמיר וגם בז נעמי ברביעי ש1.)
+def _busy_at(d, h):
+    """מי מלמד/ת בשעה הזו, ובאיזו כיתה - מתוך הפתרון עצמו בלבד."""
+    out = {}
+    for c in CLASSES:
+        t = S[c].get(f"{d},{h}")
+        if t and t != 'תל"ן': out.setdefault(t, []).append(c)
+    if h <= HDAY[d]:
+        for c in HCLASSES:
+            t = tof(H[c][f"{d},{h}"] or "")
+            if t and t not in ("מגמות", "שרית + חסן", "חסר מורה"):
+                out.setdefault(t, []).append(c)
+    return out
+
+def _side(fname, pick):
+    try: raw = json.load(io.open(fname, encoding="utf-8"))
+    except FileNotFoundError: return []
+    out = []
+    for k, v in raw.items():
+        t = pick(v)
+        if not t: continue
+        c, s = k.split("|"); d, h = (int(x) for x in s.split(","))
+        c = _CO_CLASS.get(c, c)
+        out.append((fname, t, c, d, h))
+    return out
+
+_CO_CLASS = {"anna": "א אנה", "pnina": "א פנינה"}   # co_zofia3 משתמש בקיצורים
+for fname, t, c, d, h in (
+        _side("galit_erez.json", lambda v: v) +
+        _side("zvi_hila.json", lambda v: v) +
+        _side("co_zofia3.json", lambda v: "צופיה") +
+        _side("tln_map.json", lambda v: v.split('חצי תל"ן ')[1].split(" · ")[0]
+              if isinstance(v, str) and v.startswith("חצי") else None)):
+    where = _busy_at(d, h).get(t, [])
+    if [x for x in where if x != c]:
+        errors.append(f"{t} {DAY_NAMES[d]} ש{h}: {fname} אומר {c}, "
+                      f"אבל בפתרון הוא/היא ב{' + '.join(where)}")
+
+
 if errors:
     print("!!! נכשלו " + str(len(errors)) + " בדיקות:")
     for e in errors[:12]: print("   ✗ " + e)
