@@ -255,13 +255,8 @@ for (_d,_h,_lbl),_ps in sorted(_cmt.items()):
     commit.append({"d":_d,"h":_h,"n":_lbl,"p":("כל המורים" if len(_ps)>=20 else " · ".join(_ps))})
 
 # ---------- ניצול שעות מול מכסה ----------
-# מכסות לתצוגת "ניצול שעות". אצל מורות התל"ן המכסה = שעות התל"ן + שעות המגמה
-# שהן מלמדות (יעל 12+4, חגית 8+2) - אחרת הן נראות חורגות בלי שהן באמת חורגות.
-QUOTA_FILE={"יעל":16,"חגית":10,"דליה":24,"תמיר":24,"סימה":24,"לייה":23,"פנינה":23,"מירי":23,
- "אסיף":20,"גלית":20,"נעמי":20,"תניה":18,"אורנה":18,"הילית":16,"פאני":16,"יפעת":16,
- "ארז":8,"הדר":8,"לי-אור":10,"אינס":24,"שחר":10,"אנה":25,"אביטל":25,"מרים":25,"שיר":4,
- "דניאל":26,"צופיה":18,"רובי":6,"חסן":26,"דני":20,"טלי":10,"שרית":28,"יערה":25,
- "מאמי":10,"אופיר":2,"אלי":20,"הילה":15,"צבי":14}   # 5 יסודי + 4 שישי בט אסיף + 5 מצטרף להילה (6 ביקש, שעה אחת התנגשה)
+# QUOTA_FILE ב-data2.py - מקור אחד גם ל-util.py, שהחזיק עותק שהתיישן
+from data2 import QUOTA_FILE
 util=[]
 for t,q in sorted(QUOTA_FILE.items(), key=lambda kv:-kv[1]):
     ev=teachers.get(t,[])
@@ -283,11 +278,9 @@ _CM={"שני":1,"שלישי":2}
 _QF={t:QUOTA_FILE[t] for t in (
  "מרים","צופיה","טלי","לי-אור","שחר","דניאל","דני","אינס","מירי","אנה","פנינה",
  "אביטל","יערה","לייה","דליה","תניה","אורנה","סימה","פאני","חסן","שרית")}
-_load={}
-for _c in CLASSES:
-    for (_d,_h) in SLOTS:
-        _t=S[_c][f"{_d},{_h}"]
-        if _t and _t!='תל"ן': _load[_t]=_load.get(_t,0)+1
+# ניצול בפועל מתוך util (יסודי+חטיבה+תל"ן+מגמות), לא רק היסודי. קודם חסן
+# הופיע כמועמד עם "16 שעות פנויות" בזמן שהוא בפועל 26/26.
+_load={u["t"]:u["tot"] for u in util}
 def _free_for(d,h):
     out=[]
     for t,q in _QF.items():
@@ -299,7 +292,7 @@ def _free_for(d,h):
         if DAY_NAMES[d] in off: continue
         if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+_HEV.get(t,[])): continue
         if t in MAGAMA.get((d,h),[]): continue
-        if any(S[cc][f"{d},{h}"]==t for cc in CLASSES): continue
+        if h<=DAY_HOURS[d] and any(S[cc][f"{d},{h}"]==t for cc in CLASSES): continue
         if h<=HDAY[d] and any((H[cc][f"{d},{h}"] or "").endswith("– "+t) for cc in HCLASSES): continue
         bad=False
         for day in ("שני","שלישי"):
@@ -321,7 +314,7 @@ def _free_ext(d,h,exclude=()):
         if DAY_NAMES[d] in off: continue
         if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+_HEV.get(t,[])): continue
         if t in MAGAMA.get((d,h),[]): continue
-        if any(S[cc][f"{d},{h}"]==t for cc in CLASSES): continue
+        if h<=DAY_HOURS[d] and any(S[cc][f"{d},{h}"]==t for cc in CLASSES): continue
         if h<=HDAY[d] and any((H[cc][f"{d},{h}"] or "").endswith("– "+t) for cc in HCLASSES): continue
         bad=False
         for day in ("שני","שלישי"):

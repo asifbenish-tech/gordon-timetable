@@ -271,5 +271,7 @@ wsu.cell(row=_n+4,column=1,value="יעל, חגית, הילית, יפעת = מו�
 wsu.column_dimensions["A"].width=18
 for i in range(2,10): wsu.column_dimensions[get_column_letter(i)].width=11
 
-wb.save(r"C:\Users\asifb\Desktop\מערכת שעות\מערכות שעות סופי v32.xlsx")
+# נתיב מקומי. קודם היה כאן נתיב ווינדוס קשיח, ובלינוקס הוא נוצר כשם קובץ
+# מילולי אחד ארוך ("C:\Users\...") בתיקיית הריפו במקום להישמר איפשהו.
+wb.save("מערכות שעות.xlsx")
 print("saved", len(wb.sheetnames), "sheets")

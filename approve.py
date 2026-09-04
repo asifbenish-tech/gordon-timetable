@@ -28,4 +28,10 @@ for side, src, dst, classes, slots in (("יסודי", "sol_J.json", "baseline_J.
     n = _diff(prev, cur, classes, slots)
     shutil.copyfile(src, dst)
     print(f"{side}: baseline עודכן ({n} תאים שונים מהקודם)")
+# מפת התל"ן נשמרת גם היא - אחרת שעות החצי-כיתה זזות בכל הרצה מחדש
+try:
+    shutil.copyfile("tln_map.json", "baseline_tln.json")
+    print('תל"ן: baseline_tln.json עודכן')
+except FileNotFoundError:
+    print('tln_map.json חסר - אין בסיס לתל"ן')
 print("מכאן הפותר ישמור על המערכת הזו. לדחוף ל-master כדי לפרסם.")

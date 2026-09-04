@@ -1137,6 +1137,16 @@ if STAB:
         for k,v in hx.items():
             _c,(_d,_h),_sj,_t=k
             if _bH.get(_c,{}).get(f"{_d},{_h}")==f"{_sj} – {_t}": _stab.append(1-v)
+        # שעות התל"ן החצויות: גם הן צריכות יציבות. בלי זה כל הרצה מחדש הזיזה
+        # אותן שעה קדימה/אחורה (לפתרון שקול), והדיף הראה "שינויים" בלי סיבה.
+        try:
+            _bT=json.load(io.open("baseline_tln.json",encoding="utf-8"))
+            for (_c,_s2,_u),v in hf.items():
+                _bv=_bT.get(f"{_c}|{_s2[0]},{_s2[1]}","")
+                if _bv.startswith("חצי") and _bv.split('חצי תל"ן ')[1].split(" · ")[0]==_u:
+                    _stab.append(1-v)
+        except FileNotFoundError:
+            print('baseline_tln.json חסר - התל"ן החצוי בלי יציבות (יתווסף באישור הבא)')
         print(f"יציבות: {len(_stab)} תאים מהמערכת המפורסמת, משקל {STAB}")
     except Exception as _e:
         print("ללא יציבות:",_e); _stab=[]
