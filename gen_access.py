@@ -18,6 +18,9 @@ ADMINS = {"אסיף", "דאפי", "חסן", "מיכל", "נועה"}   # מיכל
 # רואים את מערכות הכיתות (יסודי + חטיבה) בלבד - בלי מערכות המורים,
 # בלי החוסרים ובלי גיליון הצוות.
 CLASSVIEW = {"לילך"}
+# לחיצה על תא לאפשרויות החלפה - רשימה נפרדת מהתפקידים, לבקשת המנהל:
+# אסיף, דאפי ואלי בלבד (אלי רכז בית ולא מנהל, ולא כל ההנהלה נכללת).
+PICKERS = {"אסיף", "דאפי", "אלי"}
 # ALIAS מגיע מ-data2 (מקור אחד)
 # ת"ז שאינן באפליקציה נשמרות ב-ids_local.json, שאינו נכנס לגיט (הריפו ציבורי).
 # מבנה: {"שם": ["תעודת זהות", ...]} - אפשר יותר מאחת לאותו אדם.
@@ -47,10 +50,12 @@ for n, idlist in ids.items():
             else "classes" if n in CLASSVIEW else "teacher")
     e = {"n": n, "r": role}
     if role == "coordinator": e["h"] = COORDINATORS[n]
+    if n in PICKERS: e["p"] = 1
     for idn in idlist: access[hid(idn)] = e
 io.open("access_map.json", "w", encoding="utf-8").write(json.dumps(access, ensure_ascii=False, indent=1))
 roles = {e["n"]: e["r"] for e in access.values() if e["r"] != "teacher"}
 missing = sorted({(t.get("name") or "").strip().split()[0] for t in T
                   if (t.get("name") or "").strip() and not t.get("tz")})
 print(f"access_map.json: {len(access)} משתמשים | בעלי תפקיד: {roles}")
+print("לחיצה על תא (אפשרויות החלפה):", " · ".join(sorted({e["n"] for e in access.values() if e.get("p")})))
 print("ללא ת\"ז באפליקציה (לא יוכלו להזדהות עד שתוזן):", " · ".join(missing))
