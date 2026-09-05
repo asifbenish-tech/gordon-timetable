@@ -179,7 +179,7 @@ function tabBtns(){ const av=allowedViews();
   document.querySelectorAll("#tabs button[data-v]").forEach(b=>{
   b.style.display=av.includes(b.dataset.v)?"":"none";
   if(b.dataset.v==="teach"){
-    b.textContent = (!USER||USER.r==="admin") ? "מערכות מורים"
+    b.textContent = (!USER||USER.r==="admin"||USER.tv) ? "מערכות מורים"
       : (USER.r==="coordinator" ? "מערכות מורי הבית" : "📋 המערכת האישית שלי");
   }
   b.setAttribute("aria-pressed", b.dataset.v===view ? "true":"false");
@@ -196,7 +196,7 @@ function tabBtns(){ const av=allowedViews();
       a2.style.cssText="padding:.35rem .6rem;border-radius:.4rem;color:var(--ink);text-decoration:none;font:500 .88rem Heebo";
       a2.onmouseenter=()=>a2.style.background="var(--chip)";a2.onmouseleave=()=>a2.style.background="";
       pm.appendChild(a2);};
-    if(!USER||USER.r==="admin") item("📥 כל מערכות המורים (PDF)","מערכות שעות מורים.pdf");
+    if(!USER||USER.r==="admin"||USER.tv) item("📥 כל מערכות המורים (PDF)","מערכות שעות מורים.pdf");
     if(USER&&USER.r==="coordinator") item("📥 מערכות "+DATA.houses[USER.h].name+" (PDF)","מערכות "+DATA.houses[USER.h].name+".pdf");
     if(!USER||USER.r==="admin"){
     item("📥 מערכות בית א (PDF)","מערכות בית א.pdf");
@@ -385,7 +385,7 @@ function homeClassOf(name){
 }
 function allowedViews(){
   if(!USER||USER.r==="admin") return ["elem","jun","teach","gaps","staff","commit","rules"];
-  if(USER.r==="classes") return ["elem","jun"];   // מערכות הכיתות בלבד
+  if(USER.r==="classes") return USER.tv?["elem","jun","teach"]:["elem","jun"];   // tv = גם מערכות מורים
   if(USER.r==="coordinator"){const k=DATA.houses[USER.h].kind;return [k,"teach","commit"];}
   return homeClassOf(USER.n)?[homeClassOf(USER.n)[0],"teach"]:["teach"];
 }
@@ -397,7 +397,7 @@ function allowedClasses(kind){
 }
 function allowedTeachers(){
   if(!USER||USER.r==="admin") return Object.keys(DATA.teachers);
-  if(USER.r==="classes") return [];
+  if(USER.r==="classes") return USER.tv?Object.keys(DATA.teachers):[];
   if(USER.r==="coordinator"){const l=(DATA.house_teachers||{})[USER.h]||[];return l.includes(USER.n)?l:[USER.n,...l];}
   return DATA.teachers[USER.n]?[USER.n]:[];
 }
