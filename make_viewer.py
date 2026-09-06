@@ -2,7 +2,7 @@
 """מייצר viewer.html - צופה מערכות אינטראקטיבי מנתוני הפתרון."""
 import io, json
 from data2 import CLASSES, SLOTS, DAY_NAMES, DAY_HOURS, HOMEROOM, QUOTA, APP_ALIAS, LESSON_LABEL
-from hdata import HCLASSES, HSLOTS, HDAY, HHOME, NEED, GRADE
+from hdata import HCLASSES, HSLOTS, HDAY, HHOME, NEED, GRADE, OVR
 
 try: _FULLN={k:v for k,v in json.load(io.open("names_map.json",encoding="utf-8")).items() if v}
 except Exception: _FULLN={}
@@ -119,7 +119,10 @@ for c in HCLASSES:
             if subj=="מגמות": cell={"t":"מגמות","s":MAGT.get(k,""),"k":"mag"}
             elif subj=="שירה בציבור": cell={"t":"שירה בציבור","s":"כל החטיבה","k":"mag"}
             elif subj=="שעת גיבוש": cell={"t":"שעת גיבוש","s":"שתי כיתות ט יחד","k":"mag"}   # כרגע לא בשימוש - ראו "ליווי"
-            elif subj=="ליווי": cell={"t":t}         # שישי ש1 זמני: כל כיתה עם המורה שלה, בלי כותרת
+            elif subj=="ליווי":                      # שישי ש1 זמני: עוד אין שעת גיבוש
+                # בט אסיף השעה הזו נלמדת כמתמטיקה עם צבי (בקשת המנהל 06.09).
+                # התצוגה בלבד - בפתרון היא נשארת "ליווי" ואינה נספרת בתוכנית.
+                cell={"t":"מתמטיקה","s":t} if c=="ט אסיף" else {"t":t}
             elif t=="שרית + חסן": cell={"t":subj,"s":"שרית + חסן (שכבתי)","k":"pe"}
             elif t=="חסר מורה": cell={"t":subj,"s":"חסר מורה","k":"hole"}
             elif t=="צבי" and d==5 and subj not in ("שירה בציבור",):
@@ -148,7 +151,9 @@ for c in HCLASSES:
     g=GRADE[c]
     for sj,per in NEED.items():
         if per[g]==0: continue
-        _plan.append({"n":sj,"want":per[g],"got":_cnt.get(sj,0),"miss":_mis.get(sj,0)})
+        # OVR הוא מקור האמת לחריגי התוכנית (כמו ב-engine וב-checks). בלי זה
+        # הטבלה הציגה "חסר/עודף" מדומה - למשל חינוך 2 מול 3 בט אסיף.
+        _plan.append({"n":sj,"want":OVR.get((c,sj),per[g]),"got":_cnt.get(sj,0),"miss":_mis.get(sj,0)})
     jun[c]={"home":HHOME[c],"cells":cells,"hours":HDAY,"duty":dd,"plan":_plan}
 
 teachers={}
