@@ -125,7 +125,8 @@
  },
  "bae69d4ac9266645631894a6e96d4c4e3af6bea45a02c3712e66452d7fe19dd0": {
   "n": "צופיה",
-  "r": "teacher"
+  "r": "classes",
+  "tv": 1
  },
  "d1e760c88529d7175b5a54328af5b9ba01651ea8234526e84b52efab47de8fad": {
   "n": "פאני",
@@ -157,7 +158,8 @@
  },
  "2f4e383c5b94a6b8e6548eea337276f61a2eac91306a2bbe06928bfcdc27835d": {
   "n": "חסן",
-  "r": "classes"
+  "r": "classes",
+  "tv": 1
  },
  "db51d89eb9d3f4f42de2f388e805ee13e9de4c6b6f67777ffe71a41f3f049af0": {
   "n": "לי-אור",
