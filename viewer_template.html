@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>לוח גורדון</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Frank+Ruhl+Libre:wght@700&display=swap">
 <style>
@@ -126,6 +128,34 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
 .cm-mtg{background:var(--mag);border-color:var(--mag-b)}
 .cm-asp{background:var(--pe);border-color:var(--pe-b)}
 .cm-mag{background:var(--tln);border-color:var(--tln-b)}
+/* ---------- נייד ---------- */
+@media (max-width:640px){
+  header{padding:.6rem .7rem .5rem}
+  h1{font-size:1.15rem}
+  h1 small{display:block;margin:.15rem 0 0}
+  nav{gap:.3rem;margin-top:.5rem}
+  nav button{padding:.3rem .65rem;font-size:.82rem}
+  #chips{gap:.28rem}
+  #chips button{padding:.2rem .55rem;font-size:.8rem}
+  #legend{font-size:.72rem;gap:.35rem}
+  main{padding:.7rem .6rem 2.5rem}
+  .card{padding:.7rem .6rem;border-radius:.6rem}
+  .card h2{font-size:1rem}
+  /* הטבלה נכנסת לרוחב המסך במקום לגלוש הצידה */
+  table{min-width:0}
+  th,td{padding:.3rem .18rem;font-size:.66rem;line-height:1.2}
+  td .s,td .co,td .aw{font-size:.6rem}
+  /* עמודת השעה נשארת גלויה גם בגלילה הצידה */
+  tr th:first-child,tr td:first-child{position:sticky;inset-inline-start:0;z-index:1;
+    background:var(--chip);width:1.9rem;min-width:1.9rem;padding-inline:.1rem}
+  .gaprow{grid-template-columns:1fr;gap:.35rem}
+  .sol p{font-size:.8rem}
+  details.plan table{max-width:none}
+}
+@media (max-width:400px){
+  th,td{font-size:.6rem;padding:.26rem .12rem}
+  td .s,td .co,td .aw{font-size:.55rem}
+}
 @media print{
   header,#chips,#legend,nav,.jump{display:none!important}
   body{background:#fff;color:#000;font-size:13px}
