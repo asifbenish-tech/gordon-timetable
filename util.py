@@ -35,10 +35,12 @@ def build():
     # מרים 23 במקום 25, צופיה 23 במקום 18, וגם "ליאור" שכבר לא קיים אחרי
     # שהשם תוקן ל"לי-אור" - כלומר גיליון האקסל הציג מספרים לא נכונים.
     from data2 import QUOTA_FILE as Q
+    from data2 import PINAT_CHAI, PINAT_TEACHER    # פינת חי - מצטרף, לא מחליף
     rows=[]
     for t,q in Q.items():
         zo=len(CO) if t=='צופיה' else 0
         zh=sum(1 for v in ZH.values() if v==t)      # הצטרפות לשיעור של מורה אחר/ת
+        zh+=len(PINAT_CHAI) if t==PINAT_TEACHER else 0
         tot=E[t]+Hh[t]+PEc[t]+TL[t]+MG[t]+zo+zh
         rows.append([t,E[t],Hh[t]+PEc[t],TL[t],MG[t],zo,tot,q,q-tot])
     rows.sort(key=lambda r:(r[8], -r[7]))

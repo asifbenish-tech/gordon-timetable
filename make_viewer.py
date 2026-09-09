@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """מייצר viewer.html - צופה מערכות אינטראקטיבי מנתוני הפתרון."""
 import io, json
-from data2 import CLASSES, SLOTS, DAY_NAMES, DAY_HOURS, HOMEROOM, QUOTA, APP_ALIAS, LESSON_LABEL
+from data2 import CLASSES, SLOTS, DAY_NAMES, DAY_HOURS, HOMEROOM, QUOTA, APP_ALIAS, LESSON_LABEL, PINAT_CHAI, PINAT_TEACHER
 from hdata import HCLASSES, HSLOTS, HDAY, HHOME, NEED, GRADE, OVR
 
 try: _FULLN={k:v for k,v in json.load(io.open("names_map.json",encoding="utf-8")).items() if v}
@@ -74,6 +74,10 @@ for c in CLASSES:
             _tu=TLN[_tk].split('חצי תל"ן ')[1].split(" · ")[0]
             cell["co"]='½ הכיתה בתל"ן · '+_tu
             cell["k"]="half"
+        # פינת חי: המורה שכבר בכיתה נשאר/ת בתא, ומצטרפים המקצוע ואבי
+        if (c,(d,h)) in PINAT_CHAI and cell.get("t"):
+            cell["s"] = "פינת חי"
+            cell["co"] = "+ " + PINAT_TEACHER
         cells[k]=cell
     _ED={"ה דני":3,"ה תניה":0,"ו אורנה":2,"ו שרית":1}
     if c in _ED:
@@ -215,6 +219,8 @@ for k2 in GJ:
     _w=[x for x in _elsewhere("גלית",d2,h2) if x!=c2]
     if _w: print(f'אזהרה: galit_erez.json אומר גלית ב{c2} {DAY_NAMES[d2]} ש{h2}, אבל היא ב{" + ".join(_w)}')
     add_t("גלית","חטיבה",d2,h2,c2+" · אנגלית (עם ארז)")
+for (_pc,(_pd,_ph)) in sorted(PINAT_CHAI, key=lambda z:(z[1],z[0])):
+    add_t(PINAT_TEACHER,"יסודי",_pd,_ph,f"{_pc} · פינת חי")
 for k3 in ZH:
     c3,sl3=k3.split("|"); d3,h3=map(int,sl3.split(","))
     _w=[x for x in _elsewhere("צבי",d3,h3) if x!=c3]

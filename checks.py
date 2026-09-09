@@ -107,6 +107,18 @@ for fname, t, c, d, h in (
                       f"אבל בפתרון הוא/היא ב{' + '.join(where)}")
 
 
+# 7. פינת חי: אבי מצטרף למורה שכבר בכיתה - אז חייב להיות שם מישהו, ואסור
+#    שיהיו לו שני שיעורים באותה שעה.
+from data2 import PINAT_CHAI, PINAT_TEACHER
+_seen_pc = {}
+for (_pc, (_pd, _ph)) in PINAT_CHAI:
+    if not S[_pc].get(f"{_pd},{_ph}"):
+        errors.append(f"פינת חי: {_pc} {DAY_NAMES[_pd]} ש{_ph} - אין מורה בכיתה")
+    if (_pd, _ph) in _seen_pc:
+        errors.append(f"{PINAT_TEACHER} בשתי כיתות: {DAY_NAMES[_pd]} ש{_ph} - "
+                      f"{_seen_pc[(_pd,_ph)]} ו{_pc}")
+    _seen_pc[(_pd, _ph)] = _pc
+
 if errors:
     print("!!! נכשלו " + str(len(errors)) + " בדיקות:")
     for e in errors[:12]: print("   ✗ " + e)
