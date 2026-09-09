@@ -100,6 +100,11 @@ td.name{text-align:right;font-weight:500}
 .jump{border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;
   border-radius:.45rem;padding:.3rem .7rem;font:500 .8rem Heebo;white-space:nowrap}
 .jump:hover{background:var(--chip)}
+.cpimg{border:1px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;
+  border-radius:.45rem;padding:.25rem .7rem;font:700 .78rem Heebo;white-space:nowrap;margin-inline-start:.5rem}
+.cpimg:hover{background:var(--accent);color:var(--accent-ink)}
+.cpimg[disabled]{opacity:.6;cursor:default}
+.card h2{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap}
 .jump:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .hit{animation:flash 1.6s ease-out}
 @keyframes flash{0%,60%{background:var(--fill);box-shadow:inset 3px 0 0 var(--fill-b)}}
@@ -491,6 +496,177 @@ function cellHtml(c,info,extraCls){
   if(c.away) inner+='<span class="aw">'+info.home+' בחוץ: '+c.away+'</span>';
   return '<td class="'+extraCls+'">'+inner+'</td>';
 }
+
+// ---------- העתקת המערכת כתמונה ----------
+// מציירים על canvas ולא מצלמים את הדף: כך התמונה יוצאת נקייה, באותם
+// צבעים, בלי תלות בגלילה, בזום או בספריות חיצוניות.
+function cpBtn(kind,name){
+  return '<button class="cpimg" data-cp="'+kind+'" data-nm="'+String(name).replace(/"/g,'&quot;')+'">🖼 העתק מערכת</button>';
+}
+const IMG={ pad:26, colW:158, hourW:60, headH:44, rowMin:52, line:17, scale:2,
+  ink:"#22303D", muted:"#6B7A88", line2:"#DFDCD4", accent:"#0E6E66", bg:"#FFFFFF", band:"#F7F5F0",
+  fill:{home:"#E3EEF7",tln:"#E4F0DF",mag:"#E7E6F4",pe:"#FBEFD8",fill:"#D7EEF2",hole:"#FBE4E1",
+        half:"#EDF3EC",off:"#FAF9F6",sed:"#F1EFEA"} };
+
+function wrap(ctx,txt,w,max){
+  if(!txt) return [];
+  const words=String(txt).split(/\s+/); const out=[]; let cur="";
+  words.forEach(wd=>{
+    const t=cur?cur+" "+wd:wd;
+    if(ctx.measureText(t).width<=w){cur=t;}
+    else{ if(cur)out.push(cur); cur=wd; }
+  });
+  if(cur)out.push(cur);
+  if(max&&out.length>max){ const c=out.slice(0,max); c[max-1]=c[max-1].replace(/.{0,2}$/,"…"); return c; }
+  return out;
+}
+
+// מטריצה אחידה לשני סוגי המערכות: לכל יום/שעה - שורה ראשית, משנה, ותוספת
+function cpMatrix(kind,name){
+  const M={}, meta={};
+  if(kind==="cls"){
+    const info=(DATA.elem[name]||DATA.jun[name]);
+    meta.title=name; meta.sub="מחנך/ת: "+info.home;
+    meta.hours=info.hours; meta.H=Math.max.apply(null,info.hours);
+    for(let d=0;d<6;d++) for(let h=1;h<=meta.H;h++){
+      const c=info.cells[d+","+h]; if(!c||!c.t) continue;
+      M[d+","+h]={main:c.t, sub:c.s||"", co:c.co||"", k:c.k||""};
+    }
+  }else{
+    const ev=DATA.teachers[name]||[];
+    meta.title=FN(name); const u=(DATA.util||[]).find(z=>z.t===name);
+    meta.sub=u?("משובץ "+u.tot+" מתוך "+u.q+" שעות משרה"):(ev.length+" שעות בשבוע");
+    meta.H=1; meta.hours=[0,0,0,0,0,0];
+    ev.forEach(e=>{ const d=e[1],h=e[2],k=d+","+h;
+      meta.H=Math.max(meta.H,h); meta.hours[d]=Math.max(meta.hours[d],h);
+      const duty=(e[0]==="סדירות");
+      const parts=String(e[3]).split(" · ");
+      const cell=M[k]||(M[k]={main:"",sub:"",co:"",k:duty?"sed":""});
+      const main=duty?("◦ "+parts[0]):(parts.length>1?parts[1]:parts[0]);
+      const sub =duty?parts.slice(1).join(" · "):(parts.length>1?parts[0]:"");
+      cell.main=cell.main?cell.main+" / "+main:main;
+      cell.sub =cell.sub&&cell.sub!==sub?cell.sub+" · "+sub:sub;
+      if(!duty) cell.k="";
+    });
+    for(let d=0;d<6;d++) meta.hours[d]=meta.hours[d]||0;
+  }
+  return {M:M,meta:meta};
+}
+
+async function cpImage(kind,name){
+  try{ await document.fonts.ready; }catch(e){}
+  const {M,meta}=cpMatrix(kind,name);
+  const S=IMG.scale, cv=document.createElement("canvas"), ctx=cv.getContext("2d");
+  const W=IMG.pad*2+IMG.hourW+IMG.colW*6;
+  // גובה כל שורה לפי התוכן
+  ctx.font="600 13px Heebo, Arial, sans-serif";
+  const rowH=[];
+  for(let h=1;h<=meta.H;h++){
+    let ln=1;
+    for(let d=0;d<6;d++){
+      const c=M[d+","+h]; if(!c) continue;
+      ctx.font="700 13px Heebo, Arial, sans-serif";
+      let n=wrap(ctx,c.main,IMG.colW-16,2).length;
+      ctx.font="400 11px Heebo, Arial, sans-serif";
+      n+=wrap(ctx,c.sub,IMG.colW-16,3).length + wrap(ctx,c.co,IMG.colW-16,2).length;
+      ln=Math.max(ln,n);
+    }
+    rowH.push(Math.max(IMG.rowMin, 14+ln*IMG.line));
+  }
+  const tableH=rowH.reduce((a,b)=>a+b,0)+IMG.headH;
+  const topH=76, botH=30, H=IMG.pad*2+topH+tableH+botH;
+  cv.width=W*S; cv.height=H*S; ctx.scale(S,S);
+  ctx.textBaseline="middle"; ctx.textAlign="center";
+  // בסיס ימין-לשמאל: בלעדיו סימנים כמו "+" ו-"◦" נופלים בצד הלא נכון
+  try{ ctx.direction="rtl"; }catch(e){}
+  ctx.fillStyle=IMG.bg; ctx.fillRect(0,0,W,H);
+
+  // כותרת
+  let y=IMG.pad;
+  ctx.fillStyle=IMG.band; ctx.fillRect(IMG.pad,y,W-IMG.pad*2,topH-14);
+  ctx.textAlign="right"; ctx.fillStyle=IMG.ink;
+  ctx.font="700 22px 'Frank Ruhl Libre', Heebo, serif";
+  ctx.fillText(meta.title, W-IMG.pad-16, y+24);
+  ctx.font="400 13px Heebo, Arial, sans-serif"; ctx.fillStyle=IMG.muted;
+  ctx.fillText(meta.sub, W-IMG.pad-16, y+46);
+  ctx.textAlign="left"; ctx.fillStyle=IMG.accent;
+  ctx.font="700 14px Heebo, Arial, sans-serif";
+  ctx.fillText("לוח גורדון", IMG.pad+16, y+24);
+  ctx.fillStyle=IMG.muted; ctx.font="400 11px Heebo, Arial, sans-serif";
+  ctx.fillText("עודכן "+(DATA.built||""), IMG.pad+16, y+46);
+  y+=topH;
+
+  // שורת הימים (מימין לשמאל)
+  const colX=i=>W-IMG.pad-IMG.hourW-IMG.colW*(i+1);
+  ctx.textAlign="center";
+  ctx.fillStyle="#EFECE4"; ctx.fillRect(IMG.pad,y,W-IMG.pad*2,IMG.headH);
+  ctx.fillStyle=IMG.ink; ctx.font="700 13px Heebo, Arial, sans-serif";
+  ctx.fillText("שעה", W-IMG.pad-IMG.hourW/2, y+IMG.headH/2);
+  DAYS.forEach((dn,i)=>ctx.fillText(dn, colX(i)+IMG.colW/2, y+IMG.headH/2));
+  ctx.strokeStyle=IMG.line2; ctx.lineWidth=1;
+  y+=IMG.headH;
+
+  // השורות
+  for(let h=1;h<=meta.H;h++){
+    const rh=rowH[h-1];
+    ctx.fillStyle="#F5F3EE"; ctx.fillRect(W-IMG.pad-IMG.hourW,y,IMG.hourW,rh);
+    ctx.fillStyle=IMG.ink; ctx.font="700 14px Heebo, Arial, sans-serif";
+    ctx.fillText(String(h), W-IMG.pad-IMG.hourW/2, y+rh/2);
+    ctx.strokeRect(W-IMG.pad-IMG.hourW+.5,y+.5,IMG.hourW-1,rh-1);
+    for(let d=0;d<6;d++){
+      const x=colX(d), c=M[d+","+h];
+      const off=(h>(meta.hours[d]||0));
+      ctx.fillStyle=c?(IMG.fill[c.k]||IMG.bg):(off?IMG.fill.off:IMG.bg);
+      ctx.fillRect(x,y,IMG.colW,rh);
+      ctx.strokeRect(x+.5,y+.5,IMG.colW-1,rh-1);
+      if(!c) continue;
+      const cx=x+IMG.colW/2;
+      ctx.font="700 13px Heebo, Arial, sans-serif";
+      const L1=wrap(ctx,c.main,IMG.colW-16,2);
+      ctx.font="400 11px Heebo, Arial, sans-serif";
+      const L2=wrap(ctx,c.sub,IMG.colW-16,3), L3=wrap(ctx,c.co,IMG.colW-16,2);
+      let ty=y+rh/2-((L1.length+L2.length+L3.length)-1)*IMG.line/2;
+      ctx.fillStyle=IMG.ink; ctx.font="700 13px Heebo, Arial, sans-serif";
+      L1.forEach(t=>{ctx.fillText(t,cx,ty);ty+=IMG.line;});
+      ctx.fillStyle=IMG.muted; ctx.font="400 11px Heebo, Arial, sans-serif";
+      L2.forEach(t=>{ctx.fillText(t,cx,ty);ty+=IMG.line;});
+      ctx.fillStyle=IMG.accent; ctx.font="700 11px Heebo, Arial, sans-serif";
+      L3.forEach(t=>{ctx.fillText(t,cx,ty);ty+=IMG.line;});
+    }
+    y+=rh;
+  }
+  ctx.textAlign="center"; ctx.fillStyle=IMG.muted;
+  ctx.font="400 11px Heebo, Arial, sans-serif";
+  ctx.fillText("בית חינוך ע\"ש א.ד גורדון", W/2, y+18);
+  return new Promise(res=>cv.toBlob(res,"image/png"));
+}
+
+async function cpCopy(btn){
+  const kind=btn.dataset.cp, name=btn.dataset.nm, old=btn.textContent;
+  btn.disabled=true; btn.textContent="מכין…";
+  try{
+    const blob=await cpImage(kind,name);
+    let done=false;
+    try{
+      await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
+      done=true;
+    }catch(e){}
+    if(done){ btn.textContent="✓ הועתק"; }
+    else{
+      // הדפדפן לא מרשה העתקת תמונה - נפתח אותה לשמירה ידנית
+      const url=URL.createObjectURL(blob);
+      const w=window.open(url,"_blank");
+      btn.textContent=w?"נפתחה תמונה":"לא ניתן להעתיק";
+      setTimeout(()=>URL.revokeObjectURL(url),60000);
+    }
+  }catch(e){ btn.textContent="שגיאה"; }
+  setTimeout(()=>{btn.disabled=false;btn.textContent=old;},2200);
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("button.cpimg");
+  if(b){ e.stopPropagation(); cpCopy(b); }
+});
+
 function planTable(info){
   if(!info.plan||!info.plan.length) return "";
   let rows="";
@@ -521,7 +697,7 @@ function grid(name,info,duty){
   }
   let head='<tr><th>שעה</th>';
   DAYS.forEach(dn=>{head+='<th>'+dn+'</th>';}); head+='</tr>';
-  return '<section class="card"><h2>'+name+'</h2><div class="sub">מחנך/ת: '+info.home+
+  return '<section class="card"><h2>'+name+cpBtn("cls",name)+'</h2><div class="sub">מחנך/ת: '+info.home+
     (duty?(' · סידור חדר אוכל: יום '+duty+' ש5'):'')+'</div>'+
     '<div class="tblwrap"><table>'+head+rows+'</table></div>'+planTable(info)+'</section>';
 }
@@ -567,7 +743,7 @@ function teacherGrid(t){
     const tot=items.reduce((a,z)=>a+z[1],0);
     const txt=items.map(z=>sd==="יסודי"?(z[1]+(z[1]===1?' שעה ':' שעות ')+z[0]):(z[1]+' '+z[0])).join(' · ');
     summ+='<div class="tsum"><b>'+sd+' ('+tot+')</b>: '+txt+'</div>';});
-  return '<section class="card"><h2>'+FN(t)+'</h2><div class="sub">'+sub+'</div>'+
+  return '<section class="card"><h2>'+FN(t)+cpBtn("teach",t)+'</h2><div class="sub">'+sub+'</div>'+
     '<div class="tblwrap"><table>'+head+rows+'</table></div>'+
     (summ?'<div class="tsumwrap">'+summ+'</div>':'')+'</section>';
 }
