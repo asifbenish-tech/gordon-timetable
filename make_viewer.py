@@ -77,7 +77,9 @@ for c in CLASSES:
         # פינת חי: המורה שכבר בכיתה נשאר/ת בתא, ומצטרפים המקצוע ואבי
         if (c,(d,h)) in PINAT_CHAI and cell.get("t"):
             cell["s"] = "פינת חי"
-            cell["co"] = "+ " + PINAT_TEACHER
+            # לא לדרוס סימון קיים בתא (חצי כיתה בתל"ן וכד') - להוסיף אליו
+            _pco = "+ " + PINAT_TEACHER
+            cell["co"] = (cell["co"] + " · " + _pco) if cell.get("co") else _pco
         cells[k]=cell
     _ED={"ה דני":3,"ה תניה":0,"ו אורנה":2,"ו שרית":1}
     if c in _ED:
