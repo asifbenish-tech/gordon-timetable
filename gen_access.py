@@ -25,9 +25,10 @@ CLASSVIEW = {"לילך", "תדהר", "אורנה מאיר", "גלית זינגר
 # מתוך CLASSVIEW - מי שרואה גם את מערכות המורים (ותו לא: עדיין בלי
 # חוסרים, צוות, סדירויות ואילוצים). סימון "tv" ב-access_map.
 TEACHVIEW = {"לילך", "מיכל", "חסן", "חיקי", "עינת"}   # רואים גם את המערכת שלהם, מתוך 38
-# לחיצה על תא לאפשרויות החלפה - רשימה נפרדת מהתפקידים, לבקשת המנהל:
-# אסיף, דאפי ואלי בלבד (אלי רכז בית ולא מנהל, ולא כל ההנהלה נכללת).
-PICKERS = {"אסיף", "דאפי", "אלי", "צופיה"}
+# לחיצה על תא לאפשרויות החלפה. כל מי שתפקידו admin מקבל אותה אוטומטית
+# (ראו ADMINS), ולכן אין צורך לתחזק כאן רשימה כפולה. כאן רק חריגים
+# שאינם מנהלים - כרגע אלי, רכז בית ג.
+PICKERS = {"אלי"}
 # ALIAS מגיע מ-data2 (מקור אחד)
 # ת"ז שאינן באפליקציה נשמרות ב-ids_local.json, שאינו נכנס לגיט (הריפו ציבורי).
 # מבנה: {"שם": ["תעודת זהות", ...]} - אפשר יותר מאחת לאותו אדם.
@@ -57,7 +58,7 @@ for n, idlist in ids.items():
             else "classes" if n in CLASSVIEW else "teacher")
     e = {"n": n, "r": role}
     if role == "coordinator": e["h"] = COORDINATORS[n]
-    if n in PICKERS: e["p"] = 1
+    if n in PICKERS or role == "admin": e["p"] = 1
     if n in TEACHVIEW: e["tv"] = 1
     for idn in idlist: access[hid(idn)] = e
 io.open("access_map.json", "w", encoding="utf-8").write(json.dumps(access, ensure_ascii=False, indent=1))

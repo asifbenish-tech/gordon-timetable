@@ -100,6 +100,7 @@ td.name{text-align:right;font-weight:500}
 .jump{border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;
   border-radius:.45rem;padding:.3rem .7rem;font:500 .8rem Heebo;white-space:nowrap}
 .jump:hover{background:var(--chip)}
+td.pick{cursor:pointer} td.pick:hover{outline:2px solid var(--accent);outline-offset:-2px}
 .cpimg{border:1px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;
   border-radius:.45rem;padding:.25rem .7rem;font:700 .78rem Heebo;white-space:nowrap;margin-inline-start:.5rem}
 .cpimg:hover{background:var(--accent);color:var(--accent-ink)}
@@ -489,13 +490,90 @@ function chipRow(){
     b.textContent=n; b.setAttribute("aria-pressed", pick===n?"true":"false");
     b.onclick=()=>{pick=(pick===n?null:n);render();}; box.appendChild(b);});
 }
-function cellHtml(c,info,extraCls){
+function cellHtml(c,info,extraCls,cls,key){
   let inner=(c.t||"");
   if(c.s) inner+='<span class="s">'+c.s+'</span>';
   if(c.co) inner+='<span class="co">'+c.co+'</span>';
   if(c.away) inner+='<span class="aw">'+info.home+' בחוץ: '+c.away+'</span>';
-  return '<td class="'+extraCls+'">'+inner+'</td>';
+  // כל מנהל/ת מקבל/ת את זה, וכן מי שסומן/ה במפורש (PICKERS ב-gen_access)
+  const admin=!!(USER&&(USER.p||USER.r==="admin"));
+  const clk=(admin&&cls&&key)?(' class="'+extraCls+' pick" data-cls="'+cls+'" data-key="'+key+'" title="לחצו לאפשרויות החלפה"'):(' class="'+extraCls+'"');
+  return '<td'+clk+'>'+inner+'</td>';
 }
+
+// ---------- לחיצה על תא: אפשרויות שיבוץ ידני (הנהלה בלבד) ----------
+function slotTeacher(cell){          // שם המורה בתא, גם כשהתא של החטיבה (מקצוע + מורה)
+  if(!cell) return "";
+  if(cell.s&&cell.t&&DATA.util.some(u=>u.t===cell.s)) return cell.s;   // חטיבה: t=מקצוע, s=מורה
+  return cell.t||"";
+}
+function slotPanel(cls,key){
+  const [d,h]=key.split(",").map(Number);
+  const side=DATA.elem[cls]?"elem":"jun";
+  const cell=DATA[side][cls].cells[key]||{};
+  const who=slotTeacher(cell);
+  const sf=(DATA.slotfree||{})[key]||{free:[],full:[]};
+  const nm=t=>(DATA.full_names&&DATA.full_names[t])||t;
+  let html='<div style="font:700 1.05rem Heebo;margin-bottom:.1rem">'+cls+' · '+DAYS[d]+' שעה '+h+'</div>';
+  html+='<div style="color:var(--muted);font-size:.9rem;margin-bottom:.9rem">כרגע: '+
+        ((cell.t||"—")+(cell.s?" · "+cell.s:""))+'</div>';
+
+  const sec=(title,body)=>'<div style="margin-bottom:.85rem"><div style="font:700 .9rem Heebo;color:var(--accent);margin-bottom:.25rem">'+title+'</div>'+body+'</div>';
+  const chip=x=>'<span style="display:inline-block;background:var(--chip);border-radius:.4rem;padding:.15rem .5rem;margin:.12rem .12rem;font-size:.85rem">'+x+'</span>';
+
+  html+=sec("פנויים בשעה הזו (יש מקום במכסה)",
+    sf.free.length?sf.free.map(z=>chip(nm(z.t)+' · נותרו '+z.left)).join(""):
+    '<span style="color:var(--muted);font-size:.85rem">אף אחד. כל מי שפנוי — במכסה מלאה.</span>');
+
+  html+=sec("פנויים אך במכסה מלאה (דורש הגדלת משרה)",
+    sf.full.length?sf.full.map(t=>chip(nm(t))).join(""):
+    '<span style="color:var(--muted);font-size:.85rem">אין.</span>');
+
+  // מי מלמד באותה שעה בכיתות אחרות - מועמדים להחלפה
+  let others=[];
+  ["elem","jun"].forEach(sd=>{
+    Object.keys(DATA[sd]).forEach(c2=>{
+      if(c2===cls) return;
+      const cc=DATA[sd][c2].cells[key];
+      const t2=slotTeacher(cc);
+      if(t2&&t2!=="חסר מורה"&&!/^תל"ן/.test(t2)) others.push(c2+": "+t2);
+    });
+  });
+  html+=sec("מלמדים באותה שעה בכיתות אחרות (אפשר להחליף)",
+    others.length?others.map(chip).join(""):'<span style="color:var(--muted);font-size:.85rem">אין.</span>');
+
+  // איפה המורה של התא פנוי/ה בשאר השבוע - להזזת השיעור
+  if(who&&DATA.tfree&&DATA.tfree[who]){
+    const slots=DATA.tfree[who].map(k2=>{const a=k2.split(",");return DAYS[+a[0]]+" ש"+a[1];});
+    const u=DATA.util.find(z=>z.t===who);
+    const q=u?(" · "+u.tot+"/"+u.q+" שעות"):"";
+    html+=sec(nm(who)+" פנוי/ה גם בשעות האלה (להזזת השיעור)"+q,
+      slots.length?slots.map(chip).join(""):'<span style="color:var(--muted);font-size:.85rem">אין שעה פנויה בשבוע.</span>');
+  }
+  html+='<div style="color:var(--muted);font-size:.8rem;border-top:1px solid var(--line);padding-top:.5rem;margin-top:.3rem">'+
+        'זו תצוגת מידע בלבד — היא לא משנה את המערכת. לביצוע בפועל צריך להריץ את הפותר מחדש.</div>';
+  infoModal(html);
+}
+function infoModal(html){            // חלון מידע פשוט (לא ייצוא - אין textarea)
+  const ov=document.createElement("div");
+  ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;display:flex;align-items:center;justify-content:center;padding:1rem";
+  const box=document.createElement("div");
+  box.style.cssText="background:var(--surface);border:1px solid var(--line);border-radius:.75rem;padding:1.1rem;max-width:34rem;width:100%;max-height:86vh;overflow:auto";
+  box.innerHTML=html;
+  const b=document.createElement("button");
+  b.textContent="סגירה";
+  b.style.cssText="border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);padding:.4rem 1.1rem;border-radius:.5rem;font:700 .88rem Heebo;cursor:pointer;margin-top:.4rem";
+  b.onclick=()=>ov.remove();
+  box.appendChild(b); ov.appendChild(box);
+  ov.onclick=e=>{if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+document.addEventListener("click",e=>{
+  if(!(USER&&USER.p)) return;          // שכבה שנייה: גם אם תא סומן, בלי הרשאה אין פאנל
+  if(!(USER&&(USER.p||USER.r==="admin"))) return;   // שכבה שנייה: בלי הרשאה אין פאנל
+  const td=e.target.closest&&e.target.closest("td.pick");
+  if(td) slotPanel(td.dataset.cls,td.dataset.key);
+});
 
 // ---------- העתקת המערכת כתמונה ----------
 // מציירים על canvas ולא מצלמים את הדף: כך התמונה יוצאת נקייה, באותם
@@ -691,7 +769,7 @@ function grid(name,info,duty){
       if(h>info.hours[d]){ rows+='<td class="k-off"></td>'; return; }
       const c=info.cells[d+","+h]||{t:""};
       const cls=(c.k?("k-"+c.k):"")+((duty&&duty===dn&&h===5)?" duty":"");
-      rows+=cellHtml(c,info,cls);
+      rows+=cellHtml(c,info,cls,name,d+","+h);
     });
     rows+='</tr>';
   }

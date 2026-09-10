@@ -380,6 +380,46 @@ SOLUTIONS=[
  {"t":"להעלות את לי-אור ל-10 שעות בפועל","d":"אישרת להעלות אותה מ-8 ל-10. יש לה מקום פנוי במכסה.","i":"נמוכה"},
  {"t":"להוציא את גלית ממעגל השיח בשלישי","d":"ח׳ גלית מסיימת שלישי בשעה 4 בלבד. בשעות 5-6 גלית עצמה במעגל שיח ושאר מורי ח׳ בחופש.","i":"נקודתית"},
 ]
+# ---- מפת "מי פנוי" לכל משבצת בשבוע, לשימוש התצוגה (לחיצה על תא) ----
+# אותם כללים בדיוק כמו ברשימת המועמדים לחוסר - רק בלי הקיצוץ ל-6/5 הראשונים.
+SLOTFREE={}
+for _fd in range(6):
+    for _fh in range(1,8):
+        if _fh>max(DAY_HOURS[_fd],HDAY[_fd]): continue
+        _fr=_free_for(_fd,_fh)
+        _fx=_free_ext(_fd,_fh,exclude=[z["t"] for z in _fr])
+        SLOTFREE[f"{_fd},{_fh}"]={"free":_fr,"full":[z["t"] for z in _fx]}
+
+# ---- שעות פנויות לכל מורה (כולל מורי החטיבה, שאינם ב-_QF) ----
+# משבצת נחשבת פנויה אם: אין למורה אירוע בה, אינה ביום חופש, ואינה חסומה
+# באילוץ קבוע/סדירות/מגמה. בלי זה מורי חטיבה נראו כאילו אין להם שעה פנויה.
+def _blocked(t,d,h):
+    if DAY_NAMES[d] in (DAYS_OFF2.get(t) or []): return True
+    if DAY_NAMES[d] in _HOFF.get(t,[]): return True
+    if t=="צופיה" and DAY_NAMES[d]=="חמישי": return True
+    if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+_HEV.get(t,[])): return True
+    if t in MAGAMA.get((d,h),[]): return True
+    for _dy in ("שני","שלישי"):
+        if t in SED.get("קבוצת "+_dy,[]) and _CM[_dy]==d and h in SED["מעגלי שיח "+_dy]: return True
+    if t in ["לייה","שרית","יערה","צופיה","אסיף","אלי"] and d==2 and h in SED.get("ישיבת ניהול שלישי",[]): return True
+    return False
+TFREE={}
+for _t in teachers:
+    if _t in ("מגמות","חסר מורה","שכבת ט יחד","שרית + חסן"): continue
+    _busy={f"{e[1]},{e[2]}" for e in teachers[_t]}
+    # שעה 7 קיימת רק בחטיבה - למורה שמלמד/ת רק ביסודי אין משמעות להציע אותה
+    _sides={e[0] for e in teachers[_t]}
+    _jun = "חטיבה" in _sides
+    _elem = ("יסודי" in _sides) or ('תל"ן' in _sides)
+    _sl=[]
+    for _d in range(6):
+        _mx = max(DAY_HOURS[_d] if _elem else 0, HDAY[_d] if _jun else 0) or DAY_HOURS[_d]
+        for _h in range(1,8):
+            if _h>_mx: continue
+            if f"{_d},{_h}" in _busy or _blocked(_t,_d,_h): continue
+            _sl.append(f"{_d},{_h}")
+    TFREE[_t]=_sl
+
 # ---------- אילוצי מערכת ----------
 import rules as _R
 SYS_CORE=[
@@ -472,7 +512,7 @@ for _hk,_hv in _HOUSES.items():
             _cls=_lbl.split(" · ")[0] if _side=="חטיבה" else _lbl
             if _side in ("יסודי","חטיבה",'תל"ן') and _cls in _cset: _ts.add(_t2); break
     _HT[_hk]=sorted(_ts)
-data={"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"sol":SOLUTIONS,"elem":elem,"jun":jun,"teachers":{k:sorted(v,key=lambda z:(z[1],z[2])) for k,v in sorted(teachers.items())},"commit":commit,
+data={"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"slotfree":SLOTFREE,"tfree":TFREE,"sol":SOLUTIONS,"elem":elem,"jun":jun,"teachers":{k:sorted(v,key=lambda z:(z[1],z[2])) for k,v in sorted(teachers.items())},"commit":commit,
       "days":DAY_NAMES,"legend_sed":{k:v for k,v in SED.items() if "קבוצת" not in k},
       "full_names":_FULLN,"access":_ACCESS,"houses":_HOUSES,"house_teachers":_HT,"app_map":APP_MAP,
       "built":_now().strftime("%d.%m.%Y %H:%M")}
