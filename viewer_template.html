@@ -579,7 +579,9 @@ document.addEventListener("click",e=>{
 // מציירים על canvas ולא מצלמים את הדף: כך התמונה יוצאת נקייה, באותם
 // צבעים, בלי תלות בגלילה, בזום או בספריות חיצוניות.
 function cpBtn(kind,name){
-  return '<button class="cpimg" data-cp="'+kind+'" data-nm="'+String(name).replace(/"/g,'&quot;')+'">🖼 העתק מערכת</button>';
+  const nm=String(name).replace(/"/g,'&quot;');
+  return '<button class="cpimg" data-cp="'+kind+'" data-nm="'+nm+'">🖼 העתק מערכת</button>'+
+         '<button class="cpimg" data-wd="'+kind+'" data-nm="'+nm+'">📄 הנפק לוורד</button>';
 }
 const IMG={ pad:26, colW:158, hourW:60, headH:44, rowMin:52, line:17, scale:2,
   ink:"#22303D", muted:"#6B7A88", line2:"#DFDCD4", accent:"#0E6E66", bg:"#FFFFFF", band:"#F7F5F0",
@@ -743,6 +745,79 @@ async function cpCopy(btn){
 document.addEventListener("click",e=>{
   const b=e.target.closest&&e.target.closest("button.cpimg");
   if(b){ e.stopPropagation(); cpCopy(b); }
+});
+
+
+// ---------- הנפקה לוורד ----------
+// מסמך HTML עם מרחבי השמות של Word ושמירה כ-doc. וורד, גוגל דוקס
+// ו-LibreOffice פותחים אותו כמסמך רגיל, בלי ספריות חיצוניות.
+function wdEsc(t){ return String(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function wordDoc(kind,name){
+  const {M,meta}=cpMatrix(kind,name);
+  const F={home:"#E3EEF7",tln:"#E4F0DF",mag:"#E7E6F4",pe:"#FBEFD8",fill:"#D7EEF2",
+           hole:"#FBE4E1",half:"#EDF3EC",off:"#FAF9F6",sed:"#F1EFEA"};
+  let head='<tr><th style="width:5%">שעה</th>';
+  DAYS.forEach(dn=>{head+='<th>'+dn+'</th>';}); head+='</tr>';
+  let rows="";
+  for(let h=1;h<=meta.H;h++){
+    rows+='<tr><td class="hr">'+h+'</td>';
+    for(let d=0;d<6;d++){
+      const c=M[d+","+h], off=(h>(meta.hours[d]||0));
+      const bg=c?(F[c.k]||"#FFFFFF"):(off?F.off:"#FFFFFF");
+      let inner="";
+      if(c){
+        inner='<p class="m">'+wdEsc(c.main)+'</p>';
+        if(c.sub) inner+='<p class="s">'+wdEsc(c.sub)+'</p>';
+        if(c.co)  inner+='<p class="c">'+wdEsc(c.co)+'</p>';
+      }
+      rows+='<td style="background:'+bg+'">'+inner+'</td>';
+    }
+    rows+='</tr>';
+  }
+  return '﻿<html xmlns:o="urn:schemas-microsoft-com:office:office" '+
+    'xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'+
+    '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8">'+
+    '<title>'+wdEsc(meta.title)+'</title>'+
+    '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom>'+
+    '</w:WordDocument></xml><![endif]-->'+
+    '<style>@page{size:29.7cm 21cm;mso-page-orientation:landscape;margin:1.2cm}'+
+    'body{font-family:Arial,sans-serif;direction:rtl}'+
+    'h1{font-size:16pt;margin:0 0 2pt}'+
+    '.sub{font-size:10pt;color:#6B7A88;margin:0 0 10pt}'+
+    'table{border-collapse:collapse;width:100%}'+
+    'th,td{border:1px solid #C9C6BE;padding:4pt 3pt;text-align:center;vertical-align:middle}'+
+    'th{background:#28486B;color:#FFFFFF;font-size:9pt;font-weight:bold}'+
+    'td.hr{background:#EFECE4;font-weight:bold;font-size:10pt}'+
+    'p{margin:0}'+
+    'p.m{font-size:9pt;font-weight:bold;color:#22303D}'+
+    'p.s{font-size:8pt;color:#6B7A88}'+
+    'p.c{font-size:8pt;font-weight:bold;color:#0E6E66}'+
+    '.ft{font-size:8pt;color:#6B7A88;margin-top:8pt;text-align:center}'+
+    '</style></head><body>'+
+    '<h1>'+wdEsc(meta.title)+'</h1>'+
+    '<p class="sub">'+wdEsc(meta.sub)+' · לוח גורדון · עודכן '+wdEsc(DATA.built||"")+'</p>'+
+    '<table>'+head+rows+'</table>'+
+    '<p class="ft">בית חינוך ע"ש א.ד גורדון</p>'+
+    '</body></html>';
+}
+function wdSave(btn){
+  const kind=btn.dataset.wd, name=btn.dataset.nm, old=btn.textContent;
+  btn.disabled=true; btn.textContent="מכין…";
+  try{
+    const html=wordDoc(kind,name);
+    const blob=new Blob([html],{type:"application/msword;charset=utf-8"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download="מערכת שעות - "+name+".doc";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+    btn.textContent="✓ הורד";
+  }catch(e){ btn.textContent="שגיאה"; }
+  setTimeout(()=>{btn.disabled=false;btn.textContent=old;},2200);
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("button[data-wd]");
+  if(b){ e.stopPropagation(); wdSave(b); }
 });
 
 function planTable(info){
