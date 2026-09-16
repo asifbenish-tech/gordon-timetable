@@ -213,8 +213,19 @@ for _ck,_cls,_home in (("anna","א אנה","אנה"),("pnina","א פנינה","�
 # GJ ו-ZH נכתבים כקבצים נפרדים ולכן יכולים להתיישן מול sol_hat - ואז נצייר
 # מורה בכיתה שבה הוא בכלל לא נמצא. checks.py חוסם את זה בצינור; כאן מזהירים
 # גם כשמריצים make_viewer לבד. (גלית הופיעה ככה בט תמיר ובז נעמי יחד.)
+# האם המורה מלמד/ת בחטיבה בשעה הזו. חייב לפצל על " + ": שיעור חנ"ג שכבתי
+# נרשם "חינוך גופני – שרית + חסן", וחיפוש endswith על השם לבדו מפספס את
+# שניהם ומציג אותם כפנויים. (הבאג הופיע כך בראשון ש4 אצל שרית.)
+def _in_hat(t, d, h):
+    if h > HDAY[d]: return False
+    for cc in HCLASSES:
+        v = H[cc][f"{d},{h}"] or ""
+        if " – " in v and t in v.split(" – ")[1].split(" + "): return True
+    return False
+
 def _elsewhere(t,d,h):
-    out=[cc for cc in HCLASSES if h<=HDAY[d] and (H[cc][f"{d},{h}"] or "").endswith("– "+t)]
+    out=[cc for cc in HCLASSES if h<=HDAY[d] and " – " in (H[cc][f"{d},{h}"] or "")
+         and t in (H[cc][f"{d},{h}"] or "").split(" – ")[1].split(" + ")]
     return out+[cc for cc in CLASSES if h<=DAY_HOURS[d] and S[cc][f"{d},{h}"]==t]
 for k2 in GJ:
     c2,sl=k2.split("|"); d2,h2=map(int,sl.split(","))
@@ -305,6 +316,14 @@ _QF={t:QUOTA_FILE[t] for t in (
 # ניצול בפועל מתוך util (יסודי+חטיבה+תל"ן+מגמות), לא רק היסודי. קודם חסן
 # הופיע כמועמד עם "16 שעות פנויות" בזמן שהוא בפועל 26/26.
 _load={u["t"]:u["tot"] for u in util}
+# מפת התפוסות מתוך teachers - אותו מקור שממנו נבנית כל מערכת בלוח. כך
+# "מי פנוי" תמיד מסכים עם מה שרואים: שיעור, חנ"ג שכבתי, מגמה, תל"ן,
+# הצטרפות לשיעור של מורה אחר/ת, הדרכה או ישיבה - הכל נספר כתפוס.
+# קודם נבדקו רק הכיתות, ולכן שרית הופיעה כפנויה בראשון ש4 בזמן שלימדה
+# חנ"ג שכבתי בח גלית, וצופיה כפנויה בשעות שבהן היא מצטרפת לאנה ולפנינה.
+_BUSY={}
+for _bt,_bevs in teachers.items():
+    for _bs,_bd,_bh,_bl in _bevs: _BUSY.setdefault((_bd,_bh),set()).add(_bt)
 def _free_for(d,h):
     out=[]
     for t,q in _QF.items():
@@ -316,8 +335,7 @@ def _free_for(d,h):
         if DAY_NAMES[d] in off: continue
         if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+_HEV.get(t,[])): continue
         if t in MAGAMA.get((d,h),[]): continue
-        if h<=DAY_HOURS[d] and any(S[cc][f"{d},{h}"]==t for cc in CLASSES): continue
-        if h<=HDAY[d] and any((H[cc][f"{d},{h}"] or "").endswith("– "+t) for cc in HCLASSES): continue
+        if t in _BUSY.get((d,h),()): continue
         bad=False
         for day in ("שני","שלישי"):
             if t in SED.get("קבוצת "+day,[]) and _CM[day]==d and h in SED["מעגלי שיח "+day]: bad=True
@@ -338,8 +356,7 @@ def _free_ext(d,h,exclude=()):
         if DAY_NAMES[d] in off: continue
         if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+_HEV.get(t,[])): continue
         if t in MAGAMA.get((d,h),[]): continue
-        if h<=DAY_HOURS[d] and any(S[cc][f"{d},{h}"]==t for cc in CLASSES): continue
-        if h<=HDAY[d] and any((H[cc][f"{d},{h}"] or "").endswith("– "+t) for cc in HCLASSES): continue
+        if t in _BUSY.get((d,h),()): continue
         bad=False
         for day in ("שני","שלישי"):
             if t in SED.get("קבוצת "+day,[]) and _CM[day]==d and h in SED["מעגלי שיח "+day]: bad=True
@@ -390,6 +407,10 @@ for _fd in range(6):
         _fr=_free_for(_fd,_fh)
         _fx=_free_ext(_fd,_fh,exclude=[z["t"] for z in _fr])
         SLOTFREE[f"{_fd},{_fh}"]={"free":_fr,"full":[z["t"] for z in _fx]}
+        # שומר נגד נסיגה: מי שמוצג כפנוי חייב להיות פנוי באמת
+        for _z in [z["t"] for z in _fr]+[z["t"] for z in _fx]:
+            assert _z not in _BUSY.get((_fd,_fh),()), \
+                f'"מי פנוי" טועה: {_z} מוצג/ת כפנוי/ה ב{DAY_NAMES[_fd]} ש{_fh} אבל תפוס/ה'
 
 # ---- שעות פנויות לכל מורה (כולל מורי החטיבה, שאינם ב-_QF) ----
 # משבצת נחשבת פנויה אם: אין למורה אירוע בה, אינה ביום חופש, ואינה חסומה

@@ -504,7 +504,10 @@ function cellHtml(c,info,extraCls,cls,key){
 // ---------- לחיצה על תא: אפשרויות שיבוץ ידני (הנהלה בלבד) ----------
 function slotTeacher(cell){          // שם המורה בתא, גם כשהתא של החטיבה (מקצוע + מורה)
   if(!cell) return "";
-  if(cell.s&&cell.t&&DATA.util.some(u=>u.t===cell.s)) return cell.s;   // חטיבה: t=מקצוע, s=מורה
+  // בחטיבה t=מקצוע ו-s=המורה. מקבלים גם צמד שכבתי ("שרית + חסן (שכבתי)"),
+  // ובלי זה חנ"ג שכבתי הוצג ברשימה כ"חינוך גופני" במקום בשמות המורות.
+  const sv=(cell.s||"").replace(" (שכבתי)","");
+  if(sv&&cell.t&&sv.split(" + ").every(x=>DATA.util.some(u=>u.t===x))) return sv;
   return cell.t||"";
 }
 function slotPanel(cls,key){
