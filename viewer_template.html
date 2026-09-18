@@ -190,7 +190,8 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
       <button id="expbtn" title="קובץ לייבוא למערכת אחרת" style="background:var(--fill);border-color:var(--fill-b)">📤 ייצוא קובץ</button>
       <button id="pdfbtn" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent);margin-inline-start:.3rem">📄 יצירת PDF</button>
       <button id="logoutbtn" onclick="logout()" title="החלפת משתמש" style="margin-inline-start:.3rem">🚪 יציאה</button>
-      <a id="propbtn" href="https://claude.ai/artifact/6wMF83bGwPHNtsAPc64wfG" target="_blank" rel="noopener" title="לוח גורדון - הצעה (לא מפורסם למורים)" style="display:none;margin-inline-start:.3rem;border:1px solid var(--pe-b);background:var(--pe);color:var(--ink);padding:.35rem .9rem;border-radius:999px;font:500 .9rem Heebo;text-decoration:none">🔍 ההצעה האחרונה</a>
+      <button id="propbtn" title="הצעות שינוי (לא מפורסמות למורים)" style="display:none;margin-inline-start:.3rem;background:var(--pe);border-color:var(--pe-b)">🔍 הצעות</button>
+      <div id="propmenu" hidden style="position:absolute;top:110%;inset-inline-end:0;z-index:9;background:var(--surface);border:1px solid var(--line);border-radius:.6rem;padding:.4rem;min-width:19rem;box-shadow:0 6px 20px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:.25rem"></div>
       <div id="expmenu" hidden style="position:absolute;top:110%;inset-inline-end:0;z-index:9;background:var(--surface);border:1px solid var(--line);border-radius:.6rem;padding:.4rem;min-width:17rem;box-shadow:0 6px 20px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:.25rem"></div>
       <div id="pdfmenu" hidden style="position:absolute;top:110%;inset-inline-end:0;z-index:9;background:var(--surface);border:1px solid var(--line);border-radius:.6rem;padding:.4rem;min-width:15rem;box-shadow:0 6px 20px rgba(0,0,0,.15);display:flex;flex-direction:column;gap:.25rem"></div>
     </span>
@@ -225,8 +226,22 @@ function tabBtns(){ const av=allowedViews();
   const lo=document.getElementById("logoutbtn");
   if(lo) lo.style.display=USER?"":"none";
   // "ההצעה האחרונה": רק הנהלה - אסיף, דאפי, צופיה (בקשת המנהל 18.09)
-  const prb=document.getElementById("propbtn");
+  const prb=document.getElementById("propbtn"), prm=document.getElementById("propmenu");
   if(prb) prb.style.display=(USER&&["אסיף","דאפי","צופיה"].includes(USER.n))?"":"none";
+  if(prb&&prm&&!prm.dataset.ready){
+    prm.dataset.ready="1";
+    const PROPS=[["📅 המערכת הנוכחית (מפורסמת)","https://asifbenish-tech.github.io/gordon-timetable/"],
+                 ["🏫 הצעת החטיבה — הילה מדעים","https://claude.ai/artifact/6wMF83bGwPHNtsAPc64wfG"],
+                 ["🌱 הצעת שינוי יסודי — אינס ופאני","https://claude.ai/artifact/DKyZGdb4mZDTfgwfpudqyv"]];
+    for(const [lbl,href] of PROPS){
+      const a=document.createElement("a"); a.href=href; a.target="_blank"; a.rel="noopener"; a.textContent=lbl;
+      a.style.cssText="display:block;padding:.4rem .6rem;border-radius:.4rem;color:var(--ink);text-decoration:none;font:500 .9rem Heebo";
+      a.onmouseenter=()=>a.style.background="var(--chip)"; a.onmouseleave=()=>a.style.background="";
+      prm.appendChild(a);
+    }
+    prb.onclick=(e)=>{e.stopPropagation(); prm.hidden=!prm.hidden;};
+    document.addEventListener("click",()=>{prm.hidden=true;});
+  }
   const pb=document.getElementById("pdfbtn"), pm=document.getElementById("pdfmenu");
   if(pb&&pm&&!pm.dataset.ready){
     pm.dataset.ready="1";
