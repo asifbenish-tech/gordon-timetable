@@ -44,6 +44,9 @@ nav button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 #chips button{border:1px solid var(--line);background:var(--chip);color:var(--ink);
   padding:.22rem .7rem;border-radius:.5rem;font:500 .85rem Heebo;cursor:pointer}
 #chips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+#chips input.q{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:.3rem .6rem;border-radius:.5rem;font:500 .9rem Heebo;min-width:14rem}
+td.qhit{background:#FFF3B0!important;box-shadow:inset 0 0 0 2px #E0B400}
+:root[data-theme="dark"] td.qhit{background:#5a4a00!important}
 #chips select{border:1px solid var(--line);background:var(--surface);color:var(--ink);
   padding:.3rem .6rem;border-radius:.5rem;font:500 .9rem Heebo}
 main{padding:1rem 1.2rem 3rem;max-width:1080px;margin:0 auto}
@@ -492,12 +495,13 @@ function chipRow(){
   if(view==="teach"){
     const sel=document.createElement("select");
     let opts='<option value="">בחר/י מורה…</option>';
+    if(!USER||USER.r==="admin") opts+='<option value="*"'+(pick==="*"?' selected':'')+'>— כל המורים במקום אחד —</option>';
     for(const t of allowedTeachers()){
       opts+='<option value="'+t+'"'+(t===pick?' selected':'')+'>'+FN(t)+'</option>';
     }
     sel.innerHTML=opts;
     sel.onchange=()=>{pick=sel.value||null; render();};
-    box.appendChild(sel); return;
+    box.appendChild(sel); searchBox(box); return;
   }
   let names=Object.keys(view==="elem"?DATA.elem:DATA.jun);
   const _ac=allowedClasses(view);
@@ -508,6 +512,31 @@ function chipRow(){
   names.forEach(n=>{const b=document.createElement("button");
     b.textContent=n; b.setAttribute("aria-pressed", pick===n?"true":"false");
     b.onclick=()=>{pick=(pick===n?null:n);render();}; box.appendChild(b);});
+  searchBox(box);
+}
+// ---------- חיפוש (הנהלה): מסנן כרטיסים לפי שם מורה/כיתה או תוכן תא, ומדגיש תאים ----------
+let QUERY="";
+function searchBox(box){
+  if(!(!USER||USER.r==="admin")) return;
+  const inp=document.createElement("input"); inp.className="q"; inp.type="search";
+  inp.placeholder="🔎 חיפוש מורה / כיתה / מקצוע…"; inp.value=QUERY;
+  inp.oninput=()=>{QUERY=inp.value.trim(); if(view==="teach"&&QUERY&&!pick){pick="*";render();const i2=$q("#chips input.q");if(i2){i2.focus();i2.setSelectionRange(i2.value.length,i2.value.length);}} else applyQuery();};
+  box.appendChild(inp);
+}
+function applyQuery(){
+  const q=QUERY; const cards=[...document.querySelectorAll("#main .card")];
+  let shown=0;
+  cards.forEach(card=>{
+    card.querySelectorAll("td.qhit").forEach(td=>td.classList.remove("qhit"));
+    if(!q){card.style.display="";shown++;return;}
+    const h=card.querySelector("h2"); const byName=h&&h.textContent.includes(q);
+    let byCell=false;
+    card.querySelectorAll("td").forEach(td=>{ if(td.textContent.includes(q)){td.classList.add("qhit");byCell=true;} });
+    card.style.display=(byName||byCell)?"":"none"; if(byName||byCell) shown++;
+  });
+  let note=$q("#qnote");
+  if(!note){note=document.createElement("div");note.id="qnote";note.style.cssText="font-size:.85rem;color:var(--muted);margin-top:.6rem";$q("#main").prepend(note);}
+  note.textContent=q?('חיפוש "'+q+'": '+shown+' תוצאות'):"";
 }
 function cellHtml(c,info,extraCls,cls,key){
   let inner=(c.t||"");
@@ -1050,6 +1079,7 @@ function render(){
     return;
   }
   if(view==="teach"){
+    if(pick==="*"&&(!USER||USER.r==="admin")){ M.innerHTML=allowedTeachers().map(teacherGrid).join(""); applyQuery(); return; }
     M.innerHTML = pick ? teacherGrid(pick) :
       '<section class="card"><h2>מערכות מורים</h2><div class="sub">בחר/י מורה מהרשימה למעלה כדי לראות את השבוע המלא — יסודי, חטיבה ותל״ן יחד.</div></section>';
     return;
@@ -1059,6 +1089,7 @@ function render(){
   const _ac2=allowedClasses(view);
   if(_ac2) names=names.filter(n=>_ac2.includes(n));
   M.innerHTML=names.map(n=>grid(n,src[n],src[n].duty)).join("");
+  applyQuery();
 }
 $q("#stamp").textContent="עודכן "+(DATA.built||"");
 (function(){
