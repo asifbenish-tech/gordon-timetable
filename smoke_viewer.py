@@ -16,7 +16,7 @@ JS = r"""() => {
     const cards = document.querySelectorAll('.card').length, tds = document.querySelectorAll('td').length;
     const undef = (document.body.innerText.match(/undefined|NaN|\[object/g) || []).length;
     out.views[name] = {cards, tds, undef, chg: document.querySelectorAll('td.chg').length};
-    if (!tds || undef) out.bad.push(name);
+    if (!cards || undef || (!tds && name !== "cons")) out.bad.push(name);
   };
   view = "elem"; pick = null; render(); check("elem");
   view = "jun"; pick = null; render(); check("jun");
@@ -36,14 +36,8 @@ JS = r"""() => {
       if (document.querySelectorAll("td.pend").length) out.bad.push("pins-not-cleared");
     }
   } catch (e) { out.bad.push("edit-mode: " + String(e).slice(0, 120)); }
-  // מסך אילוצי מורים: פתיחה, חסימת משבצת, ייצוא, ניקוי
-  try {
-    view = "cons"; pick = null; render(); check("cons");
-    const td = document.querySelector("[data-ns]"); if (!td) out.bad.push("cons-no-grid"); else { td.click();
-      const df = consDiff(); if (df.n < 1) out.bad.push("cons-no-diff");
-      const ex = document.getElementById("consExport"); if (!ex) out.bad.push("cons-no-export"); else { ex.click(); if (!document.querySelector("textarea")) out.bad.push("cons-no-textarea"); document.querySelectorAll("body > div").forEach(d => { if (d.style.position === "fixed") d.remove(); }); }
-      const x = document.getElementById("consClear"); if (x) x.click(); if (consDiff().n) out.bad.push("cons-not-cleared"); }
-  } catch (e) { out.bad.push("cons: " + String(e).slice(0, 120)); }
+  view = "cons"; pick = null; render(); check("cons");
+  if (!document.querySelector('a[href*="artifact"]')) out.bad.push("cons-no-link");
   if (DATA.prop) {
     const pb = document.getElementById("propbanner");
     out.prop = {banner: pb && !pb.hidden ? pb.textContent : null,

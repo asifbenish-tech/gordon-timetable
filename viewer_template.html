@@ -1012,105 +1012,14 @@ function teacherGrid(t){
     '<div class="tblwrap"><table>'+head+rows+'</table></div>'+
     (summ?'<div class="tsumwrap">'+summ+'</div>':'')+'</section>';
 }
-// ---------- מסך אילוצי מורים (הנהלה): צפייה ועריכה -> ייצוא overrides להצעה ----------
-// הלוח סטטי (GitHub Pages) ולכן העריכה לא נכתבת לריפו: היא נשמרת בדפדפן ומיוצאת
-// כ-JSON בפורמט overrides של propose.py. הנתונים המקוריים מגיעים מ-DATA.cons (make_viewer).
-const CONS_FIELDS=[
-  ["max_hour","עד שעה (לא מלמד/ת אחריה)","num"],
-  ["max_days","עד כמה ימי עבודה בשבוע","num"],
-  ["min_per_day","יום עבודה = לפחות n שעות","num"],
-  ["max_gap","חלון של עד n שעות (ריק = בלי הגבלה)","num"],
-  ["no_gaps","בלי חלונות בכלל","bool"],
-  ["events_busy","לחלונות: אירוע/ישיבה נחשבים תפוסים","bool"],
-  ["no_last","לא בשעה האחרונה של היום","bool"],
-  ["no_last_subject","מקצוע שלא בשעה האחרונה (מופרד בפסיק)","text"]];
-const consLS=()=>{try{return JSON.parse(LS("gordon_cons")||"{}");}catch(e){return {};}};
-function consOf(t){            // העותק הנערך (או המקור)
-  const ed=consLS()[t]; const base=(DATA.cons||{})[t]||{};
-  return ed||JSON.parse(JSON.stringify({off_elem:base.off_elem||[],off_jun:base.off_jun||[],tcons:base.tcons||{},maxdays:base.maxdays||null}));
-}
-function consSave(t,obj){ const all=consLS(); all[t]=obj; LS("gordon_cons",JSON.stringify(all)); }
-function consDiff(){            // רק מה שהשתנה מול המקור -> overrides
-  const out={data2:{},hdata:{}}; const all=consLS(); let n=0;
-  Object.keys(all).forEach(t=>{
-    const b=(DATA.cons||{})[t]||{}; const e=all[t]; const same=(x,y)=>JSON.stringify(x||null)===JSON.stringify(y||null);
-    if(b.side!=="jun"&&!same(e.off_elem,b.off_elem||[])){ (out.data2.DAYS_OFF2=out.data2.DAYS_OFF2||{})[t]=e.off_elem; n++; }
-    if(b.side!=="elem"&&!same(e.off_jun,b.off_jun||[])){ (out.hdata.HOFF=out.hdata.HOFF||{})[t]=e.off_jun; n++; }
-    const tc={}; Object.keys(e.tcons||{}).forEach(k=>{const v=e.tcons[k]; if(v===""||v===null||v===false||(Array.isArray(v)&&!v.length)||(typeof v==="object"&&!Array.isArray(v)&&!Object.keys(v).length)) return; tc[k]=v;});
-    if(!same(tc,b.tcons||{})){ (out.data2.TCONS=out.data2.TCONS||{})[t]=Object.keys(tc).length?tc:null; n++; }
-    if(b.side!=="jun"&&!same(e.maxdays,b.maxdays||null)){ (out.data2.MAXDAYS=out.data2.MAXDAYS||{})[t]=e.maxdays; n++; }
-  });
-  if(!Object.keys(out.data2).length) delete out.data2; if(!Object.keys(out.hdata).length) delete out.hdata;
-  return {ov:out,n};
-}
+// ---------- אילוצי מורים: המסך המשותף (Artifact עם מסד נתונים) - מקום אחד, נשמר לאורך זמן ----------
+const CONS_URL="https://claude.ai/artifact/F1AcPPXAzjHFV9njpQRwiX";
 function consView(){
-  const names=Object.keys(DATA.cons||{}).sort((a,b)=>FN(a).localeCompare(FN(b),"he"));
-  if(!pick||!DATA.cons[pick]) pick=names[0];
-  const t=pick, c=DATA.cons[t], e=consOf(t), edited=!!consLS()[t];
-  const MAXH=Math.max(...Object.values(DATA.jun).map(v=>Math.max(...v.hours)),...Object.values(DATA.elem).map(v=>Math.max(...v.hours)));
-  const sel='<select id="consSel" style="font:inherit;padding:.3rem .5rem;border-radius:.5rem;border:1px solid var(--line)">'+
-    names.map(n=>'<option value="'+n+'"'+(n===t?' selected':'')+'>'+FN(n)+(consLS()[n]?' ✎':'')+'</option>').join("")+'</select>';
-  const side={elem:"יסודי",jun:"חטיבה",both:"יסודי + חטיבה"}[c.side]||"";
-  let html='<section class="card"><h2>⚙ אילוצי מורים <span style="font-size:.8rem;color:var(--muted);font-weight:400">עריכה נשמרת בדפדפן ומיוצאת להצעה - לא משנה את המערכת</span></h2>'+
-    '<div class="sub" style="display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">מורה: '+sel+' <span>'+side+'</span>'+
-    (edited?' <button class="pinb" id="consReset">↩ ביטול השינויים למורה זה</button>':'')+'</div>';
-  // ימים חופשיים
-  const dayBox=(key,label,arr)=>'<div style="margin:.5rem 0"><b>'+label+':</b> '+DAYS.map((dn,d)=>'<label style="margin-inline-end:.7rem"><input type="checkbox" data-off="'+key+'" data-day="'+dn+'"'+(arr.includes(dn)?' checked':'')+'> '+dn+'</label>').join("")+'</div>';
-  if(c.side!=="jun") html+=dayBox("off_elem","ימים חופשיים (יסודי)",e.off_elem||[]);
-  if(c.side!=="elem") html+=dayBox("off_jun","ימים חופשיים (חטיבה)",e.off_jun||[]);
-  // רשת שעות: אירועים (קריאה בלבד) + חסימות TCONS (לחיצה)
-  const ns=(e.tcons.no_slots||[]).map(s=>s[0]+","+s[1]);
-  let grid='<div class="tblwrap" style="margin:.5rem 0"><table style="min-width:520px"><tr><th>שעה</th>'+DAYS.map(dn=>'<th>'+dn+'</th>').join("")+'</tr>';
-  for(let h=1;h<=MAXH;h++){ grid+='<tr><th>'+h+'</th>';
-    DAYS.forEach((dn,d)=>{ const k=d+","+h; const ev=(c.events||{})[k];
-      const offd=((e.off_elem||[]).includes(dn)&&c.side!=="jun")||((e.off_jun||[]).includes(dn)&&c.side!=="elem");
-      const un=(c.unavail||[]).includes(k);
-      let cls="",txt="",title="לחיצה: חסימה/שחרור (TCONS no_slots)";
-      if(offd){cls="off";txt='<span style="color:var(--muted)">חופש</span>';title="יום חופשי";}
-      else if(ev){cls="sed";txt="◦ "+ev;title="סדירות/אירוע (עריכה דרך קלוד)";}
-      else if(un){cls="hole";txt="חסום";title="UNAVAIL2 (עריכה דרך קלוד)";}
-      else if(ns.includes(k)){cls="pend";txt="🚫";}
-      const clickable=!offd&&!ev&&!un;
-      grid+='<td class="'+cls+(clickable?' pick':'')+'"'+(clickable?' data-ns="'+k+'"':'')+' title="'+title+'" style="font-size:.78rem;text-align:center'+(offd?';background:#EFEDE8':'')+'">'+txt+'</td>';});
-    grid+='</tr>'; }
-  grid+='</table></div>';
-  html+='<div style="margin-top:.6rem"><b>שעות:</b> <span style="font-size:.8rem;color:var(--muted)">לחיצה על משבצת = חסימה קבועה בלי סיבה מוצגת (🚫). אפור = סדירות/ישיבה, אדום = חסימה עם סיבה (UNAVAIL2) - את אלה משנים דרך קלוד.</span>'+grid+'</div>';
-  // עד איזו שעה בכל יום
-  html+='<div style="margin:.5rem 0"><b>מסיים/ה עד שעה (לפי יום):</b> '+DAYS.map((dn,d)=>'<label style="margin-inline-end:.6rem">'+dn+' <input type="number" min="1" max="'+MAXH+'" data-du="'+d+'" value="'+(((e.tcons.day_until||{})[d])||"")+'" style="width:3rem"></label>').join("")+'</div>';
-  // שדות TCONS
-  html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(19rem,1fr));gap:.4rem .9rem;margin:.6rem 0">'+CONS_FIELDS.map(([k,lab,ty])=>{
-    const v=e.tcons[k];
-    if(ty==="bool") return '<label><input type="checkbox" data-tc="'+k+'" data-ty="bool"'+(v?' checked':'')+'> '+lab+'</label>';
-    if(ty==="num") return '<label>'+lab+' <input type="number" min="0" max="8" data-tc="'+k+'" data-ty="num" value="'+(v===undefined||v===null?"":v)+'" style="width:3.5rem"></label>';
-    return '<label>'+lab+' <input type="text" data-tc="'+k+'" data-ty="text" value="'+(Array.isArray(v)?v.join(", "):(v||""))+'" style="width:11rem"></label>';}).join("")+
-    (c.side!=="jun"?'<label>מגבלת ימי עבודה ביסודי (MAXDAYS) <input type="number" min="1" max="6" id="consMaxdays" value="'+(e.maxdays||"")+'" style="width:3.5rem"></label>':'')+'</div>';
-  if(c.tcons&&c.tcons.busy_extra&&c.tcons.busy_extra.length) html+='<div style="font-size:.8rem;color:var(--muted)">שעות שנחשבות תפוסות לחלונות (busy_extra): '+c.tcons.busy_extra.map(s=>DAYS[s[0]]+" ש"+s[1]).join(", ")+' (עריכה דרך קלוד)</div>';
-  // ייצוא
-  const df=consDiff();
-  html+='<div style="border-top:1px solid var(--line);margin-top:.8rem;padding-top:.6rem"><b>שינויים ממתינים: '+df.n+'</b> '+
-    (df.n?'<button class="pinb" id="consExport">📤 ייצוא להצעה (overrides)</button> <button class="pinb" id="consClear">🗑 ניקוי הכל</button>':'')+
-    '<div style="font-size:.8rem;color:var(--muted);margin-top:.3rem">הייצוא הוא JSON בפורמט overrides: שולחים לקלוד או מדביקים ב-proposals/&lt;שם&gt;/proposal.json, ואז python propose.py &lt;שם&gt; מציג את היקף ההשפעה. השינוי נכנס לנתונים רק אחרי אישור.</div></div>';
-  html+='</section>';
-  return html;
+  const n=Object.keys(DATA.cons||{}).length;
+  return '<section class="card"><h2>⚙ אילוצי מורים</h2><div class="sub">ימים חופשיים, שעות חסומות, כללים אישיים והערות לכל מורה - נערכים במסך משותף שנשמר בשרת, זמין מכל מחשב, ומוזן לבניית המערכות הבאה.</div>'+
+    '<p><a class="pinb" href="'+CONS_URL+'" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700">פתיחת מסך אילוצי המורים ↗</a></p>'+
+    '<div class="note">מה שרץ היום ('+n+' מורים) מופיע בלשונית "צוות – ניצול ואילוצים". שינוי במסך נכנס למערכת רק דרך הצעה ואישור.</div></section>';
 }
-function consBind(M){
-  const t=pick; const e=consOf(t); const save=()=>{consSave(t,e); render();};
-  const s=M.querySelector("#consSel"); if(s) s.onchange=()=>{pick=s.value; render();};
-  M.querySelectorAll("[data-off]").forEach(cb=>cb.onchange=()=>{const arr=new Set(e[cb.dataset.off]||[]); cb.checked?arr.add(cb.dataset.day):arr.delete(cb.dataset.day); e[cb.dataset.off]=DAYS.filter(d=>arr.has(d)); save();});
-  M.querySelectorAll("[data-ns]").forEach(td=>td.onclick=()=>{const [d,h]=td.dataset.ns.split(",").map(Number); const cur=(e.tcons.no_slots||[]).filter(s=>!(s[0]===d&&s[1]===h)); if(cur.length===(e.tcons.no_slots||[]).length) cur.push([d,h]); e.tcons.no_slots=cur; save();});
-  M.querySelectorAll("[data-du]").forEach(inp=>inp.onchange=()=>{const du=Object.assign({},e.tcons.day_until||{}); if(inp.value) du[inp.dataset.du]=+inp.value; else delete du[inp.dataset.du]; e.tcons.day_until=du; save();});
-  M.querySelectorAll("[data-tc]").forEach(inp=>inp.onchange=()=>{const k=inp.dataset.tc, ty=inp.dataset.ty;
-    if(ty==="bool") e.tcons[k]=inp.checked; else if(ty==="num") e.tcons[k]=inp.value===""?null:+inp.value; else e.tcons[k]=inp.value.split(",").map(x=>x.trim()).filter(Boolean);
-    save();});
-  const md=M.querySelector("#consMaxdays"); if(md) md.onchange=()=>{e.maxdays=md.value?+md.value:null; save();};
-  const r=M.querySelector("#consReset"); if(r) r.onclick=()=>{const all=consLS(); delete all[t]; LS("gordon_cons",JSON.stringify(all)); render();};
-  const x=M.querySelector("#consClear"); if(x) x.onclick=()=>{LS("gordon_cons",null); render();};
-  const ex=M.querySelector("#consExport"); if(ex) ex.onclick=()=>{const df=consDiff(); const txt=JSON.stringify({title:"הצעה: שינוי אילוצי מורים",banner:"הצעה - לא מפורסם",base:"published",env:{STAB:"80"},overrides:df.ov},null,1);
-    infoModal('<h3 style="margin:.2rem 0 .6rem">ייצוא אילוצים להצעה ('+df.n+' שינויים)</h3><div style="font-size:.8rem;color:var(--muted)">זה proposal.json שלם. לשמור כ-proposals/&lt;שם&gt;/proposal.json ולהריץ python propose.py &lt;שם&gt; - או לשלוח לקלוד.</div>'+
-      '<textarea readonly style="width:100%;height:14rem;font:.8rem monospace;direction:ltr">'+txt.replace(/</g,"&lt;")+'</textarea><div style="margin-top:.4rem"><button class="pinb" id="conscopy">📋 העתקה</button></div>');
-    const cp=document.getElementById("conscopy"); if(cp) cp.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(txt); cp.textContent="הועתק ✔";};};
-}
-
 function staffView(){
   const TR={}; DATA.trules.forEach(r=>{TR[r.t]=r;});
   const seen=new Set(); let rows="";
@@ -1232,7 +1141,7 @@ function render(){
   if(view==="staff"){ M.innerHTML=staffView(); return; }
   if(view==="commit"){ M.innerHTML=commitView(); return; }
   if(view==="rules"){ M.innerHTML=rulesView(); return; }
-  if(view==="cons"){ M.innerHTML=consView(); consBind(M); return; }
+  if(view==="cons"){ M.innerHTML=consView(); return; }
   if(view==="gaps"){
     M.innerHTML=gapsView();
     M.querySelectorAll(".jump").forEach(b=>{
