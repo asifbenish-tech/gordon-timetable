@@ -250,7 +250,8 @@ function tabBtns(){ const av=allowedViews();
     prm.dataset.ready="1";
     const PROPS=[["📅 המערכת הנוכחית (מפורסמת)","https://asifbenish-tech.github.io/gordon-timetable/"],
                  ["🏫 הצעת החטיבה — הילה מדעים","https://claude.ai/artifact/6wMF83bGwPHNtsAPc64wfG"],
-                 ["🌱 הצעת שינוי יסודי — אינס ופאני","https://claude.ai/artifact/DKyZGdb4mZDTfgwfpudqyv"]];
+                 ["🌱 הצעת שינוי יסודי — אינס ופאני","https://claude.ai/artifact/DKyZGdb4mZDTfgwfpudqyv"],
+                 ["⚙ אילוצי מורים — עריכה שנשמרת לאורך זמן","https://claude.ai/artifact/F1AcPPXAzjHFV9njpQRwiX"]];
     for(const [lbl,href] of PROPS){
       const a=document.createElement("a"); a.href=href; a.target="_blank"; a.rel="noopener"; a.textContent=lbl;
       a.style.cssText="display:block;padding:.4rem .6rem;border-radius:.4rem;color:var(--ink);text-decoration:none;font:500 .9rem Heebo";
