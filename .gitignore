@@ -19,3 +19,7 @@ ids_local.json
 שינויים מוצעים.html
 שינויים מוצעים.pdf
 מערכות שעות.xlsx
+
+# הצעות (propose.py): הבנייה והפלט אינם מתפרסמים דרך הריפו
+proposals/*/build/
+proposals/*/out/

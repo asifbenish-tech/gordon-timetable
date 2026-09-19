@@ -117,3 +117,5 @@ TLN_UNAVAIL = {"הילית":[(2,h) for h in range(4,9)],"חגית":[],"יפעת"
 for (_c, _s), (_t, _lbl) in FIXED_LESSONS.items():
     QUOTA.setdefault(_t, {})
     QUOTA[_t][_c] = QUOTA[_t].get(_c, 0) + 1
+
+import overrides as _ov; _ov.apply(globals(), "data")   # הצעות: OVERRIDES (ראו overrides.py)

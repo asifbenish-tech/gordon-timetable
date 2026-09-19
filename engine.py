@@ -1215,7 +1215,8 @@ if os.environ.get("CAPONLY"): raise SystemExit(0)
 # FREEZEJ=<קובץ|1>  מקפיא את היסודי על פתרון (1 = baseline_J.json).
 # FREEZEH=<קובץ|1>  מקפיא את החטיבה על פתרון (1 = baseline_hat.json).
 # PINS=<קובץ json>  נעילות נקודתיות: [{"class":..,"day":0-5,"hour":1-8,"teacher":..,"subject":..(חטיבה),"value":1|0}]
-# RULES_OFF=id1,id2 מכבה חוקי מדיניות (rules.py). כולם לניסויים והצעות - לא לפרסום.
+# RULES_OFF=id1,id2 מכבה חוקי מדיניות (rules.py). OVERRIDES=<json> עוקף נתונים (overrides.py).
+# כולם לניסויים והצעות (propose.py) - לא לפרסום.
 def _freeze(env, default, keys, lab):
     _f=os.environ.get(env)
     if not _f: return
@@ -1235,6 +1236,10 @@ if os.environ.get("PINS"):
         if _k in _tab: m.Add(_tab[_k]==_v); _np+=1
         else: print(f"PINS: אין משתנה ל-{_k} (מורה חסום/לא מלמד שם) - מדלג")
     print(f"PINS: {_np} נעילות")
+# EXTRA=<קובץ py>  אילוצים נוספים להצעה: הקובץ רץ כאן עם כל משתני המודל (m, x, hx, hfree, ...).
+if os.environ.get("EXTRA"):
+    exec(compile(io.open(os.environ["EXTRA"],encoding="utf-8").read(), os.environ["EXTRA"], "exec"))
+    print(f"EXTRA: {os.environ['EXTRA']} הוחל")
 m.Minimize(OBJ_E + OBJ_H + 6000*sum(_sp_pen) - 1500*sum(_tln_tue) - 120*sum(_HOMEHALF) + STAB*sum(_stab))
 sol=cp_model.CpSolver()
 import os as _os

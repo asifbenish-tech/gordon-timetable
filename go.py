@@ -38,6 +38,8 @@ run("outGAPS.py", "אקסל")
 run("make_viewer.py", "צופה")
 run("outAPI.py", "timetable.json לאפליקציה")
 run("outPDF.py", "קבצי PDF")
+if os.environ.get("SMOKE", "1") != "0":
+    run("smoke_viewer.py", "בדיקת דפדפן")   # הלוח נפתח ומרונדר בכרום אמיתי; SMOKE=0 מדלג
 
 S = json.load(io.open("sol_J.json", encoding="utf-8"))
 from data2 import CLASSES, SLOTS, DAY_NAMES

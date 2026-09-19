@@ -1,0 +1,19 @@
+{
+ "_doc": "דוגמה: החלפת אנה/פאני בחמישי (א אנה + ג דליה). python propose.py example",
+ "title": "דוגמה: אנה עם כיתתה בחמישי ש1",
+ "banner": "דוגמה - לא מפורסם",
+ "base": "published",
+ "env": {
+  "STAB": "80"
+ },
+ "freeze_hat": true,
+ "pins": [
+  {
+   "class": "א אנה",
+   "day": 4,
+   "hour": 1,
+   "teacher": "אנה",
+   "value": 1
+  }
+ ]
+}

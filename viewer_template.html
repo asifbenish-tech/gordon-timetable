@@ -178,9 +178,19 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
   .gaprow,.sol{page-break-inside:avoid}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+/* סימוני הצעה: היה ← נהיה (פעילים רק כשיש DATA.diff) */
+td.chg{outline:2px solid #B3261E;outline-offset:-2px}
+td.chg.src-y{outline-color:#2E7D32}
+td .was{display:block;color:#B3261E;font-size:.68rem;text-decoration:line-through}
+td.src-y .was{color:#2E7D32}
+.chgsum{margin-top:.4rem;font-size:.82rem;color:var(--muted)} .chgsum b{color:#B3261E} .chgsum b.y{color:#2E7D32}
+#difflegend{display:none;gap:1rem;font-size:.78rem;color:var(--muted);margin-top:.4rem}
+#difflegend i{display:inline-block;width:.9rem;height:.9rem;border:2px solid #B3261E;border-radius:.2rem;vertical-align:middle;margin-inline-end:.3rem}
+#difflegend i.y{border-color:#2E7D32}
+#propbanner{background:#FFF4E0;border:1px solid #E0B060;border-radius:.5rem;padding:.1rem .5rem;font-size:.8rem;margin-inline-start:.4rem}
 </style>
 <header>
-  <h1>לוח גורדון <small id="stamp"></small></h1>
+  <h1>לוח גורדון <small id="stamp"></small><span id="propbanner" hidden></span></h1>
   <nav id="tabs" role="tablist">
     <button data-v="elem" aria-pressed="true">יסודי א׳–ו׳</button>
     <button data-v="jun" aria-pressed="false">חטיבה ז׳–ט׳</button>
@@ -200,6 +210,7 @@ details.plan td,details.plan th{font-size:.8rem;padding:.28rem .5rem}
     </span>
   </nav>
   <div id="chips"></div>
+  <div id="difflegend"><span><i></i> שונה בהצעה זו (היה ← נהיה)</span><span><i class="y"></i> שונה בהצעת ההמשך</span></div>
   <div id="legend">
     <span><i style="background:var(--home)"></i> מחנך/ת</span>
     <span><i style="background:var(--tln)"></i> תל״ן</span>
@@ -543,6 +554,8 @@ function cellHtml(c,info,extraCls,cls,key){
   if(c.s) inner+='<span class="s">'+c.s+'</span>';
   if(c.co) inner+='<span class="co">'+c.co+'</span>';
   if(c.away) inner+='<span class="aw">'+info.home+' בחוץ: '+c.away+'</span>';
+  const dch=(DATA.diff||{})[cls]&&DATA.diff[cls][key];
+  if(dch){ inner+='<span class="was">היה: '+dch.was+'</span>'; extraCls=(extraCls||"")+' chg'+(dch.src==="y"?' src-y':''); }
   // כל מנהל/ת מקבל/ת את זה, וכן מי שסומן/ה במפורש (PICKERS ב-gen_access)
   const admin=!!(USER&&(USER.p||USER.r==="admin"));
   const clk=(admin&&cls&&key)?(' class="'+extraCls+' pick" data-cls="'+cls+'" data-key="'+key+'" title="לחצו לאפשרויות החלפה"'):(' class="'+extraCls+'"');
@@ -901,8 +914,10 @@ function grid(name,info,duty){
   }
   let head='<tr><th>שעה</th>';
   DAYS.forEach(dn=>{head+='<th>'+dn+'</th>';}); head+='</tr>';
+  const dcl=(DATA.diff||{})[name]||{}; const dks=Object.keys(dcl);
+  const chgsum=dks.length?('<div class="chgsum">'+dks.length+' שינויים בכיתה זו: '+dks.map(k=>{const [dd,hh]=k.split(",").map(Number); const c=info.cells[k]||{}; const nw=(c.t||"")+(c.s?" – "+c.s:""); return '<b class="'+(dcl[k].src==="y"?"y":"")+'">'+DAYS[dd]+' ש'+hh+'</b>: '+dcl[k].was+' ← '+(nw||"—");}).join(' · ')+'</div>'):'';
   return '<section class="card"><h2>'+name+cpBtn("cls",name)+'</h2><div class="sub">מחנך/ת: '+info.home+
-    (duty?(' · סידור חדר אוכל: יום '+duty+' ש5'):'')+'</div>'+
+    (duty?(' · סידור חדר אוכל: יום '+duty+' ש5'):'')+'</div>'+chgsum+
     '<div class="tblwrap"><table>'+head+rows+'</table></div>'+planTable(info)+'</section>';
 }
 function teacherGrid(t){
@@ -915,12 +930,15 @@ function teacherGrid(t){
     per[key]=(per[key]?per[key]+' · ':'')+add;});
   let rows="";
   const MAXH=Math.max(...Object.values(DATA.jun).map(v=>Math.max(...v.hours)),...Object.values(DATA.elem).map(v=>Math.max(...v.hours)));
+  const tdf=(DATA.tdiff||{})[t]||{};
   for(let h=1;h<=MAXH;h++){
     rows+='<tr><th>'+h+'</th>';
     DAYS.forEach((dn,d)=>{
       const key=d+","+h;
-      const cls=(per[key]&&sedOnly[key])?' class="sed"':'';
-      rows+='<td'+cls+'>'+(per[key]||'')+'</td>';});
+      let cls=(per[key]&&sedOnly[key])?'sed':'';
+      let inner=(per[key]||'');
+      if(tdf[key]){ cls+=' chg'+(tdf[key].src==="y"?' src-y':''); inner+='<span class="was">היה: '+tdf[key].was+'</span>'; }
+      rows+='<td'+(cls?(' class="'+cls+'"'):'')+'>'+inner+'</td>';});
     rows+='</tr>';
   }
   let head='<tr><th>שעה</th>';
@@ -1093,6 +1111,11 @@ function render(){
   applyQuery();
 }
 $q("#stamp").textContent="עודכן "+(DATA.built||"");
+if(DATA.prop){   // לוח של הצעה: כותרת, סרט וסימוני שינוי
+  const pb=document.getElementById("propbanner"); if(pb){pb.textContent=DATA.prop.banner||"הצעה"; pb.hidden=false;}
+  const dl=document.getElementById("difflegend"); if(dl) dl.style.display="flex";
+  if(DATA.prop.title) document.title=DATA.prop.title;
+}
 (function(){
   if(!Object.keys(ACCESS).length){render();return;}
   const saved=LS("gordon_auth");

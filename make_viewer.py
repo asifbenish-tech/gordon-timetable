@@ -544,6 +544,49 @@ data={"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"slotfree":SLOTFREE,
       "full_names":_FULLN,"access":_ACCESS,"houses":_HOUSES,"house_teachers":_HT,"app_map":APP_MAP,
       "built":_now().strftime("%d.%m.%Y %H:%M")}
 
+# ---- לוח של הצעה (propose.py): PROP_BASE=<viewer.html מפורסם> [PROP_MID=<הצעת ביניים>] ----
+# מוסיף DATA.diff/DATA.tdiff: תא -> {"was": מה שהיה, "src": ""|"y"} (y = שונה רק בהצעה
+# הנוכחית ביחס להצעת הביניים), ו-DATA.prop לכותרת ולסרט. הלוח הרגיל לא מושפע.
+import os as _os, re as _re
+def _load_data(path):
+    _s=io.open(path,encoding="utf-8").read()
+    return json.loads(_re.search(r"^const DATA=(\{.*\});?$",_s,_re.M).group(1))
+def _txt(c): return (c["t"]+((" – "+c["s"]) if c.get("s") else "")) if c and c.get("t") else ""
+def _tmap(T):
+    r={}
+    for t,ev in T.items():
+        for side,d,h,lbl in ev:
+            if side=="סדירות": continue
+            r.setdefault(t,{}).setdefault(f"{d},{h}",[]).append(lbl)
+    return {t:{k:" · ".join(sorted(v)) for k,v in kv.items()} for t,kv in r.items()}
+if _os.environ.get("PROP_BASE"):
+    _B=_load_data(_os.environ["PROP_BASE"]); _M=_load_data(_os.environ["PROP_MID"]) if _os.environ.get("PROP_MID") else None
+    _diff={}
+    for _side in ("elem","jun"):
+        for _cls,_info in data[_side].items():
+            for _key,_c in _info["cells"].items():
+                _new=_txt(_c); _old=_txt(_B.get(_side,{}).get(_cls,{}).get("cells",{}).get(_key))
+                if _new==_old: continue
+                _src=""
+                if _M is not None:
+                    _oldm=_txt(_M.get(_side,{}).get(_cls,{}).get("cells",{}).get(_key))
+                    if _new!=_oldm: _src="y"; _old=_oldm
+                _diff.setdefault(_cls,{})[_key]={"was":_old or "—","src":_src}
+    _TD,_TB=_tmap(data["teachers"]),_tmap(_B["teachers"]); _TM=_tmap(_M["teachers"]) if _M else None
+    _tdiff={}
+    for _t in set(_TD)|set(_TB):
+        for _key in set(_TD.get(_t,{}))|set(_TB.get(_t,{})):
+            _new=_TD.get(_t,{}).get(_key,""); _old=_TB.get(_t,{}).get(_key,"")
+            if _new==_old: continue
+            _src=""
+            if _TM is not None:
+                _oldm=_TM.get(_t,{}).get(_key,"")
+                if _new!=_oldm: _src="y"; _old=_oldm
+            _tdiff.setdefault(_t,{})[_key]={"was":_old or "—","src":_src}
+    data["diff"]=_diff; data["tdiff"]=_tdiff
+    data["prop"]={"title":_os.environ.get("PROP_TITLE",""),"banner":_os.environ.get("PROP_BANNER","הצעה")}
+    print(f"הצעה: {sum(len(v) for v in _diff.values())} תאים שונים ב-{len(_diff)} כיתות, {len(_tdiff)} מורים")
+
 html = io.open("viewer_template.html", encoding="utf-8").read()
 html = html.replace("/*__DATA__*/", "const DATA="+json.dumps(data,ensure_ascii=False)+";")
 io.open("viewer.html","w",encoding="utf-8").write(html)

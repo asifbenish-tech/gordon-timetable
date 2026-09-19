@@ -68,3 +68,6 @@ try:
     PE_BLOCKS={int(k):v for k,v in _pb.items()}
 except Exception:
     PE_BLOCKS={0:[1,2,3], 3:[4,5,6]}
+
+import overrides as _ov; _ov.apply(globals(), "hdata")   # הצעות: OVERRIDES (ראו overrides.py)
+HSLOTS=[(d,h) for d in range(6) for h in range(1,HDAY[d]+1)]   # נגזר מ-HDAY (גם אחרי עקיפה)
