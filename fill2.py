@@ -34,7 +34,7 @@ def ok(t,c,d,h):
         if d not in days and len(days)>=md: return False
     if t=='טלי' and DAY_NAMES[d] not in ('שני','שלישי'): return False
     if t=='שחר' and DAY_NAMES[d] not in ('שני','שלישי','רביעי'): return False
-    if t=='שחר' and h==DAY_HOURS[d]: return False
+    if tcons_blocked(t,d,h,DAY_HOURS[d]): return False      # TCONS ב-data2 (מקור אחד עם המנוע)
     if DAY_NAMES[d] in off: return False
     if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+HEV.get(t,[])): return False
     if t in MAGAMA.get((d,h),[]): return False

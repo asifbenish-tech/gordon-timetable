@@ -52,6 +52,57 @@ FARM_SLOTS=[(1,1),(1,2)]
 # מגבלת ימי עבודה - מקור אחד למנוע ולמילוי החוסרים כאחד
 MAXDAYS = {"לי-אור": 3, "שחר": 3, "טלי": 2}
 
+# ---- אילוצי מורים אישיים - מקור אחד (engine.py מחיל אותם על שני בתי הספר) ----
+# ימי חופש: יסודי ב-DAYS_OFF2, חטיבה ב-HOFF (hdata). שעות חסומות עם סיבה
+# (ישיבה/הדרכה/מגמה): UNAVAIL2/EVENTS2 (יסודי), HEV (חטיבה). כאן רק "העדפות
+# קשיחות" שאינן אירוע: עד איזו שעה, כמה ימים, חלונות. שדות (כולם רשות):
+#   max_hour   : לא מלמד/ת אחרי שעה זו באף יום (סוגר גם שעה 8 אם תיפתח)
+#   day_until  : {יום: שעה} - ביום זה מסיים/ה עד השעה (0=ראשון)
+#   no_slots   : [(יום,שעה),...] - חסימות נקודתיות בלי סיבה מוצגת
+#   no_last    : True - לא בשעה האחרונה של כל יום (לפי אורך היום בכל בית ספר)
+#   no_last_subject : [מקצוע,...] - המקצוע לא בשעה האחרונה (חטיבה)
+#   max_days   : עד כמה ימי עבודה בשבוע (חטיבה; ליסודי יש MAXDAYS)
+#   min_per_day: יום עבודה = לפחות n שעות (0 או n+)
+#   no_gaps    : True - בלי חלונות בכלל (יסודי+חטיבה יחד)
+#   max_gap    : חלון של עד n שעות (יסודי+חטיבה יחד)
+#   busy_extra : [(יום,שעה),...] - נחשבות תפוסות לצורך חלונות (ליווי/מגמה)
+TCONS = {
+ "פאני": {"day_until": {1: 4}},                        # שני: מסיימת בשעה 4
+ "שחר":  {"no_last": True, "min_per_day": 2},          # מועדונית; לא יום של שעה אחת
+ "הילה": {"max_days": 3, "max_gap": 2},                # HOFF: לא בשישי
+ "תמיר": {"no_slots": [(1, 7)],                        # שני ש7 - בקשת המנהל 03.09
+          "no_gaps": True, "busy_extra": [(4, 1), (4, 2), (4, 3), (4, 4)]},   # ליווי מגמות ה'
+ "אסיף": {"max_hour": 6, "no_last_subject": ["שפה"]},
+ "נעמי": {"max_hour": 6},                              # לא מלמדת שעה 7 (היה ב-HEV)
+}
+
+def tcons_blocked(t, d, h, last_hour=None):
+    """המשבצת (d,h) חסומה למורה לפי TCONS? (מה שגם fill2 ו-make_viewer צריכים לכבד).
+    last_hour = השעה האחרונה של היום בבית הספר הרלוונטי (ל-no_last)."""
+    cf = TCONS.get(t)
+    if not cf: return False
+    if h > cf.get("max_hour", 99): return True
+    if h > cf.get("day_until", {}).get(d, 99): return True
+    if (d, h) in cf.get("no_slots", []): return True
+    if cf.get("no_last") and last_hour is not None and h == last_hour: return True
+    return False
+
+def tcons_text(t):
+    """תיאור קריא של אילוצי TCONS למורה (לטבלת 'כללי מורים' בלוח)."""
+    cf = TCONS.get(t)
+    if not cf: return ""
+    out = []
+    if "max_hour" in cf: out.append(f"עד שעה {cf['max_hour']}")
+    for d, h in sorted(cf.get("day_until", {}).items()): out.append(f"{DAY_NAMES[d]} עד שעה {h}")
+    for d, h in cf.get("no_slots", []): out.append(f"לא {DAY_NAMES[d]} ש{h}")
+    if cf.get("no_last"): out.append("לא בשעה האחרונה")
+    for sj in cf.get("no_last_subject", []): out.append(f"{sj} לא בשעה האחרונה")
+    if "max_days" in cf: out.append(f"עד {cf['max_days']} ימים")
+    if "min_per_day" in cf: out.append(f"לפחות {cf['min_per_day']} שעות ביום")
+    if cf.get("no_gaps"): out.append("בלי חלונות")
+    if "max_gap" in cf: out.append(f"חלון עד {cf['max_gap']} שעות")
+    return " · ".join(out)
+
 # שם באפליקציה -> שם בפותר. מקור אחד לכל הסקריפטים; עותקים נפרדים
 # גרמו כבר לכך ששינוי שם ניתק מורה מתעודת הזהות שלה.
 APP_ALIAS = {"חסאן": "חסן", "ליאור": "לי-אור"}

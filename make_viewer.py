@@ -303,7 +303,7 @@ for t,q in sorted(QUOTA_FILE.items(), key=lambda kv:-kv[1]):
 # ---------- חוסרים + פתרונות ----------
 gapl=[]
 # ---- מי פנוי לכל חוסר: חישוב מועמדים אמיתי ----
-from data2 import DAYS_OFF2, UNAVAIL2, EVENTS2, MAGAMA
+from data2 import DAYS_OFF2, UNAVAIL2, EVENTS2, MAGAMA, tcons_blocked, tcons_text
 try: from data2 import HATIVA2
 except Exception: HATIVA2={}
 from hdata import HOFF as _HOFF, HEV as _HEV
@@ -334,6 +334,7 @@ def _free_for(d,h):
         if t=="שחר" and DAY_NAMES[d] not in ("שני","שלישי","רביעי"): continue
         if DAY_NAMES[d] in off: continue
         if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+_HEV.get(t,[])): continue
+        if tcons_blocked(t,d,h,DAY_HOURS[d]): continue
         if t in MAGAMA.get((d,h),[]): continue
         if t in _BUSY.get((d,h),()): continue
         bad=False
@@ -355,6 +356,7 @@ def _free_ext(d,h,exclude=()):
         if t=="שחר" and DAY_NAMES[d] not in ("שני","שלישי","רביעי"): continue
         if DAY_NAMES[d] in off: continue
         if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+_HEV.get(t,[])): continue
+        if tcons_blocked(t,d,h,DAY_HOURS[d]): continue
         if t in MAGAMA.get((d,h),[]): continue
         if t in _BUSY.get((d,h),()): continue
         bad=False
@@ -420,6 +422,7 @@ def _blocked(t,d,h):
     if DAY_NAMES[d] in _HOFF.get(t,[]): return True
     if t=="צופיה" and DAY_NAMES[d]=="חמישי": return True
     if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+_HEV.get(t,[])): return True
+    if tcons_blocked(t,d,h,DAY_HOURS[d] if d<len(DAY_HOURS) else None): return True
     if t in MAGAMA.get((d,h),[]): return True
     for _dy in ("שני","שלישי"):
         if t in SED.get("קבוצת "+_dy,[]) and _CM[_dy]==d and h in SED["מעגלי שיח "+_dy]: return True
@@ -474,11 +477,11 @@ _TEACH_SUBJ={
  "נעמי":"מחנכת ז נעמי · שפה ז+ח · ספרות ז+ח","אלי":"מנהל החטיבה · מחנך ז אלי (8 שעות) · תנ\"ך והיסטוריה ז · היסטוריה+גיאוגרפיה ח · מגמת יזמות",
  "גלית":"מחנכת ח · אנגלית ח+ט · שיעורים עם ארז בז","תמיר":"מחנך ט תמיר · תנ\"ך ט · היסטוריה ט · אזרחות ט · 4 שעות בכיתות ו · ליווי מגמות חמישי",
  "אסיף":"מחנך ט אסיף · שפה ט · מדעים ז · חינוך פיננסי ט · מגמת יזמות","מרים":"ערבית ז+ח+ט · סטאז עברית ביסודי (13 שעות, דגש א-ג)",
- "הדר":"מתמטיקה ז (8 שעות, 2-3 ימים)","ארז":"אנגלית ז (רביעי+חמישי, 2+2)","הילה":"מתמטיקה ח+ט (עד 3 ימים, לא שישי)",
+ "הדר":"מתמטיקה ז (8 שעות, 2-3 ימים)","ארז":"אנגלית ז (רביעי+חמישי, 2+2)","הילה":"מתמטיקה ח+ט",
  "שיר":"שישי בלבד - עם ז אלי (ספרות/היסטוריה/חינוך)","אופיר":"מגמת חדשנות · שעות בכיתות ו בשלישי","מאמי":"מגמת אומנות בתנועה · רב מלל ח בחמישי 5-6",
  "חסן":"ספורט יסודי · מגמות (ליווי ימית, ספורט ט)","שרית":"מחנכת ו שרית · ספורט חטיבה · מגמת בישול","פאני":"ספורט יסודי (פעמיים בשבוע לכיתה, בימים שונים)",
  "צופיה":"אנגלית ג · מקבילות עם אנה ופנינה · שישי בא אנה","לייה":"מחנכת ג לייה · תנ\"ך ח (כפול רצוף)","טלי":"יסודי (שני+שלישי בלבד)",
- "לי-אור":"יסודי (עד 3 ימים)","שחר":"יסודי (שני-רביעי, לא בשעה אחרונה)","דניאל":"מחנך ג דניאל","דני":"מחנך ה דני (20 שעות)",
+ "לי-אור":"יסודי (עד 3 ימים)","שחר":"יסודי (שני-רביעי)","דניאל":"מחנך ג דניאל","דני":"מחנך ה דני (20 שעות)",
  "אנה":"מחנכת א אנה","פנינה":"מחנכת א פנינה","אביטל":"מחנכת ב אביטל","יערה":"מחנכת ב יערה","דליה":"מחנכת ג דליה",
  "מירי":"מחנכת ד מירי","אינס":"מחנכת ד אינס","תניה":"מחנכת ה תניה (ראשון+רביעי מ-10:00)","אורנה":"מחנכת ו אורנה","סימה":"יסודי",
  "יעל":"תל\"ן בישול (ד-ו) · מגמה","חגית":"תל\"ן אומנות (א+ד) · מגמה","הילית":"תל\"ן פיסול","יפעת":"תל\"ן חינוך סביבתי","רובי":"מגמת אומנויות (שלישי בלבד)"}
@@ -522,6 +525,8 @@ TR=[]
 for t,subj in _TEACH_SUBJ.items():
     off=_DO.get(t) or _HO.get(t) or []
     ev=teachers.get(t,[])
+    _tc=tcons_text(t)                       # אילוצי TCONS (data2) - אותו מקור כמו המנוע
+    if _tc: subj=subj+" · "+_tc
     TR.append({"t":t,"off":", ".join(off) if off else "—","subj":subj,"n":len(ev)})
 _HOUSES={"A":{"name":"בית א","kind":"elem","classes":[c for c in CLASSES if c[0] in "אבג"]},
          "B":{"name":"בית ב","kind":"elem","classes":[c for c in CLASSES if c[0] in "דהו"]},

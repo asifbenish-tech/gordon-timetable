@@ -111,23 +111,6 @@ for _t,_maxd in MAXDAYS.items():
                 if (c,(d,h),_t) in x: m.Add(x[(c,(d,h),_t)]<=b)
     m.Add(sum(_dv)<=_maxd)
 
-# שחר: לא בשעה האחרונה של כל יום (מועדונית)
-for d in range(5):
-    for c in CLASSES:
-        k=(c,(d,DAY_HOURS[d]),"שחר")
-        if k in x: m.Add(x[k]==0)
-
-# שחר: לא לבוא ליום עם שעה אחת בלבד (0 או 2+)
-for d in range(5):
-    dh=[x[(c,(d,h),"שחר")] for c in CLASSES for h in range(1,DAY_HOURS[d]+1) if (c,(d,h),"שחר") in x]
-    if not dh: continue
-    tot=m.NewIntVar(0,len(dh),f"shachar_tot{d}")
-    m.Add(tot==sum(dh))
-    u=m.NewBoolVar(f"shachar_used{d}")
-    m.Add(tot>=2).OnlyEnforceIf(u)
-    m.Add(tot==0).OnlyEnforceIf(u.Not())
-
-# ---- סדירויות שבועיות: מעגלי שיח (חלוקה מקורית, נעולה) + ישיבת ניהול ----
 CIR_MON=["דני","אינס","דניאל","תמיר","אלי","נעמי","תניה","דליה","אנה"]
 CIR_TUE=["אסיף","פנינה","יערה","אורנה","גלית","שרית","לייה","מירי","אביטל"]
 NIHUL=["לייה","שרית","יערה","צופיה","אסיף","אלי"]   # אלי מנהל החטיבה
@@ -338,11 +321,6 @@ for s in NONFRI:
         aa=[alef_sub[(sub,c,s)] for c in ALEF if (sub,c,s) in alef_sub]
         if vv or aa: m.Add(sum(vv)+sum(aa)<=1)
 
-# פאני: יום שני מתחיל בבוקר ומסתיים בשעה 4
-for _c7 in CLASSES:
-    for _h7 in range(5,DAY_HOURS[1]+1):
-        _k7=(_c7,(1,_h7),"פאני")
-        if _k7 in x: m.Add(x[_k7]==0)
 # מורה שאינו/ה המחנך/ת: לא יותר משעתיים רצוף באותה כיתה
 for _c8 in CLASSES:
     for _t8 in allowed[_c8]:
@@ -679,17 +657,6 @@ for c in HCLASSES:
         _k=(c,s2,"העשרה טכנולוגית","אופיר")
         if _k in hx and s2[0]!=2: m.Add(hx[_k]==0)
 
-# הילה מתמטיקה: עד 3 ימי עבודה, לא ביום שישי
-ext_days=[]
-for _d in range(6):
-    _b=m.NewBoolVar(f"extm_{_d}"); ext_days.append(_b)
-    for c in HCLASSES:
-        for _h in range(1,HDAY[_d]+1):
-            _k=(c,(_d,_h),"מתמטיקה","הילה")
-            if _k in hx: m.Add(hx[_k]<=_b)
-m.Add(sum(ext_days)<=3)
-m.Add(ext_days[5]==0)          # לא בשישי
-
 # ארז: רביעי + חמישי, בכל יום 2 שעות בכל כיתת ז (לא חייב רצוף)
 for _c in [c for c in HCLASSES if GRADE[c]=="ז"]:
     for _d in (3,4):
@@ -829,21 +796,6 @@ for d in range(5):
     else: m.Add(hd_act[d]==0)
 m.Add(sum(hd_act.values())<=3)
 
-# מניעת חלונות במערכת של תמיר: השעות שלו רצופות בכל יום
-for _t in ("תמיר",):
-    for _d in range(6):
-        _busy={}
-        for _h in range(1,HDAY[_d]+1):
-            _v=[hx[(c,(_d,_h),sj,_t)] for c in HCLASSES for (sj,tt) in pairs[c]
-                if tt==_t and (c,(_d,_h),sj,_t) in hx]
-            if not _v: continue
-            _b=m.NewBoolVar(f"nogap_t{_t}{_d}{_h}"); m.AddMaxEquality(_b,_v); _busy[_h]=_b
-        _hs=sorted(_busy)
-        for _i in range(len(_hs)):
-            for _j in range(_i+2,len(_hs)):
-                for _k in range(_i+1,_j):          # עסוק ב-i וב-j => עסוק גם באמצע
-                    m.Add(_busy[_hs[_i]]+_busy[_hs[_j]]-_busy[_hs[_k]]<=1)
-
 # "חסר מורה": רק בט אסיף, רק בשישי, בדיוק 4 שעות
 # ט אסיף בשישי: אסיף בחופש -> בדיוק 4 שעות חסרות
 # בט אסיף חסר מורה נרשם כחינוך בלבד (miss_hinuch)
@@ -873,10 +825,6 @@ for c in HCLASSES:
     if GRADE[c] in "זח": m.Add(hfree[(c,(2,6))]==1)     # סוף יום המגמות
 
 # (הבלוקים הועברו ל-rules.py: tamir_subjects, leah, het_monday5, track_day, sifrut_historia, thursday_67)
-
-# תמיר: לא מלמד שעה שביעית ביום שני (בקשת המנהל 03.09)
-for _kt7 in [k for k in hx if k[3]=="תמיר" and k[1]==(1,7)]:
-    m.Add(hx[_kt7]==0)
 
 # תמיר בשישי: רק עם הכיתה שלו
 for _kt in [k for k in hx if k[3]=="תמיר" and k[1][0]==5 and k[0]!="ט תמיר"]:
@@ -915,15 +863,6 @@ for d in range(5):
 asif_fri=[hx[("ט אסיף",(5,h),sj,"אסיף")] for h in (1,3,4)
           for (sj,t) in pairs["ט אסיף"] if t=="אסיף" and ("ט אסיף",(5,h),sj,"אסיף") in hx]
 if asif_fri: m.Add(sum(asif_fri)>=2)
-
-# אסיף: לא מלמד שפה בשעה האחרונה של היום (שעה 6 בסדר)
-for c in HCLASSES:
-    for d in range(6):
-        k=(c,(d,HDAY[d]),"שפה","אסיף")
-        if k in hx: m.Add(hx[k]==0)
-# אסיף: לא מלמד שעה שביעית בכלל
-for _k in [k for k in hx if k[3]=="אסיף" and k[1][1]==7]:
-    m.Add(hx[_k]==0)
 
 # ==== חלוקת רב מלל ותנ"ך בכיתות ט (rules_rm) ====
 # אסיף: שעת החינוך השנייה שלו בשעה שישית
@@ -1072,46 +1011,57 @@ for _t,_capv in _TOTCAP.items():
     _hv=[hx[k] for k in hx if k[3]==_t]
     if _ev or _hv: m.Add(sum(_ev)+sum(_hv)<=_capv)
 
-# ---- NOGAP_CROSS: בלי חלונות למורים נבחרים, על פני שני בתי הספר ----
-for _t in ("תמיר",):
+# ---- TCONS: אילוצי מורים אישיים (data2.TCONS) - מקור אחד, יסודי + חטיבה יחד ----
+# ההגדרות עצמן בטבלה; כאן רק ההחלה הגנרית. להוסיף אילוץ למורה = שורה ב-data2.
+import collections as _tc
+_TV=_tc.defaultdict(list)                        # (מורה,(יום,שעה)) -> משתני שיבוץ בשני בתי הספר
+for _k,_v in x.items():  _TV[(_k[2],_k[1])].append(_v)
+for _k,_v in hx.items(): _TV[(_k[3],_k[1])].append(_v)
+_ntc=0
+def _tc_zero(vs):
+    global _ntc
+    for _v in vs: m.Add(_v==0); _ntc+=1
+for _t,_cf in TCONS.items():
+    _busyx=set(_cf.get("busy_extra",[]))|set(_HEV.get(_t,[]))|set(EVENTS2.get(_t,[]))|set(UNAVAIL2.get(_t,[]))
+    _dayb=[]
     for _d in range(6):
-        _busy={}
         for _h in range(1,MAXH+1):
-            from hdata import HEV as _NGHEV
-            if (_d,_h) in _NGHEV.get(_t,[]) or (_t=="תמיר" and _d==4 and _h in (1,2,3,4)):
-                _busy[_h]=1; continue              # פגישות/ליווי = תפוס (לא חלון)
-            _v =[x[k]  for k in x  if k[2]==_t and k[1]==(_d,_h)]
-            _v+=[hx[k] for k in hx if k[3]==_t and k[1]==(_d,_h)]
-            if not _v: continue
-            _b=m.NewBoolVar(f"ng_{_t}_{_d}_{_h}"); m.AddMaxEquality(_b,_v); _busy[_h]=_b
-        _hs=sorted(_busy)
-        for _i in range(len(_hs)):
-            for _j in range(_i+2,len(_hs)):
-                for _kk in range(_i+1,_j):
-                    _e1=_busy[_hs[_i]];_e2=_busy[_hs[_j]];_e3=_busy[_hs[_kk]]
-                    if isinstance(_e3,int): continue
-                    _t1=_e1 if not isinstance(_e1,int) else None
-                    _t2=_e2 if not isinstance(_e2,int) else None
-                    if _t1 is None and _t2 is None: m.Add(_e3>=1)
-                    elif _t1 is None: m.Add(_t2-_e3<=0)
-                    elif _t2 is None: m.Add(_t1-_e3<=0)
-                    else: m.Add(_t1+_t2-_e3<=1)
-
-# ---- MAXGAP: חלון של עד שעתיים (לא יותר) - הילה, על פני שני בתי הספר ----
-for _d in range(6):
-    _busy2={}
-    for _h in range(1,MAXH+1):
-        _v2=[x[k] for k in x if k[2]=="הילה" and k[1]==(_d,_h)]
-        _v2+=[hx[k] for k in hx if k[3]=="הילה" and k[1]==(_d,_h)]
-        if not _v2: continue
-        _b2=m.NewBoolVar(f"mg_{_d}_{_h}"); m.AddMaxEquality(_b2,_v2); _busy2[_h]=_b2
-    _hs2=sorted(_busy2)
-    for _i2 in range(len(_hs2)):
-        for _j2 in range(_i2+1,len(_hs2)):
-            _gaplen=_hs2[_j2]-_hs2[_i2]-1
-            if _gaplen<3: continue          # חלון מותר עד שעתיים
-            _between=[_busy2[_hs2[_k2]] for _k2 in range(_i2+1,_j2)]
-            m.Add(_busy2[_hs2[_i2]]+_busy2[_hs2[_j2]]-sum(_between)<=1)
+            if (_h>_cf.get("max_hour",99) or _h>_cf.get("day_until",{}).get(_d,99)
+                    or (_d,_h) in _cf.get("no_slots",[])):
+                _tc_zero(_TV.get((_t,(_d,_h)),[]))
+        if _cf.get("no_last"):                   # השעה האחרונה לפי אורך היום בכל בית ספר
+            _tc_zero([x[k] for k in x if k[2]==_t and k[1]==(_d,DAY_HOURS[_d])])
+            _tc_zero([hx[k] for k in hx if k[3]==_t and k[1]==(_d,HDAY[_d])])
+        for _sj in _cf.get("no_last_subject",[]):
+            _tc_zero([hx[k] for k in hx if k[3]==_t and k[2]==_sj and k[1]==(_d,HDAY[_d])])
+        _dv=[v for _h in range(1,MAXH+1) for v in _TV.get((_t,(_d,_h)),[])]
+        if "max_days" in _cf:
+            _b=m.NewBoolVar(f"tcd_{_t}_{_d}"); _dayb.append(_b)
+            for _v in _dv: m.Add(_v<=_b)
+        if "min_per_day" in _cf and _dv:
+            _tot=m.NewIntVar(0,len(_dv),f"tct_{_t}_{_d}"); m.Add(_tot==sum(_dv))
+            _u=m.NewBoolVar(f"tcu_{_t}_{_d}")
+            m.Add(_tot>=_cf["min_per_day"]).OnlyEnforceIf(_u); m.Add(_tot==0).OnlyEnforceIf(_u.Not())
+        if _cf.get("no_gaps") or "max_gap" in _cf:
+            _busy={}
+            for _h in range(1,MAXH+1):
+                if _cf.get("no_gaps") and (_d,_h) in _busyx: _busy[_h]=1; continue   # אירוע = תפוס, לא חלון
+                _vv=_TV.get((_t,(_d,_h)),[])
+                if not _vv: continue
+                _b=m.NewBoolVar(f"tcb_{_t}_{_d}_{_h}"); m.AddMaxEquality(_b,_vv); _busy[_h]=_b
+            _hs=sorted(_busy)
+            _mg=0 if _cf.get("no_gaps") else _cf["max_gap"]
+            for _i in range(len(_hs)):
+                for _j in range(_i+1,len(_hs)):
+                    if _hs[_j]-_hs[_i]-1<=_mg: continue      # חלון באורך מותר
+                    _between=[_busy[_hs[_kk]] for _kk in range(_i+1,_j)]
+                    if any(isinstance(_e,int) for _e in _between): continue   # אירוע באמצע = אין חלון
+                    _e1,_e2=_busy[_hs[_i]],_busy[_hs[_j]]
+                    _lhs=(0 if isinstance(_e1,int) else _e1)+(0 if isinstance(_e2,int) else _e2)
+                    _rhs=1-(1 if isinstance(_e1,int) else 0)-(1 if isinstance(_e2,int) else 0)
+                    m.Add(_lhs-sum(_between)<=_rhs)
+    if _dayb: m.Add(sum(_dayb)<=_cf["max_days"])
+print(f"TCONS: {len(TCONS)} מורים, {_ntc} משבצות חסומות")
 
 # ---- PARALLEL_EQ: כיתות מקבילות - אותו סך שעות שבועי (לא חייבות לסיים יחד) ----
 import collections as _cl
