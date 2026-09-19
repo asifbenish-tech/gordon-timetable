@@ -273,7 +273,7 @@ for c in CLASSES:
         if tgt<=8 and t!=HOMEROOM[c]:
             nd=sum(1 for d in range(5) if any((c,(d,h),t) in x for h in range(1,DAY_HOURS[d]+1)))
             cap=max(2,-(-tgt//max(nd,1)))
-            if (c,t)==("ד מירי","לי-אור"): cap=3   # אותו חריג כמו למעלה
+            cap=DAYCAP_EXC.get((c,t),cap)         # חריגים ב-data2 (למשל לי-אור בד מירי: 3)
             for d in range(5):
                 dv=[x[(c,(d,h),t)] for h in range(1,DAY_HOURS[d]+1) if (c,(d,h),t) in x]
                 if dv: m.Add(sum(dv)<=cap)
@@ -486,8 +486,8 @@ if ("א אנה",(0,2),"אינס") in x: m.Add(x[("א אנה",(0,2),"אינס")]=
 if ("א אנה",(0,2),"מירי") in x: m.Add(x[("א אנה",(0,2),"מירי")]==1)
 if ("ד אינס",(0,2),"אינס") in x: m.Add(x[("ד אינס",(0,2),"אינס")]==1)
 
-# אינס: 2 מדעים ברצף - כל יום חוץ משלישי (יום החופש החדש שלה)
-for c in ("ה דני","ה תניה"):
+# אינס: 2 מדעים ברצף - כל יום חוץ משלישי (יום החופש החדש שלה). הכיתות: INES_SCI_PAIR (data2)
+for c in INES_SCI_PAIR:
     ps=[]
     for d in (0,1,3,4):
         for h in range(1,DAY_HOURS[d]):
@@ -770,7 +770,14 @@ for s in HSLOTS:
         if t=="תמיר":
             allow += [b for (ss,sj2),b in tjS.items() if ss==s]
             if s==(5,2): allow.append(1)          # שירה בציבור כפולה
+        for _j in JOINT:                          # שיעור משותף (hdata.JOINT): מורה אחד, כמה כיתות
+            if t==_j["teacher"] and s==(_j["day"],_j["hour"]): allow.append(len(_j["classes"])-1)
         m.Add(sum(v)<=1+sum(allow)) if allow else m.Add(sum(v)<=1)
+for _j in JOINT:                                  # השיעור המשותף מתקיים בכל הכיתות שלו
+    for _c in _j["classes"]:
+        _k=(_c,(_j["day"],_j["hour"]),_j["subject"],_j["teacher"])
+        if _k in hx: m.Add(hx[_k]==1)
+        else: print(f"JOINT: אין משתנה ל-{_k} (המקצוע/המורה לא בתוכנית של הכיתה)")
 # תקרות מורים
 for t,cap in CAP.items():
     v=[hx[(c,s,sj,t)] for c in HCLASSES for s in HSLOTS for (sj,tt) in pairs[c] if tt==t and (c,s,sj,t) in hx]
@@ -809,10 +816,12 @@ for _c9g in T9: m.Add(hfree[(_c9g,(5,1))]==1)
 # ט תמיר: שישי מלא - ש2-4 מאוישות (עם הגיבוש בש1 = 4 שעות, גם אחרי שהכיתה
 # ויתרה על שעה שבועית). כך ההורדה נופלת באמצע השבוע ולא בשישי.
 for _h9 in (3,4): m.Add(hfree[("ט תמיר",(5,_h9))]==0)
-_miss_fri=[hx[k] for k in hx if k[3]=="חסר מורה" and k[0]==_MC and k[1][0]==5]
-if _miss_fri: m.Add(sum(_miss_fri)==3)   # שישי ט אסיף: ש1 גיבוש, ש2-4 צבי מלווה (נרשם כחסר מורה במודל,
-                                          # כדי שהשעות עדיין ייספרו לתוכנית הלימודים של הכיתה)
-for _k in [k for k in hx if k[3]=="חסר מורה" and k[1][0]==5 and k[0]!=_MC]:
+# שישי: "חסר מורה" רק בכיתות FRIDAY_COVER (hdata), בדיוק miss שעות - המלווה נכנס בפועל,
+# והשעות נרשמות כחסר מורה במודל כדי שעדיין ייספרו לתוכנית הלימודים של הכיתה.
+for _c,_fc in FRIDAY_COVER.items():
+    _miss_fri=[hx[k] for k in hx if k[3]=="חסר מורה" and k[0]==_c and k[1][0]==5]
+    if _miss_fri: m.Add(sum(_miss_fri)==_fc["miss"])
+for _k in [k for k in hx if k[3]=="חסר מורה" and k[1][0]==5 and k[0] not in FRIDAY_COVER]:
     m.Add(hx[_k]==0)                      # בשאר הכיתות אין חוסר בשישי
 # שלישי: כל הכיתות עד שעה 6 - מותר "חסר מורה" בקנס
 for _k in [k for k in hx if k[3]=="חסר מורה" and k[1][0]!=5 and not (k[1][0]==2 and k[1][1] in (5,6))
@@ -826,9 +835,7 @@ for c in HCLASSES:
 
 # (הבלוקים הועברו ל-rules.py: tamir_subjects, leah, het_monday5, track_day, sifrut_historia, thursday_67)
 
-# תמיר בשישי: רק עם הכיתה שלו
-for _kt in [k for k in hx if k[3]=="תמיר" and k[1][0]==5 and k[0]!="ט תמיר"]:
-    m.Add(hx[_kt]==0)
+# (תמיר בשישי רק עם כיתתו: rules.py tamir_friday_own)
 
 # שירה בציבור: יום שישי שעה 2, כל החטיבה יחד באולם חדר האוכל
 for c in HCLASSES:
@@ -1045,7 +1052,7 @@ for _t,_cf in TCONS.items():
         if _cf.get("no_gaps") or "max_gap" in _cf:
             _busy={}
             for _h in range(1,MAXH+1):
-                if _cf.get("no_gaps") and (_d,_h) in _busyx: _busy[_h]=1; continue   # אירוע = תפוס, לא חלון
+                if (_cf.get("no_gaps") or _cf.get("events_busy")) and (_d,_h) in _busyx: _busy[_h]=1; continue   # אירוע = תפוס, לא חלון
                 _vv=_TV.get((_t,(_d,_h)),[])
                 if not _vv: continue
                 _b=m.NewBoolVar(f"tcb_{_t}_{_d}_{_h}"); m.AddMaxEquality(_b,_vv); _busy[_h]=_b
@@ -1299,11 +1306,12 @@ if st in (cp_model.OPTIMAL,cp_model.FEASIBLE):
         for s in HSLOTS:
             got=[(sj,t) for (sj,t) in pairs[c] if (c,s,sj,t) in hx and sol.Value(hx[(c,s,sj,t)])]
             out[c][f"{s[0]},{s[1]}"]= (f"{got[0][0]} – {got[0][1]}" if got else "")
-    for _c9g in T9:                                              # שישי ש1: שעת הגיבוש עוד לא התחילה בפועל -
-        out[_c9g]["5,1"]="ליווי – "+("תמיר" if _c9g=="ט תמיר" else "צבי")   # זמנית: כל כיתה עם המורה שלה
-    for _h5 in (2,3,4):                                          # צבי מלווה את כיתת אסיף בשישי
-        _v5=out[_MC][f"5,{_h5}"]
-        if "חסר מורה" in _v5: out[_MC][f"5,{_h5}"]=_v5.replace("חסר מורה","צבי")
+    for _c9g,_f1 in FRIDAY_H1.items():                           # שישי ש1: שעת הגיבוש עוד לא התחילה בפועל -
+        if _c9g in out and not out[_c9g].get("5,1"): out[_c9g]["5,1"]="ליווי – "+_f1["teacher"]   # כל כיתה עם מלווה
+    for _c9g,_fc in FRIDAY_COVER.items():                        # המלווה נכנס במקום "חסר מורה" בשישי
+        for _h5 in range(1,HDAY[5]+1):
+            _v5=out[_c9g].get(f"5,{_h5}","")
+            if "חסר מורה" in _v5: out[_c9g][f"5,{_h5}"]=_v5.replace("חסר מורה",_fc["teacher"])
     io.open("sol_hat.json","w",encoding="utf-8").write(json.dumps(out,ensure_ascii=False,indent=1))
     peo={f"{DAY_NAMES[d]} ש{h}":g for (g,d,h) in hpe if sol.Value(hpe[(g,d,h)])}
     io.open("duty.json","w",encoding="utf-8").write(json.dumps(

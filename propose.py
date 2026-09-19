@@ -60,8 +60,11 @@ def main():
     # 3. סביבה למנוע
     env = dict(os.environ); env.update({k: str(v) for k, v in cfg.get("env", {}).items()}); env["TL"] = TL; env["NODIAG"] = "1"
     if cfg.get("rules_off"): env["RULES_OFF"] = ",".join(cfg["rules_off"])
-    if cfg.get("freeze_elem"): env["FREEZEJ"] = "1"
-    if cfg.get("freeze_hat"): env["FREEZEH"] = "1"
+    # הקפאה: true = על הבסיס; "<קובץ>" = על פתרון שמור בתיקיית ההצעה (שחזור מדויק של הצעה שכבר הוצגה)
+    for key, envk, tmp in (("freeze_elem", "FREEZEJ", "_freeze_J.json"), ("freeze_hat", "FREEZEH", "_freeze_H.json")):
+        fz = cfg.get(key)
+        if fz is True: env[envk] = "1"
+        elif fz: shutil.copy2(os.path.join(pdir, fz), os.path.join(bdir, tmp)); env[envk] = tmp
     if cfg.get("pins"):
         json.dump(cfg["pins"], io.open(os.path.join(bdir, "_pins.json"), "w", encoding="utf-8"), ensure_ascii=False); env["PINS"] = "_pins.json"
     if cfg.get("overrides"):

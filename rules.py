@@ -7,9 +7,12 @@
 def r_tamir_subjects(c):
     """תמיר: חינוך/היסטוריה/אזרחות/תנ"ך בכיתות ט — שעתיים כל אחד, אצלו בלבד."""
     m, hx, HSLOTS = c["m"], c["hx"], c["HSLOTS"]
-    # ט אסיף: היסטוריה שעה אחת - השעה ברביעי ש7 ירדה (בקשת המנהל 06.09)
-    for cls, subj, n in (("ט תמיר", "חינוך", 2), ("ט אסיף", "אזרחות", 2), ("ט אסיף", "היסטוריה", 1),
-                         ("ט תמיר", "היסטוריה", 2), ("ט תמיר", "אזרחות", 2), ("ט תמיר", 'תנ"ך', 2)):
+    NEED, OVR = c["NEED"], c["OVR"]
+    # המספרים מתוכנית הלימודים (NEED/OVR ב-hdata) - לא עותק כאן. ט אסיף: היסטוריה
+    # לפי OVR (השעה ברביעי ש7 ירדה, 06.09).
+    for cls, subj in (("ט תמיר", "חינוך"), ("ט אסיף", "אזרחות"), ("ט אסיף", "היסטוריה"),
+                      ("ט תמיר", "היסטוריה"), ("ט תמיר", "אזרחות"), ("ט תמיר", 'תנ"ך')):
+        n = OVR.get((cls, subj), NEED[subj]["ט"])
         v = [hx[(cls, s2, subj, "תמיר")] for s2 in HSLOTS if (cls, s2, subj, "תמיר") in hx]
         if v: m.Add(sum(v) == n)
 
@@ -46,7 +49,7 @@ def r_track_day(c):
     for c9 in T9:
         v5 = [hx[k] for k in hx if k[0] == c9 and k[1] == (4, 5) and k[2] == "חינוך"]
         if v5: m.Add(sum(v5) == 1)
-        for hb in (6, 7): m.Add(hfree[(c9, (4, hb))] == 1)
+        for hb in c["MAG_H"]["ט"].get("free_after", []): m.Add(hfree[(c9, (4, hb))] == 1)
 
 
 def r_sifrut_historia(c):
@@ -140,6 +143,13 @@ def r_aravit_tamir(c):
     if v: m.Add(sum(v) == 2)
 
 
+def r_tamir_friday_own(c):
+    """תמיר בשישי: רק עם הכיתה שלו (ט תמיר)."""
+    m, hx = c["m"], c["hx"]
+    for k in [k for k in hx if k[3] == "תמיר" and k[1][0] == 5 and k[0] != "ט תמיר"]:
+        m.Add(hx[k] == 0)
+
+
 def r_zayin_friday_full(c):
     """כיתות ז: שישי מלא — כל 4 השעות עם שיעור (המחנך; בז אלי — שיר)."""
     m, hfree = c["m"], c["hfree"]
@@ -159,6 +169,8 @@ RULES = [
      "desc": "שעת הספרות של ט אסיף — עם נעמי, במהלך השבוע ולא בשישי."},
     {"id": "naomi_sifrut_tet", "name": "נעמי מלמדת ספרות בט תמיר", "active": True, "fn": r_naomi_sifrut_tet,
      "desc": "שעת הספרות של ט תמיר — אצל נעמי, לא חסר מורה."},
+    {"id": "tamir_friday_own", "name": "תמיר בשישי עם כיתתו", "active": True, "fn": r_tamir_friday_own,
+     "desc": "בשישי תמיר מלמד רק בט תמיר."},
     {"id": "zayin_friday_full", "name": "שישי מלא בכיתות ז", "active": True, "fn": r_zayin_friday_full,
      "desc": "כל 4 שעות שישי מאוישות בכיתות ז — עם המחנך (בז אלי: שיר)."},
     {"id": "hadracha_sunday", "name": "הדרכות יום ראשון", "active": True, "fn": r_hadracha_sunday,

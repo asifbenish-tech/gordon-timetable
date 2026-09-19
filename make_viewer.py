@@ -2,7 +2,7 @@
 """מייצר viewer.html - צופה מערכות אינטראקטיבי מנתוני הפתרון."""
 import io, json
 from data2 import CLASSES, SLOTS, DAY_NAMES, DAY_HOURS, HOMEROOM, QUOTA, APP_ALIAS, LESSON_LABEL, PINAT_CHAI, PINAT_TEACHER
-from hdata import HCLASSES, HSLOTS, HDAY, HHOME, NEED, GRADE, OVR
+from hdata import HCLASSES, HSLOTS, HDAY, HHOME, NEED, GRADE, OVR, FRIDAY_H1, FRIDAY_COVER, JOINT
 
 try: _FULLN={k:v for k,v in json.load(io.open("names_map.json",encoding="utf-8")).items() if v}
 except Exception: _FULLN={}
@@ -125,19 +125,23 @@ for c in HCLASSES:
             if subj=="מגמות": cell={"t":"מגמות","s":MAGT.get(k,""),"k":"mag"}
             elif subj=="שירה בציבור": cell={"t":"שירה בציבור","s":"כל החטיבה","k":"mag"}
             elif subj=="שעת גיבוש": cell={"t":"שעת גיבוש","s":"שתי כיתות ט יחד","k":"mag"}   # כרגע לא בשימוש - ראו "ליווי"
-            elif subj=="ליווי":                      # שישי ש1 זמני: עוד אין שעת גיבוש
-                # בט אסיף השעה הזו נלמדת כמתמטיקה עם צבי (בקשת המנהל 06.09).
+            elif subj=="ליווי":                      # שישי ש1 זמני: עוד אין שעת גיבוש (FRIDAY_H1 ב-hdata)
                 # התצוגה בלבד - בפתרון היא נשארת "ליווי" ואינה נספרת בתוכנית.
-                cell={"t":"מתמטיקה","s":t} if c=="ט אסיף" else {"t":t}
+                _sh=(FRIDAY_H1.get(c) or {}).get("show")
+                cell={"t":_sh,"s":t} if _sh else {"t":t}
             elif t=="שרית + חסן": cell={"t":subj,"s":"שרית + חסן (שכבתי)","k":"pe"}
             elif t=="חסר מורה": cell={"t":subj,"s":"חסר מורה","k":"hole"}
-            elif t=="צבי" and d==5 and subj not in ("שירה בציבור",):
-                cell={"t":"צבי"}                        # שישי בט אסיף: בלי מקצוע, רק נוכחות
+            elif d==5 and c in FRIDAY_COVER and t==FRIDAY_COVER[c]["teacher"] and subj!="שירה בציבור":
+                _sh=FRIDAY_COVER[c].get("show")          # המלווה בשישי: עם מקצוע (show) או רק נוכחות
+                cell={"t":_sh,"s":t} if _sh else {"t":t}
             else:
                 cell={"t":subj,"s":t}
                 if t==HHOME[c]: cell["k"]="home"
         if f"{c}|{k}" in GJ: cell["co"]="+ גלית"
         if f"{c}|{k}" in ZH: cell["co"]="+ צבי"
+        for _j in JOINT:                              # שיעור משותף (hdata.JOINT)
+            if c in _j["classes"] and (d,h)==(_j["day"],_j["hour"]) and cell.get("t")==_j["subject"]: cell["co"]=_j.get("label","שיעור משותף")
+        if h==8 and cell.get("t") and "co" not in cell: cell["co"]="שעה שמינית"
         cells[k]=cell
     if c=="ז אלי" and "2,5" in cells and cells["2,5"].get("s")=="אלי":
         cells["2,5"]["co"]="זמני – עד תחילת המפגשות"
@@ -196,7 +200,8 @@ for c in HCLASSES:
             if t=="שרית + חסן":
                 add_t("שרית","חטיבה",d,h,f"{c} · {subj}"); add_t("חסן","חטיבה",d,h,f"{c} · {subj}")
             else:
-                _lbl = c if (subj=="ליווי" or (t=="צבי" and d==5 and subj!="שירה בציבור")) else f"{c} · {subj}"
+                _cov=(d==5 and c in FRIDAY_COVER and t==FRIDAY_COVER[c]["teacher"] and subj!="שירה בציבור")
+                _lbl = c if (subj=="ליווי" or (_cov and not FRIDAY_COVER[c].get("show"))) else f"{c} · {subj}"
                 add_t(t,"חטיבה",d,h,_lbl)
 
 add_t("תניה","יסודי",0,3,"שיעור הדרכה")   # שעת הוראה לכל דבר (לא בכיתה)
