@@ -12,8 +12,11 @@
 import io, json, os, sys
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from data import QUOTA as EQ, DAY_NAMES
-from data2 import TCONS, MAXDAYS, DAYS_OFF2, UNAVAIL2, EVENTS2, MAGAMA, QUOTA_FILE
-from hdata import CAP as HCAP, HEV
+from data import CLASSES as ECLASSES
+from data2 import TCONS, MAXDAYS, DAYS_OFF2, UNAVAIL2, EVENTS2, MAGAMA, QUOTA_FILE, MAXQ2, TEACH_DESC
+from hdata import CAP as HCAP, HEV, POOLS
+GRADES = ["ז", "ח", "ט"]
+def lists(): return {"classes": list(ECLASSES), "subjects": list(POOLS), "grades": GRADES}
 SED = json.load(io.open("sed_J.json", encoding="utf-8"))   # מעגלי שיח (מפגשה) + ישיבת ניהול
 NIHUL = ["לייה", "שרית", "יערה", "צופיה", "אסיף", "אלי"]
 
@@ -39,7 +42,10 @@ def current():
             if t in ts: ev[f"{d},{h}"] = "מגמות"
         tc = {k: ({str(a): b for a, b in v.items()} if isinstance(v, dict) else v) for k, v in TCONS.get(t, {}).items()}
         rows[t] = {"name": t, "side": "both" if (in_e and in_j) else ("jun" if in_j else "elem"),
-                   "quota": QUOTA_FILE.get(t), "off": list(DAYS_OFF2.get(t) or []),
+                   "desc": TEACH_DESC.get(t, ""), "quota": QUOTA_FILE.get(t), "maxq": MAXQ2.get(t),
+                   "elem_classes": dict(EQ.get(t, {})), "jun_cap": HCAP.get(t),
+                   "jun_pools": [f"{sj}|{g}" for sj in POOLS for g in POOLS[sj] if t in POOLS[sj][g]],
+                   "off": list(DAYS_OFF2.get(t) or []),
                    "events": ev, "unavail": [f"{d},{h}" for (d, h) in UNAVAIL2.get(t, [])],
                    "tcons": tc, "maxdays": MAXDAYS.get(t)}
     return rows
@@ -55,12 +61,25 @@ def clean_tc(tc):
     return out
 
 def diff(rows_db):
-    cur = current(); ov = {"data2": {}, "hdata": {}}; notes = []
+    cur = current(); ov = {"data": {}, "data2": {}, "hdata": {}}; notes = []
     def norm(x): return json.dumps(x, ensure_ascii=False, sort_keys=True)
+    # פולים בחטיבה: הרשימה לכל (מקצוע, שכבה) נבנית מכל הרשומות - שינוי אצל מורה אחד משנה את הרשימה
+    by_name = {(r.get("name") or tname(r["id"])): r for r in rows_db}
+    for sj in POOLS:
+        for g in POOLS[sj]:
+            want = sorted(t for t, r in by_name.items() if f"{sj}|{g}" in (r.get("jun_pools") or []))
+            have = sorted(POOLS[sj][g])
+            if want != have and all(t in by_name for t in have):
+                ov["hdata"].setdefault("POOLS", {}).setdefault(sj, {})[g] = want
     for r in rows_db:
         t = r.get("name") or tname(r["id"]); b = cur.get(t)
         if not b: notes.append(f"{t}: לא בקבצי המקור - מדלג"); continue
         if norm(r.get("off", [])) != norm(b["off"]): ov["data2"].setdefault("DAYS_OFF2", {})[t] = r["off"]   # HOFF נגזר מכאן
+        ec = {c: int(h) for c, h in (r.get("elem_classes") or {}).items() if h}
+        if b["side"] != "jun" and norm(ec) != norm(b["elem_classes"]):
+            ov["data"].setdefault("QUOTA", {})[t] = {c: ec.get(c) for c in set(ec) | set(b["elem_classes"])}   # None = הכיתה יורדת
+        for key, tab, sec in (("jun_cap", "CAP", "hdata"), ("maxq", "MAXQ2", "data2"), ("quota", "QUOTA_FILE", "data2")):
+            if (r.get(key) or None) != (b.get(key) or None): ov[sec].setdefault(tab, {})[t] = r.get(key) or None
         tc = clean_tc(r.get("tcons"))
         if norm(tc) != norm(clean_tc(b["tcons"])): ov["data2"].setdefault("TCONS", {})[t] = tc or None
         if b["side"] != "jun" and (r.get("maxdays") or None) != (b["maxdays"] or None): ov["data2"].setdefault("MAXDAYS", {})[t] = r.get("maxdays") or None
@@ -72,7 +91,7 @@ if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "export":
         rows = current()
-        print(json.dumps([{"id": tid(t), **v, "base": {k: v[k] for k in ("off", "tcons", "maxdays")}} for t, v in rows.items()], ensure_ascii=False, indent=1))
+        print(json.dumps({"lists": lists(), "teachers": [{"id": tid(t), **v, "base": {k: v[k] for k in ("off", "tcons", "maxdays", "elem_classes", "jun_pools", "jun_cap", "maxq", "quota")}} for t, v in rows.items()]}, ensure_ascii=False, indent=1))
     elif cmd == "diff":
         dump = json.load(io.open(sys.argv[2], encoding="utf-8"))
         rows = dump if isinstance(dump, list) else list(dump.values())
