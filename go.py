@@ -26,6 +26,11 @@ print("מריץ (מגבלת זמן " + TL + " שניות)...")
 out = run("engine.py", "פותר")
 if "INFEASIBLE" in out or "MODEL_INVALID" in out:
     print("\n!!! הפותר לא מצא פתרון - האילוצים סותרים. שום קובץ לא נדרס.")
+    cap = out[out.find("קיבולת"):out.find("\n\n", out.find("קיבולת"))] if "קיבולת" in out else ""
+    if cap: print(cap)
+    if not os.environ.get("NODIAG"):
+        print("\nמריץ אבחון אוטומטי (הרפיה אחת בכל פעם)...")
+        subprocess.run([sys.executable, "diagnose.py"])
     sys.exit(1)
 run("fill2.py", "ממלא חורים")
 run("checks.py", "בדיקות")

@@ -1218,6 +1218,49 @@ for (c,s2,u),v in hf.items():
     if k3 in x:
         b3=m.NewBoolVar(f"hh{c}{s2}{u}")
         m.Add(b3<=v); m.Add(b3<=x[k3]); _HOMEHALF.append(b3)
+# ================= דוח קיבולת: משבצות פנויות מול שעות נדרשות =================
+# חשבון פשוט לפני הפותר. גירעון כאן = INFEASIBLE בטוח; מרווח 0-1 = צפוף.
+# CAPONLY=1 מדפיס ויוצא (python capacity.py).
+def _capacity_report():
+    rows=[]
+    # --- מורים ---
+    _avail=collections.defaultdict(set); _need=collections.Counter(); _shared=collections.Counter()
+    for (_c,_s,_t) in x: _avail[_t].add(_s)
+    for (_c,_s),_t in fixed.items(): _avail[_t].add(_s)   # שישי ביסודי - קבוע, לא במשתנים
+    for (_c,_s,_sj,_t) in hx: _avail[_t].add(_s)
+    for _t,_q in QUOTA.items(): _need[_t]+=sum(_q.values())
+    for _c in HCLASSES:
+        _g=GRADE[_c]
+        for _sj,_per in NEED.items():
+            _n=OVR.get((_c,_sj),_per[_g])
+            if not _n: continue
+            _ts=[t for (sj,t) in pairs[_c] if sj==_sj and t!="חסר מורה"]
+            if len(_ts)==1: _need[_ts[0]]+=_n
+            else:
+                for t in _ts: _shared[t]+=_n
+    for _t in sorted(set(_need)|set(_shared)):
+        if _t in ("מגמות","שרית + חסן",'תל"ן',"חסר מורה"): continue
+        _a=len(_avail.get(_t,())); _n=_need[_t]; _sh=_shared[_t]
+        # שעות שישי ביסודי קבועות (המחנך/ת) - נספרות בשני הצדדים, אין צורך לתקן
+        _m=_a-_n
+        flag="✗ גירעון" if _m<0 else ("⚠ צפוף" if _m<=1 else "")
+        if flag: rows.append(f"  {_t:8s} משבצות {_a:3d} | נדרש {_n:3d}"+(f" (+עד {_sh} משותף)" if _sh else "")+f" | מרווח {_m:+d} {flag}")
+    # --- כיתות ---
+    for _c in CLASSES:
+        _slots=sum(DAY_HOURS); _req=sum(QUOTA[t].get(_c,0) for t in QUOTA)+2   # +2 תל"ן
+        _m=_slots-_req
+        if _m<-3: rows.append(f"  {_c:8s} משבצות {_slots} | יעדי מכסות {_req} (רכים) | פער {_m:+d} ⚠ היעדים גדולים מהשבוע")
+    for _c in HCLASSES:
+        _g=GRADE[_c]; _req=sum(OVR.get((_c,_sj),_per[_g]) for _sj,_per in NEED.items() if _per[_g] or (_c,_sj) in OVR)
+        # משבצות שסגורות בכללים קבועים: ט - חמישי 6-7 (יום המגמות) + שישי ש1 (גיבוש); ז/ח - שלישי ש6 (סוף יום המגמות)
+        _closed=3 if _g=="ט" else 1
+        _slots=sum(HDAY)-_closed; _m=_slots-_req
+        rows.append(f"  {_c:8s} משבצות {_slots} (אחרי כללים קבועים) | תוכנית {_req} | מרווח {_m:+d}"+(" ✗ גירעון" if _m<0 else (" ⚠ צפוף - כל נעילה נוספת עלולה להפיל" if _m<=1 else "")))
+    print("קיבולת (משבצות פנויות מול נדרש; רק מקרים צפופים/גירעון):")
+    print("\n".join(rows) if rows else "  הכל עם מרווח")
+_capacity_report()
+if os.environ.get("CAPONLY"): raise SystemExit(0)
+
 # ================= כפתורי ניסוי (משתני סביבה) =================
 # FREEZEJ=<קובץ|1>  מקפיא את היסודי על פתרון (1 = baseline_J.json).
 # FREEZEH=<קובץ|1>  מקפיא את החטיבה על פתרון (1 = baseline_hat.json).
