@@ -545,7 +545,24 @@ for _hk,_hv in _HOUSES.items():
             _cls=_lbl.split(" · ")[0] if _side=="חטיבה" else _lbl
             if _side in ("יסודי","חטיבה",'תל"ן') and _cls in _cset: _ts.add(_t2); break
     _HT[_hk]=sorted(_ts)
-data={"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"slotfree":SLOTFREE,"tfree":TFREE,"sol":SOLUTIONS,"elem":elem,"jun":jun,"teachers":{k:sorted(v,key=lambda z:(z[1],z[2])) for k,v in sorted(teachers.items())},"commit":commit,
+# ---- אילוצי מורים למסך העריכה (הנהלה): מה שמופיע כאן הוא מה שהמנוע מקבל ----
+from data2 import TCONS as _TC, MAXDAYS as _MD, QUOTA as _EQ
+from hdata import CAP as _HCAP, HEV as _HEV2
+_cons={}
+for _t in sorted(set(_EQ)|set(_HCAP)|set(_TC)|set(_DO)|set(_HO)):
+    if _t in ('תל"ן',"מגמות","חסר מורה","שרית + חסן","מדעים חיצוני"): continue
+    _in_e=_t in _EQ or _t in _DO; _in_j=_t in _HCAP or _t in _HO
+    _ev={}
+    for (_d,_h) in EVENTS2.get(_t,[]): _ev[f"{_d},{_h}"]="סדירות"
+    for (_d,_h) in _HEV2.get(_t,[]): _ev[f"{_d},{_h}"]=_ev.get(f"{_d},{_h}","ישיבה/הדרכה")
+    for (_d,_h),_ts in MAGAMA.items():
+        if _t in _ts: _ev[f"{_d},{_h}"]="מגמות"
+    _cons[_t]={"side":"both" if (_in_e and _in_j) else ("jun" if _in_j else "elem"),
+               "off_elem":list(_DO.get(_t) or []),"off_jun":list(_HO.get(_t) or []),
+               "events":_ev,"unavail":[f"{_d},{_h}" for (_d,_h) in UNAVAIL2.get(_t,[])],
+               "tcons":{k:(v if not isinstance(v,dict) else {str(a):b for a,b in v.items()}) for k,v in _TC.get(_t,{}).items()},
+               "maxdays":_MD.get(_t)}
+data={"cons":_cons,"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"slotfree":SLOTFREE,"tfree":TFREE,"sol":SOLUTIONS,"elem":elem,"jun":jun,"teachers":{k:sorted(v,key=lambda z:(z[1],z[2])) for k,v in sorted(teachers.items())},"commit":commit,
       "days":DAY_NAMES,"legend_sed":{k:v for k,v in SED.items() if "קבוצת" not in k},
       "full_names":_FULLN,"access":_ACCESS,"houses":_HOUSES,"house_teachers":_HT,"app_map":APP_MAP,
       "built":_now().strftime("%d.%m.%Y %H:%M")}
