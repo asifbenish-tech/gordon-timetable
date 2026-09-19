@@ -56,4 +56,9 @@ else:
         print('תל"ן: baseline_tln.json עודכן')
     except FileNotFoundError:
         print('tln_map.json חסר - אין בסיס לתל"ן')
+    try:
+        shutil.copyfile("co_zofia3.json", "baseline_co.json")   # שעות צופיה המקבילות - גם הן מיוצבות
+        print('צופיה: baseline_co.json עודכן')
+    except FileNotFoundError:
+        print('co_zofia3.json חסר - אין בסיס לשעות צופיה')
     print("מכאן הפותר ישמור על המערכת הזו. לדחוף ל-master כדי לפרסם.")

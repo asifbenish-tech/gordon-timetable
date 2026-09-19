@@ -1134,6 +1134,14 @@ if STAB:
                     _stab.append(1-v)
         except FileNotFoundError:
             print('baseline_tln.json חסר - התל"ן החצוי בלי יציבות (יתווסף באישור הבא)')
+        # השעות שבהן צופיה מצטרפת לא אנה/א פנינה (co_zofia3): גם הן קפצו בין ריצות
+        # שקולות ("+ צופיה" עבר מש3 לש5 בלי סיבה) - לכן גם להן יציבות מול המאושר.
+        try:
+            _bC=json.load(io.open("baseline_co.json",encoding="utf-8"))
+            for (_tag,_sl),_b in co.items():
+                if _bC.get(f"{_tag}|{_sl[0]},{_sl[1]}"): _stab.append(1-_b)
+        except FileNotFoundError:
+            print('baseline_co.json חסר - שעות צופיה המקבילות בלי יציבות (יתווסף באישור הבא)')
         print(f"יציבות: {len(_stab)} תאים מהמערכת המפורסמת, משקל {STAB}")
     except Exception as _e:
         print("ללא יציבות:",_e); _stab=[]

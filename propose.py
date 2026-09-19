@@ -80,8 +80,10 @@ def main():
     base_viewer = os.path.join(ROOT, "viewer.html"); mid_viewer = None
     if base != "published":
         bo = os.path.join(ROOT, "proposals", base, "out")
-        for a, b in (("sol_J.json", "baseline_J.json"), ("sol_hat_model.json", "baseline_hat.json"), ("tln_map.json", "baseline_tln.json")):
-            if not os.path.exists(os.path.join(bo, a)): sys.exit(f"הבסיס '{base}' לא נבנה (חסר {a}) - קודם python propose.py {base}")
+        for a, b in (("sol_J.json", "baseline_J.json"), ("sol_hat_model.json", "baseline_hat.json"), ("tln_map.json", "baseline_tln.json"), ("co_zofia3.json", "baseline_co.json")):
+            if not os.path.exists(os.path.join(bo, a)):
+                if a == "co_zofia3.json": continue
+                sys.exit(f"הבסיס '{base}' לא נבנה (חסר {a}) - קודם python propose.py {base}")
             shutil.copy2(os.path.join(bo, a), os.path.join(bdir, b))
         mid_viewer = os.path.join(bo, "viewer.html")
         print(f"בסיס: הצעה '{base}' (ההגדרות שלה יורשות: עקיפות, כללים כבויים, נעילות, אילוצים)")
@@ -192,7 +194,7 @@ def main():
     except Exception as e:
         print("  אקסל: דילוג (" + str(e) + ")")
 
-    for f in ("viewer.html", "sol_J.json", "sol_hat.json", "sol_hat_model.json", "tln_map.json", "fills.json"):
+    for f in ("viewer.html", "sol_J.json", "sol_hat.json", "sol_hat_model.json", "tln_map.json", "fills.json", "co_zofia3.json"):
         if os.path.exists(os.path.join(bdir, f)): shutil.copy2(os.path.join(bdir, f), os.path.join(odir, f))
     print(f"\nהצעה '{name}' מוכנה: proposals/{name}/out/viewer.html  (לא מפורסם - רק אחרי אישור)")
 

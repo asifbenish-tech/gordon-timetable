@@ -309,7 +309,7 @@ for t,q in sorted(QUOTA_FILE.items(), key=lambda kv:-kv[1]):
 # ---------- חוסרים + פתרונות ----------
 gapl=[]
 # ---- מי פנוי לכל חוסר: חישוב מועמדים אמיתי ----
-from data2 import DAYS_OFF2, UNAVAIL2, EVENTS2, MAGAMA, tcons_blocked, tcons_text
+from data2 import DAYS_OFF2, UNAVAIL2, EVENTS2, MAGAMA, tcons_blocked, tcons_text, FIXED_ONLY, FIXED_DAYS
 try: from data2 import HATIVA2
 except Exception: HATIVA2={}
 from hdata import HOFF as _HOFF, HEV as _HEV
@@ -334,6 +334,7 @@ def _free_for(d,h):
     out=[]
     for t,q in _QF.items():
         if _load.get(t,0)>=q: continue
+        if t in FIXED_ONLY: continue                 # רק שיעורים קבועים ביסודי
         off=list(DAYS_OFF2.get(t) or [])
         if t=="צופיה": off.append("חמישי")
         if t=="טלי" and DAY_NAMES[d] not in ("שני","שלישי"): continue
@@ -356,6 +357,7 @@ def _free_ext(d,h,exclude=()):
     out=[]
     for t,q in _QF.items():
         if t in exclude or _load.get(t,0)<q: continue
+        if t in FIXED_ONLY: continue                 # רק שיעורים קבועים ביסודי
         off=list(DAYS_OFF2.get(t) or [])
         if t=="צופיה": off.append("חמישי")
         if t=="טלי" and DAY_NAMES[d] not in ("שני","שלישי"): continue
@@ -426,6 +428,7 @@ for _fd in range(6):
 def _blocked(t,d,h):
     if DAY_NAMES[d] in (DAYS_OFF2.get(t) or []): return True
     if DAY_NAMES[d] in _HOFF.get(t,[]): return True
+    if t in FIXED_ONLY and DAY_NAMES[d] not in FIXED_DAYS[t] and d<5: return True   # ביסודי רק בימי השיעורים הקבועים
     if t=="צופיה" and DAY_NAMES[d]=="חמישי": return True
     if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+_HEV.get(t,[])): return True
     if tcons_blocked(t,d,h,DAY_HOURS[d] if d<len(DAY_HOURS) else None): return True
