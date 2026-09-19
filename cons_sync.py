@@ -13,7 +13,9 @@ import io, json, os, sys
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from data import QUOTA as EQ, DAY_NAMES
 from data2 import TCONS, MAXDAYS, DAYS_OFF2, UNAVAIL2, EVENTS2, MAGAMA, QUOTA_FILE
-from hdata import CAP as HCAP, HOFF, HEV
+from hdata import CAP as HCAP, HEV
+SED = json.load(io.open("sed_J.json", encoding="utf-8"))   # מעגלי שיח (מפגשה) + ישיבת ניהול
+NIHUL = ["לייה", "שרית", "יערה", "צופיה", "אסיף", "אלי"]
 
 SKIP = {'תל"ן', "מגמות", "חסר מורה", "שרית + חסן", "מדעים חיצוני", "אבי קרן צבי"}
 
@@ -22,17 +24,22 @@ def tname(i): return bytes.fromhex(i[2:]).decode("utf-8")
 
 def current():
     rows = {}
-    for t in sorted(set(EQ) | set(HCAP) | set(TCONS) | set(DAYS_OFF2) | set(HOFF) | set(QUOTA_FILE)):
+    for t in sorted(set(EQ) | set(HCAP) | set(TCONS) | set(DAYS_OFF2) | set(QUOTA_FILE)):
         if t in SKIP: continue
-        in_e = t in EQ or t in DAYS_OFF2; in_j = t in HCAP or t in HOFF
+        in_e = t in EQ or t in EVENTS2 or t in MAXDAYS; in_j = t in HCAP
         ev = {}
+        for day, d in (("שני", 1), ("שלישי", 2)):
+            if t in SED.get("קבוצת " + day, []):
+                for h in SED["מעגלי שיח " + day]: ev[f"{d},{h}"] = "מעגל שיח"
+        if t in NIHUL:
+            for h in SED["ישיבת ניהול שלישי"]: ev[f"2,{h}"] = "ישיבת ניהול"
         for (d, h) in EVENTS2.get(t, []): ev[f"{d},{h}"] = "סדירות"
         for (d, h) in HEV.get(t, []): ev.setdefault(f"{d},{h}", "ישיבה/הדרכה")
         for (d, h), ts in MAGAMA.items():
             if t in ts: ev[f"{d},{h}"] = "מגמות"
         tc = {k: ({str(a): b for a, b in v.items()} if isinstance(v, dict) else v) for k, v in TCONS.get(t, {}).items()}
         rows[t] = {"name": t, "side": "both" if (in_e and in_j) else ("jun" if in_j else "elem"),
-                   "quota": QUOTA_FILE.get(t), "off_elem": list(DAYS_OFF2.get(t) or []), "off_jun": list(HOFF.get(t) or []),
+                   "quota": QUOTA_FILE.get(t), "off": list(DAYS_OFF2.get(t) or []),
                    "events": ev, "unavail": [f"{d},{h}" for (d, h) in UNAVAIL2.get(t, [])],
                    "tcons": tc, "maxdays": MAXDAYS.get(t)}
     return rows
@@ -53,8 +60,7 @@ def diff(rows_db):
     for r in rows_db:
         t = r.get("name") or tname(r["id"]); b = cur.get(t)
         if not b: notes.append(f"{t}: לא בקבצי המקור - מדלג"); continue
-        if b["side"] != "jun" and norm(r.get("off_elem", [])) != norm(b["off_elem"]): ov["data2"].setdefault("DAYS_OFF2", {})[t] = r["off_elem"]
-        if b["side"] != "elem" and norm(r.get("off_jun", [])) != norm(b["off_jun"]): ov["hdata"].setdefault("HOFF", {})[t] = r["off_jun"]
+        if norm(r.get("off", [])) != norm(b["off"]): ov["data2"].setdefault("DAYS_OFF2", {})[t] = r["off"]   # HOFF נגזר מכאן
         tc = clean_tc(r.get("tcons"))
         if norm(tc) != norm(clean_tc(b["tcons"])): ov["data2"].setdefault("TCONS", {})[t] = tc or None
         if b["side"] != "jun" and (r.get("maxdays") or None) != (b["maxdays"] or None): ov["data2"].setdefault("MAXDAYS", {})[t] = r.get("maxdays") or None
@@ -66,7 +72,7 @@ if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "export":
         rows = current()
-        print(json.dumps([{"id": tid(t), **v, "base": {k: v[k] for k in ("off_elem", "off_jun", "tcons", "maxdays")}} for t, v in rows.items()], ensure_ascii=False, indent=1))
+        print(json.dumps([{"id": tid(t), **v, "base": {k: v[k] for k in ("off", "tcons", "maxdays")}} for t, v in rows.items()], ensure_ascii=False, indent=1))
     elif cmd == "diff":
         dump = json.load(io.open(sys.argv[2], encoding="utf-8"))
         rows = dump if isinstance(dump, list) else list(dump.values())
