@@ -129,6 +129,7 @@ for c in HCLASSES:
                 # התצוגה בלבד - בפתרון היא נשארת "ליווי" ואינה נספרת בתוכנית.
                 _sh=(FRIDAY_H1.get(c) or {}).get("show")
                 cell={"t":_sh,"s":t} if _sh else {"t":t}
+                if _sh and t==HHOME[c]: cell["k"]="home"
             elif t=="שרית + חסן": cell={"t":subj,"s":"שרית + חסן (שכבתי)","k":"pe"}
             elif t=="חסר מורה": cell={"t":subj,"s":"חסר מורה","k":"hole"}
             elif d==5 and c in FRIDAY_COVER and t==FRIDAY_COVER[c]["teacher"] and subj!="שירה בציבור":

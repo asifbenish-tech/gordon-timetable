@@ -22,6 +22,20 @@ JS = r"""() => {
   view = "jun"; pick = null; render(); check("jun");
   view = "teach"; pick = "*"; render(); check("teach_all");
   const t = Object.keys(DATA.teachers)[0]; view = "teach"; pick = t; render(); check("teach_one");
+  // מצב עריכה: פתיחת פאנל תא, הוספת בקשת נעילה, ייצוא, ניקוי
+  try {
+    view = "elem"; pick = null; render();
+    const td = document.querySelector("td.pick"); if (!td) out.bad.push("no-pick-cells");
+    else {
+      slotPanel(td.dataset.cls, td.dataset.key);
+      const pb = document.querySelector("[data-pin]"); if (!pb) out.bad.push("no-pin-button"); else pb.click();
+      out.pins = {pending: document.querySelectorAll("td.pend").length, btn: (document.getElementById("pinsbtn") || {}).textContent};
+      if (!out.pins.pending) out.bad.push("pin-not-marked");
+      pinsModal(); if (!document.querySelector("textarea")) out.bad.push("no-pins-export");
+      const x = document.getElementById("pinsclear"); if (x) x.click();
+      if (document.querySelectorAll("td.pend").length) out.bad.push("pins-not-cleared");
+    }
+  } catch (e) { out.bad.push("edit-mode: " + String(e).slice(0, 120)); }
   if (DATA.prop) {
     const pb = document.getElementById("propbanner");
     out.prop = {banner: pb && !pb.hidden ? pb.textContent : null,

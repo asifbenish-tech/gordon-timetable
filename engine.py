@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # ============================================================
-#  solveALL.py - פותר מאוחד: יסודי + חטיבה במודל CP-SAT אחד
-#  נוצר אוטומטית ע"י make_unified.py משני הפותרים המקוריים.
+#  engine.py - פותר מאוחד: יסודי + חטיבה במודל CP-SAT אחד (המקור ההיסטורי: attic/solveALL.py)
 #  היתרון: הפותר רואה שרשראות השפעה בין שני בתי הספר -
 #  הזזת מורה ביסודי משפיעה מיידית על החטיבה ולהפך.
 # ============================================================
@@ -697,10 +696,12 @@ shir_all=[hx[("ז אלי",(5,h),sj,"שיר")] for h in (1,3,4)
           for (sj,t) in pairs["ז אלי"] if t=="שיר" and ("ז אלי",(5,h),sj,"שיר") in hx]
 if shir_all: m.Add(sum(shir_all)>=2)   # שיר עם הכיתה בשישי, לפחות שעתיים
 
-# ט אסיף (בקשת המנהל 06.09): במקום ההיסטוריה ברביעי ש7 - שעת מתמטיקה
-# עם הילה בשני ש7. מספרי התוכנית מתעדכנים ב-OVR שב-hdata.
-if ("ט אסיף",(3,7)) in hfree: m.Add(hfree[("ט אסיף",(3,7))]==1)
-if ("ט אסיף",(1,7),"מתמטיקה","הילה") in hx: m.Add(hx[("ט אסיף",(1,7),"מתמטיקה","הילה")]==1)
+# נעילות קבועות (hdata.FIXED_H): משבצות ריקות ושיעורים במקום קבוע
+for _c,_d,_h in FIXED_H.get("free",[]):
+    if (_c,(_d,_h)) in hfree: m.Add(hfree[(_c,(_d,_h))]==1)
+for _c,_d,_h,_sj,_t in FIXED_H.get("set",[]):
+    if (_c,(_d,_h),_sj,_t) in hx: m.Add(hx[(_c,(_d,_h),_sj,_t)]==1)
+    else: print(f"FIXED_H: אין משתנה ל-{(_c,(_d,_h),_sj,_t)} - מדלג")
 
 # גלית: שני שיעורים משותפים עם ארז בכיתות ז (נספר במכסה שלה)
 gj={}
@@ -1064,6 +1065,7 @@ for _t,_cf in TCONS.items():
                     _between=[_busy[_hs[_kk]] for _kk in range(_i+1,_j)]
                     if any(isinstance(_e,int) for _e in _between): continue   # אירוע באמצע = אין חלון
                     _e1,_e2=_busy[_hs[_i]],_busy[_hs[_j]]
+                    if isinstance(_e1,int) and isinstance(_e2,int): continue    # שני אירועים - אין מה לאכוף
                     _lhs=(0 if isinstance(_e1,int) else _e1)+(0 if isinstance(_e2,int) else _e2)
                     _rhs=1-(1 if isinstance(_e1,int) else 0)-(1 if isinstance(_e2,int) else 0)
                     m.Add(_lhs-sum(_between)<=_rhs)
@@ -1306,6 +1308,7 @@ if st in (cp_model.OPTIMAL,cp_model.FEASIBLE):
         for s in HSLOTS:
             got=[(sj,t) for (sj,t) in pairs[c] if (c,s,sj,t) in hx and sol.Value(hx[(c,s,sj,t)])]
             out[c][f"{s[0]},{s[1]}"]= (f"{got[0][0]} – {got[0][1]}" if got else "")
+    io.open("sol_hat_model.json","w",encoding="utf-8").write(json.dumps(out,ensure_ascii=False,indent=1))   # תוויות המודל (להקפאה מדויקת)
     for _c9g,_f1 in FRIDAY_H1.items():                           # שישי ש1: שעת הגיבוש עוד לא התחילה בפועל -
         if _c9g in out and not out[_c9g].get("5,1"): out[_c9g]["5,1"]="ליווי – "+_f1["teacher"]   # כל כיתה עם מלווה
     for _c9g,_fc in FRIDAY_COVER.items():                        # המלווה נכנס במקום "חסר מורה" בשישי

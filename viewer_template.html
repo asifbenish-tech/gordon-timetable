@@ -187,6 +187,9 @@ td.src-y .was{color:#2E7D32}
 #difflegend{display:none;gap:1rem;font-size:.78rem;color:var(--muted);margin-top:.4rem}
 #difflegend i{display:inline-block;width:.9rem;height:.9rem;border:2px solid #B3261E;border-radius:.2rem;vertical-align:middle;margin-inline-end:.3rem}
 #difflegend i.y{border-color:#2E7D32}
+button.pinb{border:1px solid var(--line);background:var(--surface);border-radius:.5rem;padding:.25rem .6rem;font:.82rem Heebo;cursor:pointer;margin:.15rem}
+td.pend{outline:2px dashed #7A4DB8;outline-offset:-2px}
+#pinsbtn{border:1px solid #7A4DB8;background:#F3EEFA;color:#3E2A66;border-radius:.5rem;padding:.25rem .7rem;font:700 .85rem Heebo;cursor:pointer;margin-inline-start:.4rem}
 #propbanner{background:#FFF4E0;border:1px solid #E0B060;border-radius:.5rem;padding:.1rem .5rem;font-size:.8rem;margin-inline-start:.4rem}
 </style>
 <header>
@@ -554,6 +557,7 @@ function cellHtml(c,info,extraCls,cls,key){
   if(c.s) inner+='<span class="s">'+c.s+'</span>';
   if(c.co) inner+='<span class="co">'+c.co+'</span>';
   if(c.away) inner+='<span class="aw">'+info.home+' בחוץ: '+c.away+'</span>';
+  if(cls&&key&&PINS().some(p=>p.class===cls&&(p.day+","+p.hour)===key)) extraCls=(extraCls||"")+' pend';
   const dch=(DATA.diff||{})[cls]&&DATA.diff[cls][key];
   if(dch){ inner+='<span class="was">היה: '+dch.was+'</span>'; extraCls=(extraCls||"")+' chg'+(dch.src==="y"?' src-y':''); }
   // כל מנהל/ת מקבל/ת את זה, וכן מי שסומן/ה במפורש (PICKERS ב-gen_access)
@@ -614,10 +618,46 @@ function slotPanel(cls,key){
     html+=sec(nm(who)+" פנוי/ה גם בשעות האלה (להזזת השיעור)"+q,
       slots.length?slots.map(chip).join(""):'<span style="color:var(--muted);font-size:.85rem">אין שעה פנויה בשבוע.</span>');
   }
+  // ---- מצב עריכה: בקשות נעילה להרצה הבאה (נשמרות בדפדפן, מיוצאות כ-PINS ל-propose.py) ----
+  const cur=(DATA.elem[cls]||DATA.jun[cls]).cells[key]||{}; const isJun=!!DATA.jun[cls];
+  const [pd,ph]=key.split(",").map(Number);
+  const mk=(c,t,subj,v)=>JSON.stringify(Object.assign({class:c,day:pd,hour:ph,teacher:t},subj?{subject:subj}:{},{value:v}));
+  let pb='';
+  if(who) pb+='<button class="pinb" data-pin=\''+mk(cls,who,isJun?cur.t:"",1)+'\'>🔒 להשאיר: '+nm(who)+'</button>'+
+              '<button class="pinb" data-pin=\''+mk(cls,who,isJun?cur.t:"",0)+'\'>🚫 להוציא: '+nm(who)+'</button>';
+  others.forEach(o=>{const i=o.indexOf(": "); const c2=o.slice(0,i), t2=o.slice(i+2); const cc=DATA[DATA.jun[c2]?"jun":"elem"][c2].cells[key]||{};
+    const j2=!!DATA.jun[c2];
+    pb+='<button class="pinb" data-pin=\''+JSON.stringify([JSON.parse(mk(cls,t2,isJun?cc.t:"",1)),JSON.parse(mk(c2,who||"",j2?cur.t:"",who?1:0))])+'\'>⇄ להחליף עם '+c2+' ('+nm(t2)+')</button>';});
+  html+=sec("בקשת שינוי להרצה הבאה (נשמר בדפדפן; ייצוא בכפתור 🔒 בכותרת)", pb||'<span style="color:var(--muted);font-size:.85rem">אין מה לנעול בתא ריק.</span>');
   html+='<div style="color:var(--muted);font-size:.8rem;border-top:1px solid var(--line);padding-top:.5rem;margin-top:.3rem">'+
-        'זו תצוגת מידע בלבד — היא לא משנה את המערכת. לביצוע בפועל צריך להריץ את הפותר מחדש.</div>';
+        'זו תצוגת מידע בלבד — היא לא משנה את המערכת. בקשות נעילה נאספות ומיוצאות כקובץ PINS להצעה (propose.py).</div>';
   infoModal(html);
 }
+// ---- בקשות נעילה (PINS) ----
+const PINS=()=>{try{return JSON.parse(LS("gordon_pins")||"[]");}catch(e){return [];}};
+function addPins(list){ const cur=PINS(); list.forEach(p=>{ if(!cur.some(q=>JSON.stringify(q)===JSON.stringify(p))) cur.push(p); }); LS("gordon_pins",JSON.stringify(cur)); pinsBtn(); render(); }
+function pinsBtn(){
+  const admin=!!(USER&&(USER.p||USER.r==="admin")); let b=document.getElementById("pinsbtn");
+  if(!admin){ if(b) b.remove(); return; }
+  if(!b){ b=document.createElement("button"); b.id="pinsbtn"; b.onclick=pinsModal; const h=document.querySelector("header h1"); if(h) h.appendChild(b); }
+  b.textContent="🔒 נעילות ("+PINS().length+")";
+}
+function pinsModal(){
+  const pins=PINS(); const txt=JSON.stringify(pins,null,1);
+  const rows=pins.map((p,i)=>'<div style="display:flex;gap:.5rem;align-items:center;font-size:.85rem;margin:.15rem 0"><span style="flex:1">'+p.class+' · '+DAYS[p.day]+' ש'+p.hour+' · '+(p.subject?p.subject+' – ':'')+FN(p.teacher)+' → '+(p.value?'לנעול':'להוציא')+'</span><button class="pinb" data-pindel="'+i+'">✕</button></div>').join("");
+  infoModal('<h3 style="margin:.2rem 0 .6rem">בקשות נעילה להרצה הבאה</h3>'+(rows||'<div style="color:var(--muted)">אין בקשות. לחצו על תא בלוח כדי להוסיף.</div>')+
+    '<div style="font-size:.8rem;color:var(--muted);margin:.6rem 0 .3rem">להעתיק ל-proposals/&lt;שם&gt;/proposal.json תחת "pins", או לשמור כקובץ ולהריץ PINS=&lt;קובץ&gt; python engine.py:</div>'+
+    '<textarea readonly style="width:100%;height:9rem;font:.8rem monospace;direction:ltr">'+txt.replace(/</g,"&lt;")+'</textarea>'+
+    '<div style="margin-top:.4rem"><button class="pinb" id="pinscopy">📋 העתקה</button> <button class="pinb" id="pinsclear">🗑 ניקוי הכל</button></div>');
+  const c=document.getElementById("pinscopy"); if(c) c.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(txt); c.textContent="הועתק ✔";};
+  const x=document.getElementById("pinsclear"); if(x) x.onclick=()=>{LS("gordon_pins",null); document.querySelectorAll("body > div").forEach(d=>{if(d.style.position==="fixed")d.remove();}); pinsBtn(); render();};
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest&&e.target.closest("[data-pin],[data-pindel]"); if(!b) return;
+  if(b.dataset.pindel!==undefined){ const cur=PINS(); cur.splice(+b.dataset.pindel,1); LS("gordon_pins",JSON.stringify(cur)); document.querySelectorAll("body > div").forEach(d=>{if(d.style.position==="fixed")d.remove();}); pinsBtn(); render(); pinsModal(); return; }
+  let v=JSON.parse(b.dataset.pin); if(!Array.isArray(v)) v=[v]; addPins(v);
+  document.querySelectorAll("body > div").forEach(d=>{if(d.style.position==="fixed")d.remove();});
+});
 function infoModal(html){            // חלון מידע פשוט (לא ייצוא - אין textarea)
   const ov=document.createElement("div");
   ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;display:flex;align-items:center;justify-content:center;padding:1rem";
@@ -1082,6 +1122,7 @@ function rulesView(){
 }
 function render(){
   if(Object.keys(ACCESS).length&&!USER){showLogin();return;}
+  pinsBtn();
   const av=allowedViews();
   if(!av.includes(view)) view=av[0];
   if(view==="teach"&&!pick&&USER&&USER.r!=="admin"&&DATA.teachers[USER.n]) pick=USER.n;

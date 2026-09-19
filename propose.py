@@ -9,7 +9,8 @@
      "base":   "published" | "<שם הצעה אחרת>",   ממה יוצאים (יציבות + סימוני שינוי)
      "env":    {"STAB":"80", ...},      משתני סביבה למנוע (כפתורי ניסוי)
      "rules_off": ["track_day"],        חוקי מדיניות לכיבוי (rules.py)
-     "freeze_elem": true, "freeze_hat": true,   להקפיא צד שלם על הבסיס
+     "freeze_elem": true | "<קובץ>", "freeze_hat": ...,   להקפיא צד שלם על הבסיס / על פתרון שמור
+     "tln_base": "<קובץ tln_map>",     מפת תל"ן שמורה (היציבות מושכת אליה)
      "pins":   [{"class":..,"day":..,"hour":..,"teacher":..,"subject":..,"value":1}],
      "overrides": {"hdata": {...}, "data2": {...}, "data": {...}},   עקיפות נתונים (overrides.py)
      "extra":  "extra.py"               אילוצים נוספים בפייתון (רץ בתוך המנוע)
@@ -29,18 +30,45 @@ def sh(args, cwd, env=None, label=""):
     if label: print("  " + label + ": " + " | ".join(tail))
     return r.returncode, out
 
+def _merge(a, b):
+    """מיזוג עמוק: b על גבי a (מילונים מתמזגים, כל השאר מוחלף)."""
+    out = dict(a)
+    for k, v in b.items():
+        out[k] = _merge(out[k], v) if isinstance(out.get(k), dict) and isinstance(v, dict) else v
+    return out
+
+def load_cfg(name, chain=()):
+    """proposal.json של ההצעה, על גבי ההגדרות של הצעת הבסיס שלה (ושל הבסיס שלה, וכן הלאה):
+       overrides מתמזגות, rules_off/pins/extra מצטברים, env/כותרת/הקפאות של ההצעה עצמה גוברות."""
+    if name in chain: sys.exit(f"מעגל בהצעות: {' -> '.join(chain + (name,))}")
+    pdir = os.path.join(ROOT, "proposals", name)
+    cfg = json.load(io.open(os.path.join(pdir, "proposal.json"), encoding="utf-8"))
+    cfg["_dir"] = pdir
+    cfg["_extras"] = [os.path.join(pdir, cfg["extra"])] if cfg.get("extra") else []
+    base = cfg.get("base", "published")
+    if base == "published": return cfg
+    b = load_cfg(base, chain + (name,))
+    out = dict(b); out.update({k: v for k, v in cfg.items() if k not in ("overrides", "rules_off", "pins", "_extras")})
+    out["overrides"] = _merge(b.get("overrides", {}), cfg.get("overrides", {}))
+    out["rules_off"] = sorted(set(b.get("rules_off", [])) | set(cfg.get("rules_off", [])))
+    out["pins"] = b.get("pins", []) + cfg.get("pins", [])
+    out["_extras"] = b["_extras"] + cfg["_extras"]
+    out["env"] = {**b.get("env", {}), **cfg.get("env", {})}
+    out["base"] = base
+    return out
+
 def main():
     if len(sys.argv) < 2: print(__doc__); sys.exit(2)
     name = sys.argv[1]; TL = sys.argv[2] if len(sys.argv) > 2 else "200"
     pdir = os.path.join(ROOT, "proposals", name)
-    cfg = json.load(io.open(os.path.join(pdir, "proposal.json"), encoding="utf-8"))
+    cfg = load_cfg(name)
     bdir = os.path.join(pdir, "build"); odir = os.path.join(pdir, "out")
     shutil.rmtree(bdir, ignore_errors=True); os.makedirs(bdir); os.makedirs(odir, exist_ok=True)
 
     # 1. עותק נקי של הריפו (קבצים במעקב, בלי PDF) + קלטים מקומיים שאינם בגיט
     files = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"], cwd=ROOT, capture_output=True).stdout.decode("utf-8").split("\0")
     for f in files:
-        if not f or f.endswith(".pdf") or f.startswith("proposals/"): continue
+        if not f or f.endswith(".pdf") or f.startswith(("proposals/", "attic/")): continue
         dst = os.path.join(bdir, f); os.makedirs(os.path.dirname(dst), exist_ok=True); shutil.copy2(os.path.join(ROOT, f), dst)
     for f in ("ids_local.json", "app_data"):
         src = os.path.join(ROOT, f)
@@ -52,15 +80,18 @@ def main():
     base_viewer = os.path.join(ROOT, "viewer.html"); mid_viewer = None
     if base != "published":
         bo = os.path.join(ROOT, "proposals", base, "out")
-        for a, b in (("sol_J.json", "baseline_J.json"), ("sol_hat.json", "baseline_hat.json"), ("tln_map.json", "baseline_tln.json")):
-            if os.path.exists(os.path.join(bo, a)): shutil.copy2(os.path.join(bo, a), os.path.join(bdir, b))
+        for a, b in (("sol_J.json", "baseline_J.json"), ("sol_hat_model.json", "baseline_hat.json"), ("tln_map.json", "baseline_tln.json")):
+            if not os.path.exists(os.path.join(bo, a)): sys.exit(f"הבסיס '{base}' לא נבנה (חסר {a}) - קודם python propose.py {base}")
+            shutil.copy2(os.path.join(bo, a), os.path.join(bdir, b))
         mid_viewer = os.path.join(bo, "viewer.html")
-        print(f"בסיס: הצעה '{base}'")
+        print(f"בסיס: הצעה '{base}' (ההגדרות שלה יורשות: עקיפות, כללים כבויים, נעילות, אילוצים)")
 
     # 3. סביבה למנוע
     env = dict(os.environ); env.update({k: str(v) for k, v in cfg.get("env", {}).items()}); env["TL"] = TL; env["NODIAG"] = "1"
     if cfg.get("rules_off"): env["RULES_OFF"] = ",".join(cfg["rules_off"])
     # הקפאה: true = על הבסיס; "<קובץ>" = על פתרון שמור בתיקיית ההצעה (שחזור מדויק של הצעה שכבר הוצגה)
+    if cfg.get("tln_base"):   # מפת תל"ן שמורה - היציבות (STAB) מושכת אליה, כדי ששעות החצי-כיתה לא יזוזו
+        shutil.copy2(os.path.join(pdir, cfg["tln_base"]), os.path.join(bdir, "baseline_tln.json"))
     for key, envk, tmp in (("freeze_elem", "FREEZEJ", "_freeze_J.json"), ("freeze_hat", "FREEZEH", "_freeze_H.json")):
         fz = cfg.get(key)
         if fz is True: env[envk] = "1"
@@ -69,8 +100,10 @@ def main():
         json.dump(cfg["pins"], io.open(os.path.join(bdir, "_pins.json"), "w", encoding="utf-8"), ensure_ascii=False); env["PINS"] = "_pins.json"
     if cfg.get("overrides"):
         json.dump(cfg["overrides"], io.open(os.path.join(bdir, "_overrides.json"), "w", encoding="utf-8"), ensure_ascii=False); env["OVERRIDES"] = "_overrides.json"
-    if cfg.get("extra"):
-        shutil.copy2(os.path.join(pdir, cfg["extra"]), os.path.join(bdir, "_extra.py")); env["EXTRA"] = "_extra.py"
+    if cfg.get("_extras"):   # קובצי extra של כל השרשרת, לפי הסדר (בסיס קודם)
+        io.open(os.path.join(bdir, "_extra.py"), "w", encoding="utf-8").write("\n".join(
+            f"# ---- {os.path.relpath(f, ROOT)} ----\n" + io.open(f, encoding="utf-8").read() for f in cfg["_extras"]))
+        env["EXTRA"] = "_extra.py"
 
     # 4. הצינור (בלי PDF ובלי API - זו הצעה, לא פרסום)
     print(f"בונה הצעה '{name}' (מגבלת זמן {TL} שניות)...")
@@ -135,7 +168,8 @@ def main():
     BJ = json.load(io.open(os.path.join(ROOT, "baseline_J.json"), encoding="utf-8")); BH = json.load(io.open(os.path.join(ROOT, "baseline_hat.json"), encoding="utf-8"))
     lines, cells = report("מול המערכת המפורסמת", BJ, BH)
     if base != "published":
-        bJ = json.load(io.open(os.path.join(bdir, "baseline_J.json"), encoding="utf-8")); bH = json.load(io.open(os.path.join(bdir, "baseline_hat.json"), encoding="utf-8"))
+        bo = os.path.join(ROOT, "proposals", base, "out")   # להשוואה: הפלט המוצג של הבסיס (לא תוויות המודל)
+        bJ = json.load(io.open(os.path.join(bo, "sol_J.json"), encoding="utf-8")); bH = json.load(io.open(os.path.join(bo, "sol_hat.json"), encoding="utf-8"))
         l2, _ = report(f"מול הבסיס (הצעה '{base}')", bJ, bH); lines += [""] + l2
     text = "\n".join(lines)
     io.open(os.path.join(odir, "impact.txt"), "w", encoding="utf-8").write(text)
@@ -158,7 +192,7 @@ def main():
     except Exception as e:
         print("  אקסל: דילוג (" + str(e) + ")")
 
-    for f in ("viewer.html", "sol_J.json", "sol_hat.json", "tln_map.json", "fills.json"):
+    for f in ("viewer.html", "sol_J.json", "sol_hat.json", "sol_hat_model.json", "tln_map.json", "fills.json"):
         if os.path.exists(os.path.join(bdir, f)): shutil.copy2(os.path.join(bdir, f), os.path.join(odir, f))
     print(f"\nהצעה '{name}' מוכנה: proposals/{name}/out/viewer.html  (לא מפורסם - רק אחרי אישור)")
 

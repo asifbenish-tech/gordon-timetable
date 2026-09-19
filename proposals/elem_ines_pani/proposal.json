@@ -31,5 +31,6 @@
    ]
   }
  },
- "extra": "extra.py"
+ "extra": "extra.py",
+ "tln_base": "tln_model.json"
 }

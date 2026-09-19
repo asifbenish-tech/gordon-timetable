@@ -23,3 +23,4 @@ ids_local.json
 # הצעות (propose.py): הבנייה והפלט אינם מתפרסמים דרך הריפו
 proposals/*/build/
 proposals/*/out/
+sol_hat_model.json
