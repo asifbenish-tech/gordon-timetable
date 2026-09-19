@@ -13,7 +13,7 @@ import io, json, os, sys
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from data import QUOTA as EQ, DAY_NAMES
 from data import CLASSES as ECLASSES
-from data2 import TCONS, MAXDAYS, DAYS_OFF2, UNAVAIL2, EVENTS2, MAGAMA, QUOTA_FILE, MAXQ2, TEACH_DESC
+from data2 import TCONS, MAXDAYS, DAYS_OFF2, UNAVAIL2, EVENTS2, MAGAMA, QUOTA_FILE, MAXQ2, TEACH_DESC, HATIVA2, ELEM_POOL
 from hdata import CAP as HCAP, HEV, POOLS, FRIDAY_COVER, FRIDAY_H1
 JUN_EXTRA = {v["teacher"] for v in FRIDAY_COVER.values()} | {v["teacher"] for v in FRIDAY_H1.values()}   # מלווים בשישי
 GRADES = ["ז", "ח", "ט"]
@@ -30,7 +30,8 @@ def current():
     rows = {}
     for t in sorted(set(EQ) | set(HCAP) | set(TCONS) | set(DAYS_OFF2) | set(QUOTA_FILE)):
         if t in SKIP: continue
-        in_e = t in EQ or t in EVENTS2 or t in MAXDAYS; in_j = t in HCAP or t in JUN_EXTRA
+        in_e = t in EQ or t in EVENTS2 or t in MAXDAYS or t in ELEM_POOL
+        in_j = t in HCAP or t in JUN_EXTRA or t in HATIVA2   # HATIVA2: שעות בחטיבה של מורים משותפים (ספורט, ערבית...)
         ev = {}
         for day, d in (("שני", 1), ("שלישי", 2)):
             if t in SED.get("קבוצת " + day, []):

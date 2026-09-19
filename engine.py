@@ -13,7 +13,8 @@ from data2 import *
 NONFRI=[s for s in SLOTS if s[0]!=5]; FRI=[s for s in SLOTS if s[0]==5]
 DEU=[c for c in CLASSES if c[0] in "דהו"]; B_CL=[c for c in CLASSES if c.startswith("ב ")]
 G_CL=[c for c in CLASSES if c[0]=="ג"]
-POOL={"אופיר":(3,["ו אורנה","ו שרית"]),"יערה":(7,CLASSES),"דני":(0,CLASSES),"דניאל":(5,CLASSES),"אנה":(2,CLASSES),"אביטל":(4,CLASSES),"לייה":(4,CLASSES),"אינס":(0,CLASSES),"אורנה":(1,CLASSES),"טלי":(3,B_CL),"לי-אור":(6,CLASSES),"מרים":(15,CLASSES),"צופיה":(8,[c for c in CLASSES if c[0] in "אבג"]),"שחר":(2,[c for c in CLASSES if c[0] in "אבג"])}
+POOL={t:(cap, list(cls) if isinstance(cls,list) else (list(CLASSES) if cls=="*" else [c for c in CLASSES if c[0] in cls]))
+      for t,(cap,cls) in ELEM_POOL.items()}   # ELEM_POOL ב-data2 - מקור אחד
 TLN_OFF2={"הילית":["חמישי","שישי"],"חגית":["רביעי","חמישי"],"יפעת":["חמישי","שישי"],"יעל":[]}
 TLN_UN2={"הילית":[(2,h) for h in range(4,9)],"חגית":[],"יפעת":[],"יעל":[]}   # תל"ן גמיש על 4 ימים
 
