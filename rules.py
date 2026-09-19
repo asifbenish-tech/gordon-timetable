@@ -186,6 +186,9 @@ RULES = [
 
 def apply(ctx):
     n = 0
+    _off = [i for i in __import__("os").environ.get("RULES_OFF", "").split(",") if i]
+    for r in RULES:
+        if r["id"] in _off: r["active"] = False; print(f"rules: {r['id']} כבוי (RULES_OFF)")
     for r in RULES:
         if r["active"]:
             r["fn"](ctx); n += 1

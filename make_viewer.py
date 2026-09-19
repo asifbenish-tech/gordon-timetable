@@ -402,7 +402,7 @@ SOLUTIONS=[
 # אותם כללים בדיוק כמו ברשימת המועמדים לחוסר - רק בלי הקיצוץ ל-6/5 הראשונים.
 SLOTFREE={}
 for _fd in range(6):
-    for _fh in range(1,8):
+    for _fh in range(1,max(max(DAY_HOURS),max(HDAY))+1):
         if _fh>max(DAY_HOURS[_fd],HDAY[_fd]): continue
         _fr=_free_for(_fd,_fh)
         _fx=_free_ext(_fd,_fh,exclude=[z["t"] for z in _fr])
@@ -436,7 +436,7 @@ for _t in teachers:
     _sl=[]
     for _d in range(6):
         _mx = max(DAY_HOURS[_d] if _elem else 0, HDAY[_d] if _jun else 0) or DAY_HOURS[_d]
-        for _h in range(1,8):
+        for _h in range(1,max(max(DAY_HOURS),max(HDAY))+1):
             if _h>_mx: continue
             if f"{_d},{_h}" in _busy or _blocked(_t,_d,_h): continue
             _sl.append(f"{_d},{_h}")

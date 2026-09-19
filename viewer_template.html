@@ -914,7 +914,8 @@ function teacherGrid(t){
     sedOnly[key]=(sedOnly[key]===undefined?true:sedOnly[key])&&(side==="סדירות");
     per[key]=(per[key]?per[key]+' · ':'')+add;});
   let rows="";
-  for(let h=1;h<=7;h++){
+  const MAXH=Math.max(...Object.values(DATA.jun).map(v=>Math.max(...v.hours)),...Object.values(DATA.elem).map(v=>Math.max(...v.hours)));
+  for(let h=1;h<=MAXH;h++){
     rows+='<tr><th>'+h+'</th>';
     DAYS.forEach((dn,d)=>{
       const key=d+","+h;

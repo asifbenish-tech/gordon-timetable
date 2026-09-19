@@ -556,7 +556,8 @@ for _h in range(1,7):
     if ("m",_h) in blkh: m.Add(blkh[("m",_h)]==(1 if _h in _hm else 0))
 
 # ---- חסימת מורי חטיבה בצד היסודי לפי ימי החופש והסדירויות שלהם ----
-from hdata import HOFF as _HOFF, HEV as _HEV
+from hdata import HOFF as _HOFF, HEV as _HEV, HDAY as _HDAY
+MAXH=max(_HDAY)   # השעה האחרונה ביום (7; 8 אם יפתחו שעה שמינית ב-hdata)
 # אופיר: עד 3 שעות בכיתות ו, רק ביום שלישי
 for _ko in [k for k in x if k[2]=="אופיר" and k[1][0]!=2]:
     m.Add(x[_ko]==0)
@@ -597,7 +598,7 @@ hebusy["אלי"].discard((HCM["שלישי"],5))   # ש5 שוחררה זמנית:
 def htblk(t):
     b=set(hebusy.get(t,()))
     for dn in HOFF.get(t,[]):
-        for h in range(1,8): b.add((DIDX[dn],h))
+        for h in range(1,MAXH+1): b.add((DIDX[dn],h))
     for s in HEV.get(t,[]): b.add(s)
     return b
 
@@ -1054,7 +1055,7 @@ CROSS=sorted(_ET & _HT)
 _nlink=0
 for _t in CROSS:
     for _d in range(6):
-        for _h in range(1,8):
+        for _h in range(1,MAXH+1):
             _ev=[x[k] for k in x  if k[2]==_t and k[1]==(_d,_h)]
             _hv=[hx[k] for k in hx if k[3]==_t and k[1]==(_d,_h)]
             if _ev and _hv:
@@ -1075,7 +1076,7 @@ for _t,_capv in _TOTCAP.items():
 for _t in ("תמיר",):
     for _d in range(6):
         _busy={}
-        for _h in range(1,8):
+        for _h in range(1,MAXH+1):
             from hdata import HEV as _NGHEV
             if (_d,_h) in _NGHEV.get(_t,[]) or (_t=="תמיר" and _d==4 and _h in (1,2,3,4)):
                 _busy[_h]=1; continue              # פגישות/ליווי = תפוס (לא חלון)
@@ -1099,7 +1100,7 @@ for _t in ("תמיר",):
 # ---- MAXGAP: חלון של עד שעתיים (לא יותר) - הילה, על פני שני בתי הספר ----
 for _d in range(6):
     _busy2={}
-    for _h in range(1,8):
+    for _h in range(1,MAXH+1):
         _v2=[x[k] for k in x if k[2]=="הילה" and k[1]==(_d,_h)]
         _v2+=[hx[k] for k in hx if k[3]=="הילה" and k[1]==(_d,_h)]
         if not _v2: continue
@@ -1217,6 +1218,30 @@ for (c,s2,u),v in hf.items():
     if k3 in x:
         b3=m.NewBoolVar(f"hh{c}{s2}{u}")
         m.Add(b3<=v); m.Add(b3<=x[k3]); _HOMEHALF.append(b3)
+# ================= כפתורי ניסוי (משתני סביבה) =================
+# FREEZEJ=<קובץ|1>  מקפיא את היסודי על פתרון (1 = baseline_J.json).
+# FREEZEH=<קובץ|1>  מקפיא את החטיבה על פתרון (1 = baseline_hat.json).
+# PINS=<קובץ json>  נעילות נקודתיות: [{"class":..,"day":0-5,"hour":1-8,"teacher":..,"subject":..(חטיבה),"value":1|0}]
+# RULES_OFF=id1,id2 מכבה חוקי מדיניות (rules.py). כולם לניסויים והצעות - לא לפרסום.
+def _freeze(env, default, keys, lab):
+    _f=os.environ.get(env)
+    if not _f: return
+    _sol=json.load(io.open(default if _f=="1" else _f,encoding="utf-8")); _n=0
+    for k,v in keys.items():
+        _c,(_d,_h)=k[0],k[1]; _want=lab(k)
+        if _sol.get(_c,{}).get(f"{_d},{_h}")==_want: m.Add(v==1); _n+=1
+    print(f"{env}: {_n} תאים קפואים")
+_freeze("FREEZEJ","baseline_J.json",x,lambda k:k[2])
+_freeze("FREEZEH","baseline_hat.json",hx,lambda k:f"{k[2]} – {k[3]}")
+if os.environ.get("PINS"):
+    _pins=json.load(io.open(os.environ["PINS"],encoding="utf-8")); _np=0
+    for _p in _pins:
+        _c,_d,_h,_t,_v=_p["class"],int(_p["day"]),int(_p["hour"]),_p["teacher"],int(_p.get("value",1))
+        _k=(_c,(_d,_h),_p["subject"],_t) if "subject" in _p else (_c,(_d,_h),_t)
+        _tab=hx if "subject" in _p else x
+        if _k in _tab: m.Add(_tab[_k]==_v); _np+=1
+        else: print(f"PINS: אין משתנה ל-{_k} (מורה חסום/לא מלמד שם) - מדלג")
+    print(f"PINS: {_np} נעילות")
 m.Minimize(OBJ_E + OBJ_H + 6000*sum(_sp_pen) - 1500*sum(_tln_tue) - 120*sum(_HOMEHALF) + STAB*sum(_stab))
 sol=cp_model.CpSolver()
 import os as _os
