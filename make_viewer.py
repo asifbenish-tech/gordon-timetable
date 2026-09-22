@@ -638,7 +638,25 @@ def _teachers_sheet(xlsx="מערכות שעות.xlsx"):
                 if per.get((d,h)) and sed_only.get((d,h)): c.fill=_SED
                 if f"{d},{h}" in tdf:
                     c.fill=_CHG; c.comment=Comment("היה: "+tdf[f"{d},{h}"]["was"],"הצעה")
-        _r+=_maxh+3
+        # מתחת למערכת: כמה שעות בכל כיתה (ובחטיבה - גם לפי מקצוע)
+        import collections as _co
+        _bycls=_co.Counter(); _bysub=_co.defaultdict(_co.Counter); _other=_co.Counter()
+        for side,d,h,lbl in data["teachers"][t]:
+            if side=="סדירות": continue
+            if side=="חטיבה" and " · " in lbl:
+                _c,_sj=lbl.split(" · ",1); _bycls[_c]+=1; _bysub[_c][_sj.split(" · ")[0]]+=1
+            elif side in ("יסודי",'תל"ן'):
+                _c=lbl.split(" · ")[0]; _bycls[_c]+=1
+                if side=='תל"ן': _bysub[_c]['תל"ן']+=1
+            else: _other[side if side!="מגמות" else "מגמות"]+=1
+        _rr=_r+_maxh+2
+        ws.cell(row=_rr,column=1,value="שעות לפי כיתה:").font=_HF
+        _lines=[f"{_c}: {_n}"+((" ("+", ".join(f"{sj} {k}" for sj,k in _bysub[_c].most_common())+")") if _bysub.get(_c) else "") for _c,_n in sorted(_bycls.items(),key=lambda z:(-z[1],z[0]))]
+        _lines+=[f"{_k}: {_n}" for _k,_n in _other.items()]
+        _lines.append(f"סה\"כ: {sum(_bycls.values())+sum(_other.values())}")
+        for _i,_ln in enumerate(_lines):
+            c=ws.cell(row=_rr+_i,column=2,value=_ln); c.alignment=Alignment(horizontal="right")
+        _r=_rr+len(_lines)+2
     ws.column_dimensions["A"].width=14
     for d in range(6): ws.column_dimensions[chr(ord("B")+d)].width=30
     wb.save(xlsx); print(f"אקסל: גיליון מערכות מורים עודכן ({xlsx})")
