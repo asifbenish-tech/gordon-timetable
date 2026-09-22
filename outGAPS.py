@@ -194,56 +194,10 @@ for ri,row in enumerate(TR2):
 wsm.cell(row=19,column=1,value="הערה: חסן מלווה רק בשעות 1-2 (לבקשתך); בשעות 3-4 המלווה למגמה הימית הוא נעמי (במקום אלי, בגלל התנגשות עם ישיבת מרכזי בית חינוך)")
 for i in range(1,6): wsm.column_dimensions[get_column_letter(i)].width=26
 
-# ---- מערכות מורים (יסודי + חטיבה יחד) ----
-def tof(v): return v.split(" – ")[1] if " – " in v else None
-def sof(v): return v.split(" – ")[0] if " – " in v else None
-
-teachers = set()
-for c in CLASSES:
-    for s2 in SLOTS:
-        t = E[c][f"{s2[0]},{s2[1]}"]
-        if t: teachers.add(t)
-for c in HCLASSES:
-    for s2 in HSLOTS:
-        t = tof(H[c][f"{s2[0]},{s2[1]}"])
-        if t and t!="שכבת ט יחד": teachers.add(t)
-teachers.add("צופיה")
-
+# ---- מערכות מורים: הגיליון נכתב ב-make_viewer מתוך DATA.teachers (אותו מקור כמו הלוח:
+# יסודי + חטיבה + תל"ן + מגמות + הצטרפויות + שישי ט + סדירויות, כולל שעה שמינית) ----
 wst = wb.create_sheet("מערכות מורים"); wst.sheet_view.rightToLeft = True
-wst["A1"] = "מערכות שעות לכל מורה (יסודי + חטיבה)"; wst["A1"].font = Font(bold=True, size=14)
-r = 3
-MAXHR = 7
-for t in sorted(teachers):
-    try: _fn=json.load(io.open("names_map.json",encoding="utf-8")).get(t) or t
-    except Exception: _fn=t
-    wst.cell(row=r, column=1, value=_fn).font = Font(bold=True, size=12)
-    for i, dn in enumerate(DAY_NAMES):
-        cc = wst.cell(row=r+1, column=2+i, value=dn); cc.fill = HDRF; cc.font = HF; cc.alignment = CEN
-    total = 0
-    for h in range(1, MAXHR+1):
-        wst.cell(row=r+1+h, column=1, value=h).font = Font(bold=True)
-        for d in range(6):
-            found = []
-            if h <= DAY_HOURS[d]:
-                for c in CLASSES:
-                    if E[c][f"{d},{h}"] == t: found.append(c)
-            if h <= HDAY[d]:
-                for c in HCLASSES:
-                    v = H[c][f"{d},{h}"]
-                    if tof(v) == t: found.append(c + " (" + sof(v) + ")")
-            for (cls_co, sl_co), whoo in COMAP.items():
-                if whoo == t and sl_co == (d, h):
-                    found.append(cls_co + " (מצטרפת)")
-            _val = ", ".join(found) if found else ""
-            if d == 0 and h in (6, 7):                    # אסיפת צוות: ראשון 6-7, כל המורים
-                _val = (_val + " · " if _val else "") + "אסיפת צוות"
-            cell = wst.cell(row=r+1+h, column=2+d, value=_val)
-            cell.alignment = CEN; cell.border = BO
-            if found: total += len(found)
-    wst.cell(row=r, column=2, value="סה" + chr(34) + "כ " + str(total) + " ש'")
-    r += MAXHR + 3
-wst.column_dimensions["A"].width = 12
-for d in range(6): wst.column_dimensions[get_column_letter(2+d)].width = 26
+wst["A1"] = "מערכות המורים נכתבות ב-make_viewer (רץ אחרי outGAPS בצינור)"
 
 # ---- גיליון ניצול שעות ----
 from util import build as _build

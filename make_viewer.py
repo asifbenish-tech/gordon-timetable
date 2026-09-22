@@ -602,9 +602,51 @@ if _os.environ.get("PROP_BASE"):
     data["prop"]={"title":_os.environ.get("PROP_TITLE",""),"banner":_os.environ.get("PROP_BANNER","הצעה")}
     print(f"הצעה: {sum(len(v) for v in _diff.values())} תאים שונים ב-{len(_diff)} כיתות, {len(_tdiff)} מורים")
 
+# ---- גיליון "מערכות מורים" באקסל - מאותו DATA.teachers שהלוח מציג ----
+def _teachers_sheet(xlsx="מערכות שעות.xlsx"):
+    import os
+    if not os.path.exists(xlsx): return
+    from openpyxl import load_workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.comments import Comment
+    wb=load_workbook(xlsx)
+    if "מערכות מורים" in wb.sheetnames: wb.remove(wb["מערכות מורים"])
+    ws=wb.create_sheet("מערכות מורים", min(len(wb.sheetnames), max(0,wb.sheetnames.index("ניצול שעות") if "ניצול שעות" in wb.sheetnames else len(wb.sheetnames))))
+    ws.sheet_view.rightToLeft=True
+    _HF=Font(bold=True); _CEN=Alignment(horizontal="center",vertical="center",wrap_text=True)
+    _BO=Border(*[Side(style="thin",color="BBBBBB")]*4); _HDR=PatternFill("solid",fgColor="DDEBF7")
+    _SED=PatternFill("solid",fgColor="F2F2F2"); _CHG=PatternFill("solid",fgColor="FFF2A8")
+    ws["A1"]="מערכות שעות לכל מורה (יסודי + חטיבה + תל\"ן + מגמות + סדירויות)"; ws["A1"].font=Font(bold=True,size=14)
+    _maxh=max(max(DAY_HOURS),max(HDAY)); _r=3
+    _util={u["t"]:u for u in util}
+    for t in sorted(data["teachers"], key=lambda z:_FULLN.get(z,z)):
+        if t in ("מגמות","חסר מורה","שרית + חסן","שכבת ט יחד"): continue
+        per={}; sed_only={}
+        for side,d,h,lbl in data["teachers"][t]:
+            k=(d,h); txt=("◦ "+lbl) if side=="סדירות" else (lbl+("" if side=="יסודי" else f" ({side})"))
+            per[k]=(per[k]+" · " if k in per else "")+txt; sed_only[k]=sed_only.get(k,True) and side=="סדירות"
+        u=_util.get(t); n=sum(1 for k,v in sed_only.items() if not v)
+        ws.cell(row=_r,column=1,value=_FULLN.get(t,t)).font=Font(bold=True,size=12)
+        ws.cell(row=_r,column=2,value=(f"משובץ {u['tot']} מתוך {u['q']} שעות" if u else f"{n} שעות בשבוע"))
+        for i,dn in enumerate(DAY_NAMES):
+            c=ws.cell(row=_r+1,column=2+i,value=dn); c.fill=_HDR; c.font=_HF; c.alignment=_CEN; c.border=_BO
+        tdf=(data.get("tdiff") or {}).get(t,{})
+        for h in range(1,_maxh+1):
+            ws.cell(row=_r+1+h,column=1,value=h).font=_HF
+            for d in range(6):
+                c=ws.cell(row=_r+1+h,column=2+d,value=per.get((d,h),"")); c.alignment=_CEN; c.border=_BO
+                if per.get((d,h)) and sed_only.get((d,h)): c.fill=_SED
+                if f"{d},{h}" in tdf:
+                    c.fill=_CHG; c.comment=Comment("היה: "+tdf[f"{d},{h}"]["was"],"הצעה")
+        _r+=_maxh+3
+    ws.column_dimensions["A"].width=14
+    for d in range(6): ws.column_dimensions[chr(ord("B")+d)].width=30
+    wb.save(xlsx); print(f"אקסל: גיליון מערכות מורים עודכן ({xlsx})")
 html = io.open("viewer_template.html", encoding="utf-8").read()
 html = html.replace("/*__DATA__*/", "const DATA="+json.dumps(data,ensure_ascii=False)+";")
 io.open("viewer.html","w",encoding="utf-8").write(html)
+try: _teachers_sheet()
+except Exception as _e: print("אקסל: גיליון מערכות מורים לא נכתב:", _e)
 # index.html - הפניה עם חותמת גרסה שנקבעת בזמן הריצה (Date.now).
 # קודם החותמת הוטבעה כאן בזמן הבנייה, ולכן דפדפן ששמר את index.html
 # במטמון המשיך להפנות לגרסה הישנה - וזו בדיוק הסיבה שמורה יכול היה
