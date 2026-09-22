@@ -119,8 +119,9 @@ for c in HCLASSES:                                    # ---- חטיבה ----
     dd=DAY_NAMES.index(DUTY[c])
     cell=ws.cell(row=2+5,column=2+dd); cell.fill=DUTYFILL
     cell.comment=openpyxl.comments.Comment(f"סידור חדר אוכל – {hr} עם הכיתה","מערכת")
-    ws.cell(row=9,column=1,value=f"סידור חדר אוכל: יום {DUTY[c]}, שעה 5 (עם {hr})").font=Font(bold=True,color="BF8F00")
-    r=11; ws.cell(row=r,column=1,value="שעות לפי מקצוע:").font=Font(bold=True)
+    _last=2+max(HDAY)   # שורת השעה האחרונה (7 או 8) - ההערות מתחתיה, לא על שעה 7
+    ws.cell(row=_last+2,column=1,value=f"סידור חדר אוכל: יום {DUTY[c]}, שעה 5 (עם {hr})").font=Font(bold=True,color="BF8F00")
+    r=_last+4; ws.cell(row=r,column=1,value="שעות לפי מקצוע:").font=Font(bold=True)
     cnt=collections.Counter(v.split(" – ")[0] for v in H[c].values() if v)
     for i,(sj,n) in enumerate(cnt.most_common()):
         ws.cell(row=r+1+i,column=1,value=sj); ws.cell(row=r+1+i,column=2,value=n)
