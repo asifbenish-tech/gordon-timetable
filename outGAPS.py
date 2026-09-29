@@ -22,10 +22,8 @@ for _k,_t in FILLS.items():
 FILLFILL=PatternFill("solid",fgColor="00B0F0")
 try: TLNMAP=json.load(io.open("tln_map.json",encoding="utf-8"))
 except Exception: TLNMAP={}
-MAGT={ (2,1):"חסן / רובי / שרית / אסיף", (2,2):"חסן / רובי / שרית / אסיף",
-       (2,3):"נעמי / חגית / יעל / אופיר", (2,4):"נעמי / חגית / יעל / אופיר",
-       (4,1):"חסן / מאמי / אסיף", (4,2):"חסן / מאמי / אסיף",
-       (4,3):"אלי / יעל / מאמי", (4,4):"אלי / יעל / מאמי" }
+from data2 import MAG_ROLES, MAG_EXT   # מגמות - מקור אחד ב-data2 (לא לכתוב כאן שמות)
+MAGT={k:" / ".join(t for t,_r in v) for k,v in MAG_ROLES.items()}
 COMAP={}
 for _k in CO:
     _tag,_sl=_k.split("|"); _d,_h=_sl.split(",")
@@ -171,28 +169,21 @@ for i,t in enumerate([
 wsg.column_dimensions["A"].width=110
 wsm=wb.create_sheet("מגמות חטיבה"); wsm.sheet_view.rightToLeft=True
 wsm["A1"]="מגמות חטיבה – טבלת המורים לפי הטופס המקורי"; wsm["A1"].font=Font(bold=True,size=14)
-TR1=[("שעות","מגמה ימית","מגמת אומנויות","מגמת בישול וספורט אתגרי","מגמת חדשנות וטכנולוגיה"),
-     ("1","כדורעף חופים","רובי","שרית","אסיף"),
-     ("2","כדורעף חופים","רובי","שרית","אסיף"),
-     ("3","ימאות (מלווה: נעמי)","חגית","יעל","אופיר של גבריאל"),
-     ("4","ימאות (מלווה: נעמי)","חגית","יעל","אופיר של גבריאל")]
-wsm["A3"]="יום שלישי – מגמות לשכבות ז+ח"; wsm["A3"].font=Font(bold=True,size=12)
-for ri,row in enumerate(TR1):
-    for ci,v in enumerate(row):
-        cc=wsm.cell(row=4+ri,column=1+ci,value=v)
-        if ri==0: cc.fill=HDRG; cc.font=HF
-TR2=[("שעות","מגמה ימית","מגמת אומנויות","מגמת בישול וספורט אתגרי","מגמת חדשנות וטכנולוגיה"),
-     ("1","ימאות","מאמי","חסן","אסיף"),
-     ("2","ימאות","מאמי","חסן","אסיף"),
-     ("3","כדורעף חופים","מאמי","יעל","אלי"),
-     ("4","כדורעף חופים","מאמי","יעל","אלי")]
-wsm["A11"]="יום חמישי – מגמות לשכבת ט"; wsm["A11"].font=Font(bold=True,size=12)
-for ri,row in enumerate(TR2):
-    for ci,v in enumerate(row):
-        cc=wsm.cell(row=12+ri,column=1+ci,value=v)
-        if ri==0: cc.fill=HDRG; cc.font=HF
-wsm.cell(row=19,column=1,value="הערה: חסן מלווה רק בשעות 1-2 (לבקשתך); בשעות 3-4 המלווה למגמה הימית הוא נעמי (במקום אלי, בגלל התנגשות עם ישיבת מרכזי בית חינוך)")
-for i in range(1,6): wsm.column_dimensions[get_column_letter(i)].width=26
+# הטבלה נבנית מ-MAG_ROLES: בכל שעה - מי מלמד/ת או מלווה איזו מגמה, ומדריך חיצוני אם יש
+_r0=3
+for _day,_title in ((2,"יום שלישי – מגמות לשכבות ז+ח"),(4,"יום חמישי – מגמות לשכבת ט")):
+    wsm.cell(row=_r0,column=1,value=_title).font=Font(bold=True,size=12)
+    _hrs=sorted(h for (d,h) in MAG_ROLES if d==_day)
+    _w=max(len(MAG_ROLES[(_day,h)]) for h in _hrs)
+    for ci,v in enumerate(["שעה"]+[f"מורה {i+1}" for i in range(_w)]+["מדריך חיצוני"]):
+        cc=wsm.cell(row=_r0+1,column=1+ci,value=v); cc.fill=HDRG; cc.font=HF
+    for ri,h in enumerate(_hrs):
+        wsm.cell(row=_r0+2+ri,column=1,value=h)
+        for ci,(t,role) in enumerate(MAG_ROLES[(_day,h)]):
+            wsm.cell(row=_r0+2+ri,column=2+ci,value=f"{t} – {role}")
+        wsm.cell(row=_r0+2+ri,column=2+_w,value=MAG_EXT.get((_day,h),""))
+    _r0+=len(_hrs)+4
+for i in range(1,8): wsm.column_dimensions[get_column_letter(i)].width=26
 
 # ---- מערכות מורים: הגיליון נכתב ב-make_viewer מתוך DATA.teachers (אותו מקור כמו הלוח:
 # יסודי + חטיבה + תל"ן + מגמות + הצטרפויות + שישי ט + סדירויות, כולל שעה שמינית) ----
