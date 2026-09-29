@@ -66,6 +66,7 @@ if X:
                 if not t: continue
                 if h not in rows: err.append(f"אקסל {c}: חסרה שורת שעה {h}"); continue
                 xv = str(rows[h][1 + d].value or "").replace(" – ", " · ")
+                if t == "חסר מורה" and "מפגשה" in s and "(זמני)" in xv: continue   # מפגשה פעם בשלושה שבועות - באקסל המחנך/ת (זמני)
                 if t.replace(" – ", " · ") not in xv and not (s and s in xv):
                     nx += 1
                     if nx <= 20: err.append(f"אקסל {c} {DN[d]} ש{h}: בלוח '{t} / {s}', באקסל '{xv}'")

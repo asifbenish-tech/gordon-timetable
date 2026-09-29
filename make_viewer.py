@@ -665,7 +665,10 @@ def _teachers_sheet(xlsx="מערכות שעות.xlsx"):
         c=wg.cell(row=3,column=1+i,value=hh); c.fill=_HDR; c.font=_HF; c.border=_BO
     for ri,g in enumerate(_g):
         cand=", ".join(x["t"]+(" (מעבר למכסה)" if x.get("ext") else "") for x in g.get("cand",[])) or "אין"
-        for ci,v in enumerate([g["c"],g["d"],g["h"],g.get("why",""),cand]):
+        _why=g.get("why","")
+        if "מפגשה" in _why or "מעגל שיח" in _why:   # המפגשה פעם בשלושה שבועות - בשאר השבועות המחנך/ת נכנס/ת
+            _why+=" - פעם בשלושה שבועות; בשאר השבועות המחנך/ת נכנס/ת (זמני)"
+        for ci,v in enumerate([g["c"],g["d"],g["h"],_why,cand]):
             c=wg.cell(row=4+ri,column=1+ci,value=v); c.border=_BO; c.alignment=Alignment(horizontal="right",wrap_text=True)
     for col,w in zip("ABCDE",(12,10,6,50,40)): wg.column_dimensions[col].width=w
     wb.save(xlsx); print(f"אקסל: גיליונות מערכות מורים וחוסרים עודכנו ({xlsx})")

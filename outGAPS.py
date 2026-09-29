@@ -62,6 +62,9 @@ def grid(ws,title,home,cells,dayhours,hdr,away,cls=None,hcls=None):
                 if cls is not None and not _busy:         # חוסר ביסודי: מחנך/ת הכיתה פנוי/ה ונכנס/ת בינתיים
                     cell.value=f"{home} (זמני)"
                     cell.comment=openpyxl.comments.Comment("מחנך/ת הכיתה נכנס/ת בינתיים - שיבוץ זמני עד סגירת החוסר","מערכת")
+                elif cls is not None and "מפגשה" in _busy:   # מפגשה פעם בשלושה שבועות: בשאר השבועות המחנך/ת נכנס/ת
+                    cell.value=f"{home} (זמני)"
+                    cell.comment=openpyxl.comments.Comment(f"בשבוע של מפגשה (פעם בשלושה שבועות) - חסר מורה. בשאר השבועות {home} נכנס/ת","מערכת")
                 elif cls is not None:                     # המחנך/ת תפוס/ה - אין מי שייכנס
                     cell.value="חסר מורה"
                     cell.comment=openpyxl.comments.Comment(f"אין מורה: {_busy}","מערכת")
