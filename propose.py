@@ -14,6 +14,7 @@
      "pins":   [{"class":..,"day":..,"hour":..,"teacher":..,"subject":..,"value":1}],
      "overrides": {"hdata": {...}, "data2": {...}, "data": {...}},   עקיפות נתונים (overrides.py)
      "extra":  "extra.py"               אילוצים נוספים בפייתון (רץ בתוך המנוע)
+     "access": ["אסיף", "דאפי"]         מי נכנס/ת ללוח ההצעה (לפי ת"ז); בלי השדה - כל מי שנכנס ללוח הרגיל
    }
    הפלט ב-proposals/<שם>/out/: viewer.html (עם סימוני היה ← נהיה), impact.txt
    (היקף ההשפעה: תאים, כיתות, מורים), sol_*.json, אקסל עם גיליון "שינויים".
@@ -124,6 +125,7 @@ def main():
         if rc != 0: print(o[-1500:]); sys.exit(1)
     env["PROP_BASE"] = base_viewer; env["PROP_TITLE"] = cfg.get("title", name); env["PROP_BANNER"] = cfg.get("banner", "הצעה - לא מפורסם")
     if mid_viewer: env["PROP_MID"] = mid_viewer
+    if cfg.get("access"): env["PROP_ACCESS"] = ",".join(cfg["access"])   # כניסה לפי ת"ז רק לשמות האלה
     rc, o = sh([sys.executable, "make_viewer.py"], bdir, env, "לוח")
     if rc != 0: print(o[-1500:]); sys.exit(1)
 

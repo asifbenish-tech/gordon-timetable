@@ -8,6 +8,12 @@ try: _FULLN={k:v for k,v in json.load(io.open("names_map.json",encoding="utf-8")
 except Exception: _FULLN={}
 try: _ACCESS=json.load(io.open("access_map.json",encoding="utf-8"))
 except Exception: _ACCESS={}
+# לוח של הצעה: PROP_ACCESS="שם,שם" - רק תעודות הזהות של האנשים האלה נכנסות (שאר הגיבובים לא מוטבעים)
+import os as _os0
+if _os0.environ.get("PROP_ACCESS"):
+    _allow={n.strip() for n in _os0.environ["PROP_ACCESS"].split(",") if n.strip()}
+    _ACCESS={h:v for h,v in _ACCESS.items() if v.get("n") in _allow}
+    print(f"הצעה: כניסה רק ל-{len(_ACCESS)} תעודות ({', '.join(sorted(_allow))})")
 S   = json.load(io.open("sol_J.json",  encoding="utf-8"))
 H   = json.load(io.open("sol_hat.json",encoding="utf-8"))
 TLN = json.load(io.open("tln_map.json",encoding="utf-8"))
