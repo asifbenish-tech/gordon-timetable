@@ -164,10 +164,11 @@ for c,n in (("ה דני",11),("ה תניה",9)):
     v=[x[(c,s,"דני")] for s in NONFRI if (c,s,"דני") in x]
     fx=sum(1 for (cc,ss),tt in fixed.items() if tt=="דני" and cc==c)
     if v: m.Add(sum(v)==n-fx)
-# דניאל: לפחות 17 בכיתה שלו, ולא בכיתות ו
-v=[x[("ג דניאל",s,"דניאל")] for s in NONFRI if ("ג דניאל",s,"דניאל") in x]
-fx=sum(1 for (cc,ss),tt in fixed.items() if tt=="דניאל" and cc=="ג דניאל")
-if v: m.Add(sum(v)>=17-fx)
+# מינימום שעות של מחנך/ת בכיתתו/ה (כולל שישי) - HOME_MIN ב-data2. דניאל: גם לא בכיתות ו
+for _c,_n in HOME_MIN.items():
+    v=[x[(_c,s,HOMEROOM[_c])] for s in NONFRI if (_c,s,HOMEROOM[_c]) in x]
+    fx=sum(1 for (cc,ss),tt in fixed.items() if tt==HOMEROOM[_c] and cc==_c)
+    if v: m.Add(sum(v)>=_n-fx)
 for c in ("ו שרית","ו אורנה"):
     v=[x[(c,s,"דניאל")] for s in NONFRI if (c,s,"דניאל") in x]
     if v: m.Add(sum(v)<=2)
