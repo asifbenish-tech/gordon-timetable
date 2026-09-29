@@ -26,7 +26,6 @@ def ok(t,c,d,h):
     L=load()
     if L.get(t,0)>=CAPS.get(t,0): return False
     off=list(DAYS_OFF2.get(t) or [])
-    if t=='צופיה': off.append('חמישי')
     # מגבלת ימי עבודה - חייבת להתאים למנוע, אחרת המילוי מוסיף יום שלישי/רביעי
     md=MAXDAYS.get(t)
     if md:
@@ -42,7 +41,7 @@ def ok(t,c,d,h):
     if h<=HDAY[d] and any(t in tof(H[cc][f'{d},{h}']) for cc in HCLASSES): return False
     for day in ('שני','שלישי'):
         if t in SED.get('קבוצת '+day,[]) and CM[day]==d and h in SED['מעגלי שיח '+day]: return False
-    if t in ['לייה','שרית','יערה','צופיה','אסיף','אלי'] and d==2 and h in SED['ישיבת ניהול שלישי']: return False
+    if t in NIHUL and d==2 and h in SED['ישיבת ניהול שלישי']: return False
     if t in ('שרית','חסן') and h in PE_BLOCKS.get(d,[]): return False   # ספורט חטיבה - היה עותק ישן (1-3) והכניס את חסן לשני מקומות
     return True
 gaps=[(c,d,h) for c in CLASSES for (d,h) in SLOTS if not S[c][f'{d},{h}']]

@@ -23,7 +23,7 @@ MAGROLES={f"{d},{h}":v for (d,h),v in _MR.items()}
 EXT={f"{d},{h}":v for (d,h),v in _ME.items()}
 MAGT={k:" · ".join(f"{t} {r}" for t,r in v)+(" · "+EXT[k] if k in EXT else "") for k,v in MAGROLES.items()}
 CM={"שני":1,"שלישי":2}
-NIHUL=["לייה","שרית","יערה","צופיה","אסיף"]
+from data2 import NIHUL   # ישיבת מרכזי בית חינוך - מקור אחד
 
 def away_map(hr):
     out={}
@@ -242,7 +242,7 @@ for _day in ("שני","שלישי"):
     for _t in SED.get("קבוצת "+_day,[]):
         for _h in SED["מעגלי שיח "+_day]:
             add_t(_t,"סדירות",_CM2[_day],_h,"מפגשה (מעגלי שיח)")
-for _t in ("לייה","שרית","יערה","צופיה","אסיף","אלי"):
+for _t in NIHUL:
     for _h in SED.get("ישיבת ניהול שלישי",[3,4]):
         add_t(_t,"סדירות",2,_h,"ישיבת מרכזי בית חינוך")
 _COMMIT=[
@@ -303,7 +303,7 @@ gapl=[]
 from data2 import DAYS_OFF2, UNAVAIL2, EVENTS2, MAGAMA, tcons_blocked, tcons_text, FIXED_ONLY, FIXED_DAYS
 try: from data2 import HATIVA2
 except Exception: HATIVA2={}
-from hdata import HOFF as _HOFF, HEV as _HEV
+from hdata import HOFF as _HOFF, HEV as _HEV, PE_BLOCKS as _PEB_ALL
 _CM={"שני":1,"שלישי":2}
 # מורי היסודי שנבדקים כמועמדים לחוסר. המכסה נלקחת מ-QUOTA_FILE - מקור אחד,
 # אחרת עדכון מכסה מזיז את התצוגה ולא את רשימת המועמדים (מרים 23 מול 25).
@@ -327,7 +327,6 @@ def _free_for(d,h):
         if _load.get(t,0)>=q: continue
         if t in FIXED_ONLY: continue                 # רק שיעורים קבועים ביסודי
         off=list(DAYS_OFF2.get(t) or [])
-        if t=="צופיה": off.append("חמישי")
         if t=="טלי" and DAY_NAMES[d] not in ("שני","שלישי"): continue
         if t=="שחר" and DAY_NAMES[d] not in ("שני","שלישי","רביעי"): continue
         if DAY_NAMES[d] in off: continue
@@ -338,8 +337,8 @@ def _free_for(d,h):
         bad=False
         for day in ("שני","שלישי"):
             if t in SED.get("קבוצת "+day,[]) and _CM[day]==d and h in SED["מעגלי שיח "+day]: bad=True
-        if t in ["לייה","שרית","יערה","צופיה","אסיף","אלי"] and d==2 and h in SED["ישיבת ניהול שלישי"]: bad=True
-        if t in ("שרית","חסן") and ((d==0 and h in (1,2,3)) or (d==3 and h in (1,2,3))): bad=True
+        if t in NIHUL and d==2 and h in SED["ישיבת ניהול שלישי"]: bad=True
+        if t in ("שרית","חסן") and h in _PEB_ALL.get(d,()): bad=True   # ספורט שכבתי חטיבה (PE_BLOCKS)
         if not bad: out.append({"t":t,"left":q-_load.get(t,0)})
     out.sort(key=lambda z:-z["left"])
     return out[:6]
@@ -350,7 +349,6 @@ def _free_ext(d,h,exclude=()):
         if t in exclude or _load.get(t,0)<q: continue
         if t in FIXED_ONLY: continue                 # רק שיעורים קבועים ביסודי
         off=list(DAYS_OFF2.get(t) or [])
-        if t=="צופיה": off.append("חמישי")
         if t=="טלי" and DAY_NAMES[d] not in ("שני","שלישי"): continue
         if t=="שחר" and DAY_NAMES[d] not in ("שני","שלישי","רביעי"): continue
         if DAY_NAMES[d] in off: continue
@@ -361,8 +359,8 @@ def _free_ext(d,h,exclude=()):
         bad=False
         for day in ("שני","שלישי"):
             if t in SED.get("קבוצת "+day,[]) and _CM[day]==d and h in SED["מעגלי שיח "+day]: bad=True
-        if t in ["לייה","שרית","יערה","צופיה","אסיף","אלי"] and d==2 and h in SED["ישיבת ניהול שלישי"]: bad=True
-        if t in ("שרית","חסן") and ((d==0 and h in (1,2,3)) or (d==3 and h in (4,5,6))): bad=True
+        if t in NIHUL and d==2 and h in SED["ישיבת ניהול שלישי"]: bad=True
+        if t in ("שרית","חסן") and h in _PEB_ALL.get(d,()): bad=True   # ספורט שכבתי חטיבה (PE_BLOCKS)
         if not bad: out.append({"t":t,"left":0,"ext":1})
     return out[:5]
 def _why(c,d,h):
@@ -420,13 +418,12 @@ def _blocked(t,d,h):
     if DAY_NAMES[d] in (DAYS_OFF2.get(t) or []): return True
     if DAY_NAMES[d] in _HOFF.get(t,[]): return True
     if t in FIXED_ONLY and DAY_NAMES[d] not in FIXED_DAYS[t] and d<5: return True   # ביסודי רק בימי השיעורים הקבועים
-    if t=="צופיה" and DAY_NAMES[d]=="חמישי": return True
     if (d,h) in (UNAVAIL2.get(t,[])+EVENTS2.get(t,[])+_HEV.get(t,[])): return True
     if tcons_blocked(t,d,h,DAY_HOURS[d] if d<len(DAY_HOURS) else None): return True
     if t in MAGAMA.get((d,h),[]): return True
     for _dy in ("שני","שלישי"):
         if t in SED.get("קבוצת "+_dy,[]) and _CM[_dy]==d and h in SED["מעגלי שיח "+_dy]: return True
-    if t in ["לייה","שרית","יערה","צופיה","אסיף","אלי"] and d==2 and h in SED.get("ישיבת ניהול שלישי",[]): return True
+    if t in NIHUL and d==2 and h in SED.get("ישיבת ניהול שלישי",[]): return True
     return False
 TFREE={}
 for _t in teachers:
@@ -447,24 +444,32 @@ for _t in teachers:
 
 # ---------- אילוצי מערכת ----------
 import rules as _R
+# כללי יסוד - החלקים שנגזרים מנתונים נכתבים מהנתונים עצמם (טקסט ידני התיישן: ספורט 1-3,
+# "תנ"ך ז ללא מורה", שוויון יומי, גיבוש בשישי). הטקסט החופשי - רק מה שאין לו נתון.
+from hdata import PE_BLOCKS as _PEB, FRIDAY_H1 as _FH1, FRIDAY_COVER as _FC, MAG_H as _MAGH
+_DS="אבגדהו"
+_wk_e=" ".join(f"{_DS[d]}{n}" for d,n in enumerate(DAY_HOURS))
+_wk_h=" ".join(f"{_DS[d]}{n}" for d,n in enumerate(HDAY))
+_fri=[]
+for _c9,_f in _FH1.items(): _fri.append(f"{_c9} ש1: {(_f.get('show') or 'ליווי')} עם {_f['teacher']}")
+for _c9,_f in _FC.items(): _fri.append(f"{_c9}: {_f['teacher']} נכנס ב-{_f['miss']} שעות (במקום המחנך)")
 SYS_CORE=[
- ("מבנה השבוע","יסודי: א5 ב6 ג6 ד6 ה5 ו4. חטיבה: א5 ב7 ג6(ז+ח עד 5) ד6 ה7(ט עד 5) ו4."),
- ("יום המגמות","ז+ח בשלישי, ט בחמישי: מגמות ש1-4, שיעור חינוך עם המחנך בש5, ובזה מסתיים היום."),
+ ("מבנה השבוע",f"יסודי: {_wk_e}. חטיבה: {_wk_h} (ז+ח בשלישי ו-ט בחמישי מסתיימים בש5, יום המגמות)."),
+ ("יום המגמות","ז+ח בשלישי, ט בחמישי: מגמות ש1-4, שיעור חינוך עם המחנך בש5, ובזה מסתיים היום. מי מלווה כל מגמה - בלשונית \"לוח סדירויות\"."),
  ("שישי ביסודי","המחנך/ת בלבד עם הכיתה (א אנה: צופיה)."),
  ("שירה בציבור","כל החטיבה בשישי ש2, אצל המחנך ונספרת לו."),
- ("מפגשה (מעגלי שיח) - שני 3-4","תדהר+עדי עם: אנה, אינס, אסיף, דליה, דני, דניאל, מירי, נעמי, תמיר."),
- ("מפגשה (מעגלי שיח) - שלישי 5-6","תדהר+גלית עם: אביטל, אורנה, אלי, גלית, יערה, לייה, פנינה, שרית, תניה."),
- ("ישיבת מרכזי בית חינוך","שלישי 3-4: לייה, שרית, יערה, צופיה, אסיף, אלי."),
+ ("מפגשה (מעגלי שיח) - שני "+"-".join(map(str,SED["מעגלי שיח שני"][::len(SED["מעגלי שיח שני"])-1])),"עם: "+", ".join(SED["קבוצת שני"])+"."),
+ ("מפגשה (מעגלי שיח) - שלישי "+"-".join(map(str,SED["מעגלי שיח שלישי"][::len(SED["מעגלי שיח שלישי"])-1])),"עם: "+", ".join(SED["קבוצת שלישי"])+"."),
+ ("ישיבת מרכזי בית חינוך","שלישי "+"-".join(map(str,SED["ישיבת ניהול שלישי"][::len(SED["ישיבת ניהול שלישי"])-1]))+": "+", ".join(NIHUL)+"."),
  ("אסיפת צוות","ראשון 6-7: כל המורים."),
- ("חינוך גופני שכבתי","חטיבה: ראשון 1-3 ורביעי 4-6, שרית+חסן, שעה לכל שכבה."),
+ ("חינוך גופני שכבתי","חטיבה: "+" ו".join(f"{DAY_NAMES[d]} {min(h)}-{max(h)}" for d,h in sorted(_PEB.items()))+", שרית+חסן, שעה לכל שכבה."),
  ("חווה חקלאית","כיתות ג בשני 1-2 עם המחנכות."),
  ("סידור חדר אוכל - חטיבה","כל כיתת חטיבה פעם בשבוע בש5 עם המחנך, כל כיתה ביום אחר."),
  ("סידור חדר אוכל - ה+ו","משמרת ראשונה, שעה 4 עם המחנך/ת: ה דני-רביעי, ה תניה-ראשון, ו אורנה-שלישי, ו שרית-שני. בנוסף, כל שבוע כיתה אחרת נכנסת בחמישי (רוטציה חודשית)."),
- ("שוויון מקבילות","כיתות באותה שכבה לומדות אותו מספר שעות בכל יום."),
+ ("שוויון מקבילות","כיתות מקבילות באותה שכבה לומדות אותו סך שעות שבועי (לא חייבות לסיים יחד בכל יום)."),
  ("חלונות","אין חלונות באמצע יום - שחרור רק בסוף היום."),
  ("תל\"ן","שעתיים בכל כיתה; יעל, חגית, יפעת והילית מלמדות תל\"ן ומעט מגמה בלבד."),
- ("תנ\"ך בכיתות ז","במערכת ללא מורה כרגע - עד גיוס."),
- ("שישי בט אסיף","ש1 שעת גיבוש שכבתית (שתי כיתות ט יחד); בשאר השעות המורה צבי נכנס."),
+ ("שישי בשכבת ט","; ".join(_fri)+"."),
  ("חוסרים ביסודי","במשבצות ללא מורה מחנך/ת הכיתה נכנס/ת בינתיים - שיבוץ זמני עד לסגירת החוסר."),
 ]
 SYS_RULES=[("["+r["id"]+"] "+r["name"]+("" if r["active"] else " — כבוי"),r["desc"]) for r in _R.RULES]
@@ -650,7 +655,20 @@ def _teachers_sheet(xlsx="מערכות שעות.xlsx"):
         _r=_rr+len(_lines)+2
     ws.column_dimensions["A"].width=14
     for d in range(6): ws.column_dimensions[chr(ord("B")+d)].width=30
-    wb.save(xlsx); print(f"אקסל: גיליון מערכות מורים עודכן ({xlsx})")
+    # ---- גיליון "חוסרים": אותם חוסרים שהלוח מציג (לשונית "חוסרים"), עם סיבה ומועמדים ----
+    if "חוסרים" in wb.sheetnames: wb.remove(wb["חוסרים"])
+    _pos=wb.sheetnames.index("מגמות חטיבה") if "מגמות חטיבה" in wb.sheetnames else len(wb.sheetnames)
+    wg=wb.create_sheet("חוסרים",_pos); wg.sheet_view.rightToLeft=True
+    _g=data["gaps"]
+    wg["A1"]=f"משבצות ללא מורה: {len(_g)}"; wg["A1"].font=Font(bold=True,size=14)
+    for i,hh in enumerate(["כיתה","יום","שעה","למה","מי פנוי/ה (מועמדים)"]):
+        c=wg.cell(row=3,column=1+i,value=hh); c.fill=_HDR; c.font=_HF; c.border=_BO
+    for ri,g in enumerate(_g):
+        cand=", ".join(x["t"]+(" (מעבר למכסה)" if x.get("ext") else "") for x in g.get("cand",[])) or "אין"
+        for ci,v in enumerate([g["c"],g["d"],g["h"],g.get("why",""),cand]):
+            c=wg.cell(row=4+ri,column=1+ci,value=v); c.border=_BO; c.alignment=Alignment(horizontal="right",wrap_text=True)
+    for col,w in zip("ABCDE",(12,10,6,50,40)): wg.column_dimensions[col].width=w
+    wb.save(xlsx); print(f"אקסל: גיליונות מערכות מורים וחוסרים עודכנו ({xlsx})")
 html = io.open("viewer_template.html", encoding="utf-8").read()
 html = html.replace("/*__DATA__*/", "const DATA="+json.dumps(data,ensure_ascii=False)+";")
 io.open("viewer.html","w",encoding="utf-8").write(html)

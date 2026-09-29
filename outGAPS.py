@@ -22,7 +22,8 @@ for _k,_t in FILLS.items():
 FILLFILL=PatternFill("solid",fgColor="00B0F0")
 try: TLNMAP=json.load(io.open("tln_map.json",encoding="utf-8"))
 except Exception: TLNMAP={}
-from data2 import MAG_ROLES, MAG_EXT   # מגמות - מקור אחד ב-data2 (לא לכתוב כאן שמות)
+from data2 import MAG_ROLES, MAG_EXT, NIHUL
+from hdata import FRIDAY_H1, FRIDAY_COVER, PE_BLOCKS as _PEB   # מגמות - מקור אחד ב-data2 (לא לכתוב כאן שמות)
 MAGT={k:" / ".join(t for t,_r in v) for k,v in MAG_ROLES.items()}
 COMAP={}
 for _k in CO:
@@ -32,7 +33,20 @@ COFILL=PatternFill("solid",fgColor="D5A6BD")
 CEN=Alignment(horizontal="center",vertical="center",wrap_text=True)
 CM={"שני":1,"שלישי":2}
 
-def grid(ws,title,home,cells,dayhours,hdr,away,cls=None):
+def _home_busy(hr, c, d, h, away):
+    """המחנך/ת תפוס/ה במקום אחר באותה שעה? (אותו כלל כמו בלוח - make_viewer._home_busy).
+       אם כן - התא הוא "חסר מורה" ולא "מחנך/ת (זמני)", אחרת היא משובצת בשני מקומות."""
+    if (d, h) in away: return away[(d, h)]
+    if DAY_NAMES[d] in (DAYS_OFF2.get(hr) or []): return f"{hr} בחופש"
+    for c2 in CLASSES:
+        if c2 != c and E[c2].get(f"{d},{h}") == hr: return f"{hr} מלמד/ת ב{c2}"
+    for c2 in HCLASSES:
+        v = H[c2].get(f"{d},{h}") or ""
+        if hr in v.split(" – ")[-1].split(" + "): return f"{hr} מלמד/ת ב{c2}"
+    if hr in MAGAMA.get((d, h), []): return f"{hr} במגמות"
+    return None
+
+def grid(ws,title,home,cells,dayhours,hdr,away,cls=None,hcls=None):
     ws.sheet_view.rightToLeft=True
     ws["A1"]=title; ws["A1"].font=Font(bold=True,size=14); ws.merge_cells("A1:G1"); ws["A1"].alignment=CEN
     for i,v in enumerate(["שעה"]+DAY_NAMES):
@@ -44,14 +58,23 @@ def grid(ws,title,home,cells,dayhours,hdr,away,cls=None):
             if h>dayhours[d]: cell.fill=PatternFill("solid",fgColor="F2F2F2"); continue
             v=cells.get((d,h),"")
             if not v:
-                if cls is not None:                       # חוסר ביסודי: מחנך/ת הכיתה נכנס/ת בינתיים
+                _busy=_home_busy(home,cls,d,h,away) if cls is not None else None
+                if cls is not None and not _busy:         # חוסר ביסודי: מחנך/ת הכיתה פנוי/ה ונכנס/ת בינתיים
                     cell.value=f"{home} (זמני)"
                     cell.comment=openpyxl.comments.Comment("מחנך/ת הכיתה נכנס/ת בינתיים - שיבוץ זמני עד סגירת החוסר","מערכת")
+                elif cls is not None:                     # המחנך/ת תפוס/ה - אין מי שייכנס
+                    cell.value="חסר מורה"
+                    cell.comment=openpyxl.comments.Comment(f"אין מורה: {_busy}","מערכת")
                 else:
                     cell.value="חסר מורה"
                 cell.fill=PatternFill("solid",fgColor="FF9999"); cell.font=Font(bold=True,color="990000")
                 cell.border=BO; continue
-            if v.endswith("– צבי") and d==5: v="צבי"    # שישי בט אסיף - בלי מקצוע
+            if d==5 and hcls:                              # שישי ט: אותה תצוגה כמו בלוח (hdata)
+                _sj,_t=(v.split(" – ")+[""])[:2]
+                if _sj=="ליווי" and hcls in FRIDAY_H1:
+                    _sh=FRIDAY_H1[hcls].get("show"); v=f"{_sh} – {_t}" if _sh else _t
+                elif hcls in FRIDAY_COVER and _t==FRIDAY_COVER[hcls]["teacher"] and _sj!="שירה בציבור":
+                    _sh=FRIDAY_COVER[hcls].get("show"); v=f"{_sh} – {_t}" if _sh else _t
             cell.value=v
             if cls is not None and (cls,(d,h)) in FILLMAP:
                 cell.fill=FILLFILL; cell.font=Font(bold=True,color="FFFFFF")
@@ -64,6 +87,8 @@ def grid(ws,title,home,cells,dayhours,hdr,away,cls=None):
                 cell.comment=openpyxl.comments.Comment(
                     "צופיה מצטרפת לשיעור (שתי מורות בכיתה) – היא אינה מחליפה את "+home,"מערכת")
                 cell.border=BO; continue
+            _tk=f"{cls}|{d},{h}" if cls else None
+            if v=='תל"ן' and _tk in TLNMAP: cell.value='תל"ן – '+TLNMAP[_tk]   # שמות המורות גם כשהמחנכת בחוץ
             if (d,h) in away:
                 cell.fill=AW; cell.comment=openpyxl.comments.Comment(f"{home} בחוץ: {away[(d,h)]}","מערכת")
             elif "מגמות" in v:
@@ -73,8 +98,6 @@ def grid(ws,title,home,cells,dayhours,hdr,away,cls=None):
             elif v==home or v.endswith("– "+home): cell.fill=HR
             elif v=='תל"ן':
                 cell.fill=TL
-                _tk=f"{cls}|{d},{h}" if cls else None
-                if _tk and _tk in TLNMAP: cell.value='תל"ן – '+TLNMAP[_tk]
             else:
                 _tk2=f"{cls}|{d},{h}" if cls else None
                 if _tk2 and _tk2 in TLNMAP and TLNMAP[_tk2].startswith("חצי"):
@@ -89,7 +112,7 @@ for c in CLASSES:                                     # ---- יסודי ----
     for day in ("שני","שלישי"):
         if hr in D["קבוצת "+day]:
             for h in D["מעגלי שיח "+day]: away[(CM[day],h)]="מפגשה (מעגלי שיח)"
-    if hr in ["לייה","שרית","יערה","צופיה","אסיף"]:
+    if hr in NIHUL:
         for h in D["ישיבת ניהול שלישי"]: away[(2,h)]="ישיבת מרכזי בית חינוך"
     grid(ws,f"יסודי – כיתה {c}   (מחנך/ת: {hr})",hr,
          {(d,h):E[c][f"{d},{h}"] for (d,h) in SLOTS},DAY_HOURS,HDRF,away,cls=c)
@@ -110,7 +133,7 @@ for c in HCLASSES:                                    # ---- חטיבה ----
             for h in D["מעגלי שיח "+day]: away[(CM[day],h)]="מפגשה (מעגלי שיח)"
     if c=="ז אלי": away.pop((2,5),None)               # אלי נכנס לכיתתו בש5 (זמני)
     grid(ws,f"חטיבה – כיתה {c}   (מחנך/ת: {hr})",hr,
-         {(d,h):H[c][f"{d},{h}"] for (d,h) in HSLOTS},HDAY,HDRG,away)
+         {(d,h):H[c][f"{d},{h}"] for (d,h) in HSLOTS},HDAY,HDRG,away,hcls=c)
     if c=="ז אלי" and "אלי" in H[c]["2,5"]:
         _c25=ws.cell(row=2+5,column=2+2)
         _c25.comment=openpyxl.comments.Comment("אלי נכנס לכיתתו זמנית עד תחילת המפגשות (מתנגש במפגשה)","מערכת")
@@ -128,45 +151,32 @@ for c in HCLASSES:                                    # ---- חטיבה ----
 
 ws=wb.create_sheet("סדירויות"); ws.sheet_view.rightToLeft=True   # ---- ריכוז ----
 ws["A1"]="סדירויות ובלוקים קבועים"; ws["A1"].font=Font(bold=True,size=14)
+def _mag_line(day):   # מי מלווה כל מגמה - מ-MAG_ROLES (לא טקסט ידני)
+    hrs=sorted(h for (d,h) in MAG_ROLES if d==day); parts=[]; prev=None
+    for h in hrs:
+        who=", ".join(t for t,_r in MAG_ROLES[(day,h)])
+        if parts and who==prev: parts[-1]=(parts[-1][0],h,who)
+        else: parts.append((h,h,who))
+        prev=who
+    return " | ".join(f"ש{a}-{b}: {w}" if a!=b else f"ש{a}: {w}" for a,b,w in parts)
+_zof=[DAY_NAMES.index(x) for x in DAYS_OFF2.get("צופיה",[])]
 rows=[("מפגשה (מעגלי שיח) – קבוצה א'","שני",D["מעגלי שיח שני"],", ".join(D["קבוצת שני"])),
       ("מפגשה (מעגלי שיח) – קבוצה ב'","שלישי",D["מעגלי שיח שלישי"],", ".join(D["קבוצת שלישי"])),
-      ("ישיבת מרכזי בית חינוך","שלישי",D["ישיבת ניהול שלישי"],"לייה, שרית, יערה, צופיה, אסיף"),
+      ("ישיבת מרכזי בית חינוך","שלישי",D["ישיבת ניהול שלישי"],", ".join(NIHUL)),
       ("אסיפת צוות","ראשון",[6,7],"כל המורים"),
-      ("מגמות ז + ח","שלישי",[1,2,3,4],"ש1-2: חסן, שרית, אסיף, רובי | ש3-4: אלי, חגית, יעל, אופיר"),
-      ("מגמות ט","חמישי",[1,2,3,4],"ש1-2: חסן, אסיף, מאמי | ש3-4: אלי, יעל, מאמי"),
-      ("ספורט שכבתי חטיבה","ראשון",[1,2,3],"שרית (בנות) + חסן (בנים) – שעה לכל שכבה"),
-      ("ספורט שכבתי חטיבה","רביעי",[4,5,6],"שרית (בנות) + חסן (בנים) – שעה לכל שכבה"),
-      ("חווה חקלאית שכבת ג'","שני",[1,2],"לייה, דליה ודניאל עם הכיתות שלהן ✔")]
+      ("מגמות ז + ח","שלישי",[1,2,3,4],_mag_line(2)),
+      ("מגמות ט","חמישי",[1,2,3,4],_mag_line(4))]+[
+      ("ספורט שכבתי חטיבה",DAY_NAMES[_d],_hs,"שרית (בנות) + חסן (בנים) – שעה לכל שכבה") for _d,_hs in sorted(_PEB.items())]+[
+      ("חווה חקלאית שכבת ג'","שני",[1,2],"לייה, דליה ודניאל עם הכיתות שלהן (רצוי, לא חובה)")]
 r=3
 for name,day,hrs,who in rows:
     ws.cell(row=r,column=1,value=name).font=Font(bold=True)
     ws.cell(row=r,column=2,value=f"{day}, שעות {hrs[0]}-{hrs[-1]}")
     ws.cell(row=r,column=3,value=who); r+=1
-ws.cell(row=r+1,column=1,value="צופיה: יום חופש רביעי ✔ | בשני מתחילה משעה 3 ✔").font=Font(bold=True)
+ws.cell(row=r+1,column=1,value="צופיה: יום חופש "+", ".join(DAYS_OFF2.get("צופיה",[]))+" | שני ורביעי מתחילה משעה 3").font=Font(bold=True)
 ws.column_dimensions["A"].width=30; ws.column_dimensions["B"].width=24; ws.column_dimensions["C"].width=95
-wsg=wb.create_sheet("הבעיה בשכבת ו"); wsg.sheet_view.rightToLeft=True
-wsg["A1"]="שכבת ו – 8 משבצות ללא מורה"; wsg["A1"].font=Font(bold=True,size=14)
-r=3
-for i,hh in enumerate(["כיתה","יום","שעה"]):
-    cc=wsg.cell(row=r,column=1+i,value=hh); cc.fill=HDRF; cc.font=HF
-r=4
-for c in ("ו אורנה","ו שרית"):
-    for (d,h) in SLOTS:
-        if not E[c][f"{d},{h}"]:
-            wsg.cell(row=r,column=1,value=c); wsg.cell(row=r,column=2,value=DAY_NAMES[d])
-            wsg.cell(row=r,column=3,value=h); r+=1
-r+=1
-wsg.cell(row=r,column=1,value="השורש: שתי המחנכות לא זמינות מספיק").font=Font(bold=True,size=12)
-for i,t in enumerate([
- "אורנה – מכסה 18 שעות בכיתתה, זמינה בפועל 14",
- "   ראשון 4 (ש1 הדרכת שפה) · שני חופש · שלישי 2 (ש1-2 לא זמינה, ש5-6 מפגשה) · רביעי 4 (ש1-2 לא זמינה) · חמישי חופש · שישי 4",
- "שרית – מכסה 22 שעות ביסודי, זמינה בפועל 15",
- "   מאבדת 10 ש' בשבוע: 6 ספורט שכבתי בחטיבה, 2 מגמות, 2 ישיבת מרכזי בית חינוך",
- "",
- "מאזן היסודי כולו: קיבולת 421 מול ביקוש 416 – עודף של 5 שעות בלבד,",
- "וכל העודף שייך למורות שכבות א-ג (צופיה, טלי, שחר) שאינן מלמדות בשכבת ו."]):
-    wsg.cell(row=r+1+i,column=1,value=t)
-wsg.column_dimensions["A"].width=110
+# (גיליון "הבעיה בשכבת ו" הישן הוסר: טקסט ידני שהתיישן. גיליון "חוסרים" נכתב ב-make_viewer מאותם
+# חוסרים שהלוח מציג, עם הסיבה והמועמדים)
 wsm=wb.create_sheet("מגמות חטיבה"); wsm.sheet_view.rightToLeft=True
 wsm["A1"]="מגמות חטיבה – טבלת המורים לפי הטופס המקורי"; wsm["A1"].font=Font(bold=True,size=14)
 # הטבלה נבנית מ-MAG_ROLES: בכל שעה - מי מלמד/ת או מלווה איזו מגמה, ומדריך חיצוני אם יש

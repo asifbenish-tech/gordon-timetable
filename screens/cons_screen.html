@@ -1,0 +1,159 @@
+<title>אילוצי מורים גורדון</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Frank+Ruhl+Libre:wght@700&display=swap">
+<style>
+:root{--bg:#F8F6F1;--surface:#FFFFFF;--ink:#22303D;--muted:#6B7A88;--line:#DFDCD4;--accent:#0E6E66;--accent-ink:#FFFFFF;--chip:#EEF2F0;--block:#B3261E;--block-bg:#FBE4E1;--ev:#F1EFEA;--edit:#7A4DB8;--edit-bg:#F3EEFA;--off:#EFEDE8;--ok:#2E7D32}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#171C22;--surface:#1F262E;--ink:#E8E6E0;--muted:#9AA6B2;--line:#2F3942;--accent:#4FB3A9;--accent-ink:#0F1A18;--chip:#28323B;--block:#F08A7E;--block-bg:#4A2320;--ev:#2A313A;--edit:#B99BE8;--edit-bg:#332A47;--off:#242B33;--ok:#7BC47F}}
+:root[data-theme="dark"]{--bg:#171C22;--surface:#1F262E;--ink:#E8E6E0;--muted:#9AA6B2;--line:#2F3942;--accent:#4FB3A9;--accent-ink:#0F1A18;--chip:#28323B;--block:#F08A7E;--block-bg:#4A2320;--ev:#2A313A;--edit:#B99BE8;--edit-bg:#332A47;--off:#242B33;--ok:#7BC47F}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 Heebo,Arial,sans-serif;direction:rtl;padding-block:0;padding-inline:16px;margin:0}
+header{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap;padding:1rem 0 .6rem;border-bottom:1px solid var(--line)}
+h1{font:700 1.5rem "Frank Ruhl Libre",Heebo,serif;margin:0;text-wrap:balance}
+header .st{font-size:.82rem;color:var(--muted)}
+.wrap{display:grid;grid-template-columns:15rem 1fr;gap:1rem;padding-block:1rem;max-width:1200px;margin:0 auto}
+@media (max-width:760px){.wrap{grid-template-columns:1fr}}
+aside{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;max-height:calc(100vh - 1rem);overflow:auto}
+.search{width:100%;box-sizing:border-box;padding:.45rem .7rem;border:1px solid var(--line);border-radius:.5rem;background:var(--surface);color:var(--ink);font:inherit;margin-bottom:.5rem}
+.tlist{display:flex;flex-direction:column;gap:2px}
+.tlist button{display:flex;justify-content:space-between;align-items:center;text-align:right;border:1px solid transparent;background:transparent;color:var(--ink);padding:.35rem .6rem;border-radius:.45rem;font:inherit;cursor:pointer}
+.tlist button:hover{background:var(--chip)} .tlist button[aria-pressed="true"]{background:var(--surface);border-color:var(--line);font-weight:700}
+.tlist .side{font-size:.7rem;color:var(--muted)} .tlist .ed{width:.5rem;height:.5rem;border-radius:50%;background:var(--edit);display:inline-block;margin-inline-start:.3rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:.8rem;padding:1rem 1.1rem;margin-bottom:1rem}
+.card h2{margin:0 0 .2rem;font-size:1.2rem} .sub{color:var(--muted);font-size:.85rem;margin-bottom:.6rem}
+fieldset{border:0;padding:0;margin:.7rem 0} legend{font-weight:700;margin-bottom:.3rem;padding:0}
+label.d{margin-inline-end:.8rem;white-space:nowrap}
+.tblwrap{overflow-x:auto} table{border-collapse:collapse;min-width:520px;width:100%} th,td{border:1px solid var(--line);padding:.3rem .4rem;text-align:center;font-size:.8rem} th{background:var(--chip)}
+td.pick{cursor:pointer} td.pick:hover{outline:2px solid var(--accent);outline-offset:-2px}
+td.ev{background:var(--ev);color:var(--muted)} td.un{background:var(--block-bg);color:var(--block)} td.ns{background:var(--edit-bg);color:var(--edit);font-weight:700} td.off{background:var(--off);color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(18rem,1fr));gap:.45rem .9rem}
+input[type=number]{width:3.6rem;font:inherit;padding:.2rem .3rem;border:1px solid var(--line);border-radius:.4rem;background:var(--bg);color:var(--ink)}
+input[type=text],textarea{font:inherit;padding:.3rem .5rem;border:1px solid var(--line);border-radius:.4rem;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
+button.b{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:.5rem;padding:.3rem .7rem;font:inherit;cursor:pointer} button.b:hover{background:var(--chip)}
+button.b.p{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.badge{display:inline-block;font-size:.72rem;padding:.05rem .45rem;border-radius:1rem;background:var(--edit-bg);color:var(--edit);margin-inline-start:.4rem}
+.diff{font-size:.85rem} .diff li{margin:.15rem 0} .diff b{color:var(--edit)}
+.note{font-size:.8rem;color:var(--muted)} .warn{background:var(--block-bg);color:var(--block);padding:.5rem .8rem;border-radius:.5rem;font-size:.85rem;margin-bottom:.8rem}
+.saved{color:var(--ok);font-size:.8rem} :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){.saved{transition:opacity .4s}}
+</style>
+<header>
+  <h1>⚙ אילוצי מורים</h1>
+  <span class="st" id="status">מתחבר למסד הנתונים…</span>
+</header>
+<div class="wrap">
+  <aside>
+    <input class="search" id="q" type="search" placeholder="חיפוש מורה…" aria-label="חיפוש מורה">
+    <div class="tlist" id="tlist"></div>
+  </aside>
+  <main id="main"><div class="card"><div class="sub">טוען…</div></div></main>
+</div>
+<script>
+const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"], MAXH=8;
+const FIELDS=[["max_hour","עד שעה (לא מלמד/ת אחריה)","num"],["max_days","עד כמה ימי עבודה בשבוע","num"],["min_per_day","יום עבודה = לפחות n שעות","num"],["max_gap","חלון של עד n שעות (ריק = בלי הגבלה)","num"],["no_gaps","בלי חלונות בכלל","bool"],["events_busy","לחלונות: אירוע/ישיבה נחשבים תפוסים","bool"],["no_last","לא בשעה האחרונה של היום","bool"],["no_last_subject","מקצוע שלא בשעה האחרונה (מופרד בפסיק)","text"]];
+const $=s=>document.querySelector(s);
+let db=null, docs={}, pick=null, unsub=null, readOnly=false, filter="", LISTS={classes:[],subjects:[],grades:["ז","ח","ט"]};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const clean=tc=>{const o={}; Object.entries(tc||{}).forEach(([k,v])=>{ if(v===""||v===null||v===false||v===undefined) return; if(Array.isArray(v)&&!v.length) return; if(typeof v==="object"&&!Array.isArray(v)&&!Object.keys(v).length) return; o[k]=v;}); return o;};
+const same=(a,b)=>JSON.stringify(a??null)===JSON.stringify(b??null);
+function changes(d){ const b=d.base||{}; const out=[];
+  if(!same(d.off||[],b.off||[])) out.push("ימים חופשיים: "+((b.off||[]).join(", ")||"—")+" ← "+((d.off||[]).join(", ")||"—"));
+  const tc=clean(d.tcons), bt=clean(b.tcons);
+  new Set([...Object.keys(tc),...Object.keys(bt)]).forEach(k=>{ if(same(tc[k],bt[k])) return; const f=FIELDS.find(x=>x[0]===k); const fmt=v=>v===undefined?"—":(k==="no_slots"?v.map(s=>DAYS[s[0]]+" ש"+s[1]).join(", "):(k==="day_until"?Object.entries(v).map(([a,c])=>DAYS[+a]+" עד "+c).join(", "):(Array.isArray(v)?v.join(", "):String(v)))); out.push((f?f[1]:(k==="no_slots"?"שעות חסומות":(k==="day_until"?"מסיים/ה עד שעה":k)))+": "+fmt(bt[k])+" ← "+fmt(tc[k])); });
+  if(d.side!=="jun"&&(d.maxdays||null)!==(b.maxdays||null)) out.push("מגבלת ימי עבודה: "+(b.maxdays||"—")+" ← "+(d.maxdays||"—"));
+  const ec=(o)=>{const r={}; Object.entries(o||{}).forEach(([c,h])=>{if(+h) r[c]=+h;}); return r;};
+  const e1=ec(d.elem_classes), e2=ec(b.elem_classes);
+  new Set([...Object.keys(e1),...Object.keys(e2)]).forEach(c=>{ if(e1[c]!==e2[c]) out.push("שעות ב"+c+": "+(e2[c]||"—")+" ← "+(e1[c]||"—")); });
+  const p1=(d.jun_pools||[]).slice().sort(), p2=(b.jun_pools||[]).slice().sort();
+  if(!same(p1,p2)) out.push("מקצועות בחטיבה: "+(p2.map(x=>x.replace("|"," ")).join(", ")||"—")+" ← "+(p1.map(x=>x.replace("|"," ")).join(", ")||"—"));
+  [["jun_cap","תקרת שעות בחטיבה"],["maxq","מכסה פרונטלית ביסודי"],["quota","מכסת משרה (לתצוגה)"]].forEach(([k,lab])=>{ if((d[k]||null)!==(b[k]||null)) out.push(lab+": "+(b[k]||"—")+" ← "+(d[k]||"—")); });
+  return out; }
+function renderList(){ const ids=Object.keys(docs).sort((a,b)=>docs[a].name.localeCompare(docs[b].name,"he"));
+  $("#tlist").innerHTML=ids.filter(i=>!filter||docs[i].name.includes(filter)).map(i=>{const d=docs[i]; const n=changes(d).length;
+    return '<button data-id="'+i+'" aria-pressed="'+(i===pick)+'"><span>'+esc(d.name)+(n?'<span class="ed" title="'+n+' שינויים"></span>':'')+(d.note?' 📝':'')+'</span><span class="side">'+({elem:"יסודי",jun:"חטיבה",both:"שניהם"}[d.side]||"")+'</span></button>';}).join("");
+  $("#tlist").querySelectorAll("button").forEach(b=>b.onclick=()=>{pick=b.dataset.id; try{localStorage.setItem("cons_pick",pick);}catch(e){} render();}); }
+function summary(){ const ch=Object.values(docs).map(d=>[d,changes(d)]).filter(x=>x[1].length);
+  return '<div class="card"><h2>סיכום</h2><div class="sub">'+Object.keys(docs).length+' מורים · '+ch.length+' עם שינויים מול קבצי המקור. כאן: מה כל מורה מלמד/ת (כיתות ושעות ביסודי, מקצועות ושכבות בחטיבה), מכסות, ימים חופשיים, שעות חסומות, כללים אישיים והערות. השינויים נשמרים לאורך זמן; לבניית מערכת מריצים אותם דרך הצעה ורואים את היקף ההשפעה לפני אישור.</div>'+
+    (ch.length?'<ul class="diff">'+ch.map(([d,c])=>'<li><b>'+esc(d.name)+'</b>: '+c.map(esc).join(" · ")+'</li>').join("")+'</ul>':'<div class="note">אין שינויים ממתינים.</div>')+
+    '<div class="note" style="margin-top:.5rem">הערות של מורים (📝) נשמרות גם הן - שימושי לקראת בניית המערכות מחדש.</div></div>'; }
+function render(){ renderList(); const M=$("#main");
+  if(!pick||!docs[pick]){ M.innerHTML=summary()+'<div class="card"><div class="sub">בחרו מורה מהרשימה כדי לראות ולערוך את האילוצים.</div></div>'; return; }
+  const d=docs[pick], e=d, tc=e.tcons||{}, side=d.side;
+  const chk=(key,label,arr)=>'<fieldset><legend>'+label+'</legend>'+DAYS.map(dn=>'<label class="d"><input type="checkbox" id="'+key+'_'+dn+'" data-off="'+key+'" data-day="'+dn+'"'+((arr||[]).includes(dn)?' checked':'')+((readOnly)?' disabled':'')+'> '+dn+'</label>').join("")+'</fieldset>';
+  let h='<div class="card"><h2>'+esc(d.name)+(changes(d).length?'<span class="badge">'+changes(d).length+' שינויים</span>':'')+'</h2><div class="sub">'+({elem:"יסודי",jun:"חטיבה",both:"יסודי + חטיבה"}[side]||"")+(d.quota?' · מכסה '+d.quota+' שעות':'')+(d.updatedAt?' · עודכן '+new Date(d.updatedAt).toLocaleString("he-IL"):'')+' <span class="saved" id="saved"></span></div>';
+  if(readOnly) h+='<div class="warn">אין לך הרשאת עריכה במסך הזה - אפשר לצפות בלבד.</div>';
+  const dis=readOnly?' disabled':'';
+  h+='<fieldset><legend>מה מלמד/ת</legend><input type="text" id="desc" value="'+esc(d.desc||"")+'" placeholder="תיאור קצר (מופיע בטבלת הצוות בלוח)"'+dis+'></fieldset>';
+  if(side!=="jun"){
+    const ecs=e.elem_classes||{}; const cls=LISTS.classes.length?LISTS.classes:Object.keys(ecs);
+    const tot=Object.values(ecs).reduce((a,v)=>a+(+v||0),0);
+    h+='<fieldset><legend>שעות לפי כיתה (יסודי) <span class="note">סה"כ '+tot+(e.maxq?' מתוך '+e.maxq:'')+'</span></legend><div class="grid2">'+
+      cls.filter(c=>ecs[c]||(d.elem_actual||{})[c]||!readOnly).map(c=>{const a=(d.elem_actual||{})[c]||0; const w=+(ecs[c]||0);
+        return '<label>'+esc(c)+' <input type="number" min="0" max="30" id="ec_'+esc(c)+'" data-ec="'+esc(c)+'" value="'+(ecs[c]||"")+'"'+dis+'>'+
+          ((a||w)?' <span class="note"'+(a!==w?' style="color:var(--block)"':'')+'>בפועל '+a+'</span>':'')+'</label>';}).join("")+'</div>'+
+      '<div class="note">המספר בשדה = היעד שהפותר מנסה להגיע אליו (לא חובה). "בפועל" = כמה שעות יש היום במערכת המפורסמת; באדום כשזה שונה מהיעד.</div></fieldset>';
+  }
+  if(side!=="elem"){
+    const pools=e.jun_pools||[]; const subs=LISTS.subjects.length?LISTS.subjects:[...new Set(pools.map(x=>x.split("|")[0]))];
+    let pg='<div class="tblwrap"><table style="min-width:0;width:auto"><tr><th>מקצוע</th>'+LISTS.grades.map(g=>'<th>'+g+'</th>').join("")+'</tr>';
+    subs.forEach(sj=>{ pg+='<tr><th style="text-align:right">'+esc(sj)+'</th>'+LISTS.grades.map(g=>{const k=sj+"|"+g; return '<td><input type="checkbox" data-pool="'+esc(k)+'" aria-label="'+esc(sj+" "+g)+'"'+(pools.includes(k)?' checked':'')+dis+'></td>';}).join("")+'</tr>'; });
+    pg+='</table></div>';
+    h+='<fieldset><legend>מקצועות בחטיבה (מי יכול/ה ללמד מה) <span class="note">תקרה: <input type="number" min="0" max="40" id="juncap" value="'+(e.jun_cap||"")+'"'+dis+'> שעות</span></legend>'+pg+
+      '<div class="note">סימון = המורה נכנס/ת לרשימת המורים של המקצוע בשכבה; כמה שעות בכל כיתה נקבע בתוכנית הלימודים (NEED/OVR), לא כאן.</div></fieldset>';
+  }
+  h+='<fieldset><legend>מכסות</legend><div class="grid2"><label>מכסת משרה לתצוגה (ניצול שעות) <input type="number" min="0" max="40" id="quota" value="'+(e.quota||"")+'"'+dis+'></label>'+
+     (side!=="jun"?'<label>מכסה פרונטלית ביסודי (MAXQ2) <input type="number" min="0" max="40" id="maxq" value="'+(e.maxq||"")+'"'+dis+'></label>':'')+'</div></fieldset>';
+  h+=chk("off","ימים חופשיים",e.off);
+  const ns=(tc.no_slots||[]).map(s=>s[0]+","+s[1]);
+  let g='<div class="tblwrap"><table><tr><th>שעה</th>'+DAYS.map(x=>'<th>'+x+'</th>').join("")+'</tr>';
+  for(let hh=1;hh<=MAXH;hh++){ g+='<tr><th>'+hh+'</th>'; DAYS.forEach((dn,dd)=>{ const k=dd+","+hh; const ev=(d.events||{})[k];
+    const offd=(e.off||[]).includes(dn); const un=(d.unavail||[]).includes(k);
+    let cls="",txt="",tt="לחיצה: חסימה/שחרור";
+    if(offd){cls="off";txt="חופש";tt="יום חופשי";} else if(ev){cls="ev";txt="◦ "+ev;tt=ev+" - משתנה דרך קלוד";} else if(un){cls="un";txt="חסום";tt="חסימה עם סיבה (UNAVAIL2) - משתנה דרך קלוד";} else if(ns.includes(k)){cls="ns";txt="🚫";}
+    const ok=!offd&&!ev&&!un&&!readOnly; g+='<td class="'+cls+(ok?' pick':'')+'"'+(ok?' data-ns="'+k+'" tabindex="0" role="button"':'')+' title="'+tt+'">'+txt+'</td>'; }); g+='</tr>'; }
+  g+='</table></div>';
+  h+='<fieldset><legend>שעות</legend><div class="note" style="margin-bottom:.3rem">לחיצה על משבצת = חסימה קבועה בלי סיבה מוצגת (🚫). אפור = מעגל שיח (מפגשה), ישיבת ניהול, סדירות, הדרכה או מגמות; אדום = חסימה עם סיבה. את האפורים והאדומים משנים דרך קלוד.</div>'+g+'</fieldset>';
+  h+='<fieldset><legend>מסיים/ה עד שעה (לפי יום)</legend>'+DAYS.map((dn,dd)=>'<label class="d">'+dn+' <input type="number" min="1" max="'+MAXH+'" id="du_'+dd+'" data-du="'+dd+'" value="'+(((tc.day_until||{})[dd])||"")+'"'+(readOnly?' disabled':'')+'></label>').join("")+'</fieldset>';
+  h+='<fieldset><legend>כללים נוספים</legend><div class="grid2">'+FIELDS.map(([k,lab,ty])=>{const v=tc[k];
+    if(ty==="bool") return '<label><input type="checkbox" id="tc_'+k+'" data-tc="'+k+'" data-ty="bool"'+(v?' checked':'')+(readOnly?' disabled':'')+'> '+lab+'</label>';
+    if(ty==="num") return '<label>'+lab+' <input type="number" min="0" max="8" id="tc_'+k+'" data-tc="'+k+'" data-ty="num" value="'+(v==null?"":v)+'"'+(readOnly?' disabled':'')+'></label>';
+    return '<label>'+lab+'<input type="text" id="tc_'+k+'" data-tc="'+k+'" data-ty="text" value="'+esc(Array.isArray(v)?v.join(", "):(v||""))+'"'+(readOnly?' disabled':'')+'></label>';}).join("")+
+    (side!=="jun"?'<label>מגבלת ימי עבודה ביסודי (MAXDAYS) <input type="number" min="1" max="6" id="maxdays" value="'+(e.maxdays||"")+'"'+(readOnly?' disabled':'')+'></label>':'')+'</div>'+
+    ((tc.busy_extra||[]).length?'<div class="note" style="margin-top:.4rem">שעות שנחשבות תפוסות לחלונות: '+tc.busy_extra.map(s=>DAYS[s[0]]+" ש"+s[1]).join(", ")+' (משתנה דרך קלוד)</div>':'')+'</fieldset>';
+  h+='<fieldset><legend>הערות (בקשות, שינויים צפויים, דברים לזכור לשנה הבאה)</legend><textarea id="note" rows="3"'+(readOnly?' disabled':'')+'>'+esc(d.note||"")+'</textarea></fieldset>';
+  const ch=changes(d);
+  h+='<div style="border-top:1px solid var(--line);padding-top:.6rem;margin-top:.4rem"><b>מול קבצי המקור:</b> '+(ch.length?'<ul class="diff">'+ch.map(x=>'<li>'+esc(x)+'</li>').join("")+'</ul>'+(readOnly?'':'<button class="b" id="reset">↩ החזרה לערכי המקור</button>'):'<span class="note">ללא שינוי.</span>')+'</div>';
+  if((d.log||[]).length) h+='<details style="margin-top:.6rem"><summary class="note">היסטוריית שינויים ('+d.log.length+')</summary><ul class="diff">'+d.log.slice().reverse().map(l=>'<li><span class="note">'+new Date(l.ts).toLocaleString("he-IL")+'</span> '+esc(l.what)+'</li>').join("")+'</ul></details>';
+  h+='</div>'+summary();
+  M.innerHTML=h; bind(d);
+}
+let timer=null, pendingWhat=[];
+function save(d,what){ if(readOnly) return; d.updatedAt=new Date().toISOString(); pendingWhat.push(what); render();
+  clearTimeout(timer); timer=setTimeout(async()=>{ const body=JSON.parse(JSON.stringify(d)); body.log=(body.log||[]).concat([{ts:body.updatedAt,what:pendingWhat.join(" · ")}]).slice(-40); pendingWhat=[]; delete body.id;
+    try{ await db.doc("teachers/"+pick).set(body); d.log=body.log; const s=$("#saved"); if(s){s.textContent="נשמר ✔"; setTimeout(()=>{if(s.textContent==="נשמר ✔") s.textContent="";},2000);} }
+    catch(err){ if(err&&err.code==="invalid_argument"){ readOnly=true; render(); } else { const s=$("#saved"); if(s) s.textContent="השמירה נכשלה, ננסה שוב"; setTimeout(()=>save(d,"ניסיון חוזר"),1500+Math.random()*1000); } }
+  },600); }
+function bind(d){ const M=$("#main"); const tc=d.tcons=d.tcons||{};
+  M.querySelectorAll("[data-off]").forEach(cb=>cb.onchange=()=>{const s=new Set(d[cb.dataset.off]||[]); cb.checked?s.add(cb.dataset.day):s.delete(cb.dataset.day); d[cb.dataset.off]=DAYS.filter(x=>s.has(x)); save(d,(cb.checked?"יום חופשי נוסף: ":"יום חופשי הוסר: ")+cb.dataset.day);});
+  M.querySelectorAll("[data-ns]").forEach(td=>{const f=()=>{const [dd,hh]=td.dataset.ns.split(",").map(Number); const cur=(tc.no_slots||[]).filter(s=>!(s[0]===dd&&s[1]===hh)); const add=cur.length===(tc.no_slots||[]).length; if(add) cur.push([dd,hh]); tc.no_slots=cur; save(d,(add?"חסימה: ":"שחרור: ")+DAYS[dd]+" ש"+hh);}; td.onclick=f; td.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f();}};});
+  M.querySelectorAll("[data-du]").forEach(inp=>inp.onchange=()=>{const du=Object.assign({},tc.day_until||{}); if(inp.value) du[inp.dataset.du]=+inp.value; else delete du[inp.dataset.du]; tc.day_until=du; save(d,DAYS[+inp.dataset.du]+" עד שעה "+(inp.value||"—"));});
+  M.querySelectorAll("[data-tc]").forEach(inp=>inp.onchange=()=>{const k=inp.dataset.tc,ty=inp.dataset.ty; if(ty==="bool") tc[k]=inp.checked; else if(ty==="num") tc[k]=inp.value===""?null:+inp.value; else tc[k]=inp.value.split(",").map(x=>x.trim()).filter(Boolean); save(d,FIELDS.find(x=>x[0]===k)[1]+": "+(ty==="bool"?(inp.checked?"כן":"לא"):(inp.value||"—")));});
+  const md=M.querySelector("#maxdays"); if(md) md.onchange=()=>{d.maxdays=md.value?+md.value:null; save(d,"מגבלת ימי עבודה: "+(md.value||"—"));};
+  const nt=M.querySelector("#note"); if(nt) nt.onchange=()=>{d.note=nt.value.trim(); save(d,"הערה עודכנה");};
+  const ds=M.querySelector("#desc"); if(ds) ds.onchange=()=>{d.desc=ds.value.trim(); save(d,"תיאור עודכן");};
+  M.querySelectorAll("[data-ec]").forEach(inp=>inp.onchange=()=>{const ecs=Object.assign({},d.elem_classes||{}); if(inp.value&&+inp.value>0) ecs[inp.dataset.ec]=+inp.value; else delete ecs[inp.dataset.ec]; d.elem_classes=ecs; save(d,"שעות ב"+inp.dataset.ec+": "+(inp.value||"—"));});
+  M.querySelectorAll("[data-pool]").forEach(cb=>cb.onchange=()=>{const s=new Set(d.jun_pools||[]); cb.checked?s.add(cb.dataset.pool):s.delete(cb.dataset.pool); d.jun_pools=[...s].sort(); save(d,(cb.checked?"נוסף מקצוע: ":"הוסר מקצוע: ")+cb.dataset.pool.replace("|"," "));});
+  [["#juncap","jun_cap","תקרת שעות בחטיבה"],["#maxq","maxq","מכסה פרונטלית ביסודי"],["#quota","quota","מכסת משרה"]].forEach(([sel,k,lab])=>{const inp=M.querySelector(sel); if(inp) inp.onchange=()=>{d[k]=inp.value?+inp.value:null; save(d,lab+": "+(inp.value||"—"));};});
+  const r=M.querySelector("#reset"); if(r) r.onclick=()=>{const b=d.base||{}; d.off=JSON.parse(JSON.stringify(b.off||[])); d.tcons=JSON.parse(JSON.stringify(b.tcons||{})); d.maxdays=b.maxdays||null; ["elem_classes","jun_pools","jun_cap","maxq","quota"].forEach(k=>{d[k]=JSON.parse(JSON.stringify(b[k]===undefined?null:b[k]));}); save(d,"החזרה לערכי המקור");};
+}
+$("#q").oninput=()=>{filter=$("#q").value.trim(); renderList();};
+try{ pick=localStorage.getItem("cons_pick"); }catch(e){}
+(async()=>{
+  db=await claude.use("db");
+  if(!db){ $("#status").textContent="מסד הנתונים לא זמין בתצוגה הזו"; $("#main").innerHTML='<div class="card"><div class="warn">המסך הזה עובד רק בתוך claude.ai, כשמסד הנתונים של הדף זמין. פתחו אותו מהקישור המקורי.</div></div>'; return; }
+  db.doc("meta/lists").onSnapshot(s=>{ if(s.exists){ const l=s.data(); LISTS={classes:l.classes||[],subjects:l.subjects||[],grades:l.grades||LISTS.grades}; render(); } }, ()=>{});
+  unsub=db.collection("teachers").onSnapshot(snap=>{ const nd={}; snap.docs.forEach(s=>{ if(s.exists){ const b=JSON.parse(JSON.stringify(s.data())); b.id=s.id; nd[s.id]=b; } });
+    // שומרים עריכה מקומית שטרם נשמרה
+    if(pick&&docs[pick]&&timer){ nd[pick]=docs[pick]; }
+    docs=nd; $("#status").textContent=Object.keys(docs).length?"מחובר · שינויים נשמרים אוטומטית":"המסד ריק - קלוד טוען אליו את האילוצים מקבצי המקור"; if(pick&&!docs[pick]) pick=null; render(); },
+    err=>{ $("#status").textContent="החיבור למסד נותק ("+err.code+") - רעננו את הדף"; });
+})();
+</script>

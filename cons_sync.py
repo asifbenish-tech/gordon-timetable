@@ -9,7 +9,7 @@
        ומדפיס overrides. עם שם הצעה: כותב proposals/<שם>/proposal.json
        שאפשר להריץ ב-propose.py. הנתונים בקבצי המקור משתנים רק אחרי אישור.
    מזהה רשומה: "t_" + hex(utf8(שם)) - כי מזהי מסמכים חייבים להיות ASCII."""
-import io, json, os, sys
+import io, json, os, sys, collections
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from data import QUOTA as EQ, DAY_NAMES
 from data import CLASSES as ECLASSES
@@ -19,15 +19,25 @@ JUN_EXTRA = {v["teacher"] for v in FRIDAY_COVER.values()} | {v["teacher"] for v 
 GRADES = ["ז", "ח", "ט"]
 def lists(): return {"classes": list(ECLASSES), "subjects": list(POOLS), "grades": GRADES}
 SED = json.load(io.open("sed_J.json", encoding="utf-8"))   # מעגלי שיח (מפגשה) + ישיבת ניהול
-NIHUL = ["לייה", "שרית", "יערה", "צופיה", "אסיף", "אלי"]
+from data2 import NIHUL
 
 SKIP = {'תל"ן', "מגמות", "חסר מורה", "שרית + חסן", "מדעים חיצוני", "אבי קרן צבי"}
 
 def tid(name): return "t_" + name.encode("utf-8").hex()
 def tname(i): return bytes.fromhex(i[2:]).decode("utf-8")
 
+def actual_elem():
+    """שעות בפועל לכל מורה בכל כיתה ביסודי, לפי המערכת המפורסמת (לתצוגה ליד היעד)."""
+    try: S = json.load(io.open("sol_J.json", encoding="utf-8"))
+    except FileNotFoundError: return {}
+    out = collections.defaultdict(dict)
+    for c, cells in S.items():
+        for k, t in cells.items():
+            if t and t != 'תל"ן': out[t][c] = out[t].get(c, 0) + 1
+    return out
+
 def current():
-    rows = {}
+    rows = {}; ACT = actual_elem()
     for t in sorted(set(EQ) | set(HCAP) | set(TCONS) | set(DAYS_OFF2) | set(QUOTA_FILE)):
         if t in SKIP: continue
         in_e = t in EQ or t in EVENTS2 or t in MAXDAYS or t in ELEM_POOL
@@ -45,7 +55,7 @@ def current():
         tc = {k: ({str(a): b for a, b in v.items()} if isinstance(v, dict) else v) for k, v in TCONS.get(t, {}).items()}
         rows[t] = {"name": t, "side": "both" if (in_e and in_j) else ("jun" if in_j else "elem"),
                    "desc": TEACH_DESC.get(t, ""), "quota": QUOTA_FILE.get(t), "maxq": MAXQ2.get(t),
-                   "elem_classes": dict(EQ.get(t, {})), "jun_cap": HCAP.get(t),
+                   "elem_classes": dict(EQ.get(t, {})), "elem_actual": dict(ACT.get(t, {})), "jun_cap": HCAP.get(t),
                    "jun_pools": [f"{sj}|{g}" for sj in POOLS for g in POOLS[sj] if t in POOLS[sj][g]],
                    "off": list(DAYS_OFF2.get(t) or []),
                    "events": ev, "unavail": [f"{d},{h}" for (d, h) in UNAVAIL2.get(t, [])],
