@@ -150,6 +150,54 @@ def r_tamir_friday_own(c):
         m.Add(hx[k] == 0)
 
 
+def r_hila_math_tet(c):
+    """הילה: בדיוק 4 שעות מתמטיקה בכל כיתת ט (החמישית - שישי עם צבי)."""
+    m, hx = c["m"], c["hx"]
+    for cls in ("ט תמיר", "ט אסיף"):
+        v = [hx[k] for k in hx if k[0] == cls and k[2] == "מתמטיקה" and k[3] == "הילה"]
+        if v: m.Add(sum(v) == 4)
+
+
+def r_eighth_hour(c):
+    """שעה שמינית: רק ח גלית בשני, ורק כשאין ברירה (קנס)."""
+    m, hfree = c["m"], c["hfree"]
+    for cls in c["HCLASSES"]:
+        for d in range(5):
+            if (cls, (d, 8)) not in hfree: continue
+            if (cls, d) == ("ח גלית", 1): c["OBJ_H"] = c["OBJ_H"] + 400 * hfree[(cls, (d, 8))].Not()
+            else: m.Add(hfree[(cls, (d, 8))] == 1)
+
+
+def r_science_tet_real(c):
+    """מדעים בט אסיף - שיעור אמיתי עם הילה, לא שעת "חסר מורה" של שישי."""
+    m, hx = c["m"], c["hx"]
+    for k in [k for k in hx if k[0] == "ט אסיף" and k[2] == "מדעים" and k[3] == "חסר מורה"]:
+        m.Add(hx[k] == 0)
+
+
+def r_ines_mirit(c):
+    """אינס: 8 שעות בד מירי ולא בה תניה."""
+    m, x, NONFRI = c["m"], c["x"], c["NONFRI"]
+    for cls, n in (("ד מירי", 8), ("ה תניה", 0)):
+        v = [x[(cls, s, "אינס")] for s in NONFRI if (cls, s, "אינס") in x]
+        if v: m.Add(sum(v) == n)
+
+
+def r_sima_four(c):
+    """סימה: בדיוק 4 שעות בכל אחת מכיתותיה (ד-ו)."""
+    m, x, NONFRI = c["m"], c["x"], c["NONFRI"]
+    for cls in ("ד מירי", "ד אינס", "ה דני", "ה תניה", "ו אורנה", "ו שרית"):
+        v = [x[(cls, s, "סימה")] for s in NONFRI if (cls, s, "סימה") in x]
+        if v: m.Add(sum(v) == 4)
+
+
+def r_pani_pe_overlap(c):
+    """פאני: כמה שפחות חפיפה עם בלוקי הספורט של החטיבה (קנס; ביטול מלא אינו אפשרי)."""
+    x = c["x"]
+    v = [x[(cls, (d, h), "פאני")] for d, hs in c["PE_BLOCKS"].items() for h in hs for cls in c["CLASSES"] if (cls, (d, h), "פאני") in x]
+    c["OBJ_E"] = c["OBJ_E"] + 500 * sum(v)
+
+
 def r_zayin_friday_full(c):
     """כיתות ז: שישי מלא — כל 4 השעות עם שיעור (המחנך; בז אלי — שיר)."""
     m, hfree = c["m"], c["hfree"]
@@ -169,8 +217,20 @@ RULES = [
      "desc": "שעת הספרות של ט אסיף — עם נעמי, במהלך השבוע ולא בשישי."},
     {"id": "naomi_sifrut_tet", "name": "נעמי מלמדת ספרות בט תמיר", "active": True, "fn": r_naomi_sifrut_tet,
      "desc": "שעת הספרות של ט תמיר — אצל נעמי, לא חסר מורה."},
-    {"id": "tamir_friday_own", "name": "תמיר בשישי עם כיתתו", "active": True, "fn": r_tamir_friday_own,
-     "desc": "בשישי תמיר מלמד רק בט תמיר."},
+    {"id": "hila_math_tet", "name": "הילה - 4 מתמטיקה בכל ט", "active": True, "fn": r_hila_math_tet,
+     "desc": "הילה מלמדת בדיוק 4 שעות מתמטיקה בכל כיתת ט; החמישית בשישי עם צבי."},
+    {"id": "eighth_hour", "name": "שעה שמינית", "active": True, "fn": r_eighth_hour,
+     "desc": "שעה 8 רק בח גלית ביום שני, ורק כשאין ברירה."},
+    {"id": "science_tet_real", "name": "מדעים בט אסיף", "active": True, "fn": r_science_tet_real,
+     "desc": "המדעים בט אסיף נלמדים עם הילה, לא בשעות החוסר של שישי."},
+    {"id": "ines_mirit", "name": "אינס בד מירי", "active": True, "fn": r_ines_mirit,
+     "desc": "אינס 8 שעות בד מירי, ולא בה תניה."},
+    {"id": "sima_four", "name": "סימה 4 בכל כיתה", "active": True, "fn": r_sima_four,
+     "desc": "סימה בדיוק 4 שעות בכל אחת מכיתות ד-ו."},
+    {"id": "pani_pe_overlap", "name": "פאני וספורט החטיבה", "active": True, "fn": r_pani_pe_overlap,
+     "desc": "כמה שפחות שעות של פאני בזמן הספורט השכבתי של החטיבה."},
+    {"id": "tamir_friday_own", "name": "תמיר בשישי עם כיתתו", "active": False, "fn": r_tamir_friday_own,
+     "desc": "כבוי מ-03.10: בשישי ש3 תמיר מלמד היסטוריה בט אסיף (FIXED_H)."},
     {"id": "zayin_friday_full", "name": "שישי מלא בכיתות ז", "active": True, "fn": r_zayin_friday_full,
      "desc": "כל 4 שעות שישי מאוישות בכיתות ז — עם המחנך (בז אלי: שיר)."},
     {"id": "hadracha_sunday", "name": "הדרכות יום ראשון", "active": True, "fn": r_hadracha_sunday,

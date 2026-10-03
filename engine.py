@@ -689,6 +689,10 @@ shir_all=[hx[("ז אלי",(5,h),sj,"שיר")] for h in (1,3,4)
           for (sj,t) in pairs["ז אלי"] if t=="שיר" and ("ז אלי",(5,h),sj,"שיר") in hx]
 if shir_all: m.Add(sum(shir_all)>=2)   # שיר עם הכיתה בשישי, לפחות שעתיים
 
+# נעילות קבועות ביסודי (data2.ELEM_PINS): החלטות המנהל
+for _c,_s,_t in ELEM_PINS:
+    if (_c,_s,_t) in x: m.Add(x[(_c,_s,_t)]==1)
+    else: print(f"ELEM_PINS: אין משתנה ל-{(_c,_s,_t)} - מדלג")
 # נעילות קבועות (hdata.FIXED_H): משבצות ריקות ושיעורים במקום קבוע
 for _c,_d,_h in FIXED_H.get("free",[]):
     if (_c,(_d,_h)) in hfree: m.Add(hfree[(_c,(_d,_h))]==1)
@@ -1036,6 +1040,9 @@ for _t,_cf in TCONS.items():
         for _sj in _cf.get("no_last_subject",[]):
             _tc_zero([hx[k] for k in hx if k[3]==_t and k[2]==_sj and k[1]==(_d,HDAY[_d])])
         _dv=[v for _h in range(1,MAXH+1) for v in _TV.get((_t,(_d,_h)),[])]
+        if _dv and _d in _cf.get("day_range",{}):          # שעות ביום מסוים: (מינימום, מקסימום)
+            _lo,_hi=_cf["day_range"][_d]; m.Add(sum(_dv)>=_lo); m.Add(sum(_dv)<=_hi)
+        if _dv and "max_per_day" in _cf: m.Add(sum(_dv)<=_cf["max_per_day"])
         if "max_days" in _cf:
             _b=m.NewBoolVar(f"tcd_{_t}_{_d}"); _dayb.append(_b)
             for _v in _dv: m.Add(_v<=_b)

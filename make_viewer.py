@@ -512,6 +512,13 @@ def _build_app_map():
                 break
     return {"classes": cmap, "teachers": tmap}
 APP_MAP = _build_app_map()
+# app_data/ (מקומי, לא בגיט) חסר בסביבה זו -> המיפוי האחרון שנבנה ממנו (app_map_cache.json, כבר
+# מפורסם ב-timetable.json). בלי זה בנייה בלי app_data מוחקת את המזהים שהאפליקציה קוראת.
+if APP_MAP["classes"] or APP_MAP["teachers"]:
+    io.open("app_map_cache.json","w",encoding="utf-8").write(json.dumps(APP_MAP,ensure_ascii=False,indent=1,sort_keys=True))
+else:
+    try: APP_MAP = json.load(io.open("app_map_cache.json",encoding="utf-8")); print("app_map: מהמטמון (אין app_data)")
+    except Exception: print("אזהרה: אין app_data ואין app_map_cache.json - מזהי האפליקציה ריקים")
 
 def _now():   # שעון ישראל, כדי שחותמת העדכון תהיה מובנת
     import datetime
