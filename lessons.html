@@ -191,10 +191,22 @@ function adminBox(d){
 
 function render(){renderTiles();renderPanel()}
 
-async function call(body){
-  var res=await fetch(API,{method:"POST",body:JSON.stringify(body)});
-  return res.json();
+// JSONP: תגית script במקום fetch, כך שהדפדפן לא חוסם את התשובה מ-Google (CORS).
+var jsonpN=0;
+function jsonp(params){
+  return new Promise(function(resolve,reject){
+    var cb="plcb"+(++jsonpN)+"_"+Date.now(),sc=document.createElement("script"),done=false;
+    function end(){done=true;try{delete window[cb]}catch(e){window[cb]=undefined}sc.remove();clearTimeout(t)}
+    window[cb]=function(data){end();resolve(data)};
+    sc.onerror=function(){if(!done){end();reject(new Error("load"))}};
+    var t=setTimeout(function(){if(!done){end();reject(new Error("timeout"))}},25000);
+    var q=Object.keys(params).filter(function(k){return params[k]!=null&&params[k]!==""}).map(function(k){return encodeURIComponent(k)+"="+encodeURIComponent(params[k])});
+    q.push("callback="+cb,"t="+Date.now());
+    sc.src=API+"?"+q.join("&");
+    document.head.appendChild(sc);
+  });
 }
+function call(body){return jsonp(body)}
 async function post(body,okText){
   S.busy=true;S.msg=null;render();
   try{var r=await call(body);S.msg=r.ok?["ok",okText]:["err",r.error||"הפעולה לא הצליחה."]}
@@ -228,13 +240,13 @@ async function cancel(d){
 async function load(){
   var notice=document.getElementById("notice");
   try{
-    var res=await fetch(API+(S.key?"?key="+encodeURIComponent(S.key):""),{cache:"no-store"});
-    var j=await res.json();
+    var j=await jsonp(S.key?{key:S.key}:{});
+    if(j.ok===false)throw new Error(j.error||"server");
     S.bookings=j.bookings||{};S.closed=j.closed||{};S.holidays=j.holidays||{};S.admin=!!j.admin;S.loaded=true;
     Object.keys(S.tokens).forEach(function(d){if(!S.bookings[d])delete S.tokens[d]});
     notice.textContent=S.admin?"מצב ניהול: רואים שמות ונושאים, אפשר לבטל שיבוצים ולסמן ימי חופש.":"בחרו יום ראשון פנוי. מורה אחד בכל שיעור; תאריך שמישהו כבר בחר מסומן \"תפוס\".";
     if(S.key&&!S.admin)notice.textContent="קישור הניהול לא תקין. מוצג העמוד הרגיל.";
-  }catch(e){notice.textContent="לא הצלחתי לטעון את השיבוצים. רעננו את הדף."}
+  }catch(e){notice.textContent="לא הצלחתי לטעון את השיבוצים"+(e&&e.message&&e.message.indexOf("שגיאה")===0?" ("+e.message+")":"")+". רעננו את הדף בעוד דקה."}
   render();
 }
 

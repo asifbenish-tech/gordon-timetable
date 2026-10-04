@@ -11,7 +11,8 @@ var LOCATION = "בית חינוך א.ד גורדון";
 // חופשות משרד החינוך תשפ"ז שנופלות ביום ראשון. ימים נוספים - מתוך מצב הניהול בעמוד.
 var HOLIDAYS = {"2026-12-06": "חופשת חנוכה", "2027-04-18": "חופשת פסח", "2027-04-25": "חופשת פסח"};
 
-function setup() {
+// יוצר את הגיליון ואת מפתח הניהול אם חסרים. רץ אוטומטית בכל בקשה.
+function ensure_() {
   var p = PropertiesService.getScriptProperties();
   if (!p.getProperty("SHEET_ID")) {
     var ss = SpreadsheetApp.create("שיעורים פרטיים - שיבוצים");
@@ -24,28 +25,46 @@ function setup() {
     p.setProperty("SHEET_ID", ss.getId());
   }
   if (!p.getProperty("ADMIN_KEY")) p.setProperty("ADMIN_KEY", Utilities.getUuid().replace(/-/g, ""));
+  return p;
+}
+
+// להרצה ידנית: מאשר הרשאות ושולח לאסיף את קישור הניהול.
+function setup() {
+  var p = ensure_();
   var link = PAGE_URL + "?admin=" + p.getProperty("ADMIN_KEY");
   MailApp.sendEmail(owner_(), "שיעורים פרטיים - קישור הניהול שלך",
-    "הגיליון נוצר: " + SpreadsheetApp.openById(p.getProperty("SHEET_ID")).getUrl() +
+    "הגיליון: " + SpreadsheetApp.openById(p.getProperty("SHEET_ID")).getUrl() +
     "\n\nקישור הניהול (רק לך - רואים בו שמות ונושאים, מבטלים שיבוצים ומסמנים ימי חופש):\n" + link +
     "\n\nלמורים שולחים את הקישור בלי החלק ?admin=...:\n" + PAGE_URL);
   Logger.log("Admin link: " + link);
 }
 
+// העמוד קורא דרך GET עם callback (JSONP), כך שאין תלות בהגדרות CORS של הדפדפן.
 function doGet(e) {
-  return json_(list_(isAdmin_(e.parameter.key)));
+  var r = e.parameter || {}, cb = r.callback;
+  var out;
+  try { ensure_(); out = r.action ? act_(r) : list_(isAdmin_(r.key)); }
+  catch (err) { out = {ok: false, error: "שגיאה בשרת: " + err.message}; }
+  if (cb && /^[A-Za-z_$][\w$]*$/.test(cb))
+    return ContentService.createTextOutput(cb + "(" + JSON.stringify(out) + ");").setMimeType(ContentService.MimeType.JAVASCRIPT);
+  return json_(out);
 }
 
 function doPost(e) {
   var r;
   try { r = JSON.parse(e.postData.contents); } catch (err) { return json_({ok: false, error: "בקשה לא תקינה."}); }
+  ensure_();
+  return json_(act_(r));
+}
+
+function act_(r) {
   var lock = LockService.getScriptLock();
-  if (!lock.tryLock(10000)) return json_({ok: false, error: "המערכת עמוסה. נסו שוב בעוד רגע."});
+  if (!lock.tryLock(10000)) return {ok: false, error: "המערכת עמוסה. נסו שוב בעוד רגע."};
   try {
-    if (r.action === "book") return json_(book_(r));
-    if (r.action === "cancel") return json_(cancel_(r));
-    if (r.action === "close" || r.action === "open") return json_(setClosed_(r));
-    return json_({ok: false, error: "פעולה לא מוכרת."});
+    if (r.action === "book") return book_(r);
+    if (r.action === "cancel") return cancel_(r);
+    if (r.action === "close" || r.action === "open") return setClosed_(r);
+    return {ok: false, error: "פעולה לא מוכרת."};
   } finally { lock.releaseLock(); }
 }
 
