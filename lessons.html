@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>שיעורים פרטיים עם אסיף</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Suez+One&family=Assistant:wght@400;600;700&display=swap">
+<style>
+/* Layout: one column of Sunday tiles grouped by month, with the booking panel beside it on wide screens and under the tapped tile on phones */
+:root{
+  --bg:#f3f5f2; --surface:#ffffff; --ink:#1d2a24; --muted:#5f6e66; --line:#d8ded9;
+  --accent:#2f6b4f; --accent-ink:#ffffff; --chalk:#e8b93c;
+  --free:#e6f1ea; --taken:#f6e4dc; --taken-ink:#8a3b22; --off:#ecebe6; --off-ink:#7b776c;
+  --font-display:"Suez One","Frank Ruhl Libre",Georgia,serif;
+  --font-body:"Assistant","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a17; --surface:#1c2420; --ink:#e7ece9; --muted:#9aa8a0; --line:#2e3933;
+  --accent:#6fbf94; --accent-ink:#0f1612; --chalk:#e8b93c;
+  --free:#1f3329; --taken:#3a2620; --taken-ink:#f0a98f; --off:#22261f; --off-ink:#9b978b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a17; --surface:#1c2420; --ink:#e7ece9; --muted:#9aa8a0; --line:#2e3933;
+  --accent:#6fbf94; --accent-ink:#0f1612; --chalk:#e8b93c;
+  --free:#1f3329; --taken:#3a2620; --taken-ink:#f0a98f; --off:#22261f; --off-ink:#9b978b; color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:28px 48px;display:grid;gap:24px}
+header{display:grid;gap:6px}
+h1{font-family:var(--font-display);font-weight:400;font-size:clamp(28px,5vw,40px);line-height:1.15;margin:0;text-wrap:balance}
+.slot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted)}
+.slot b{color:var(--ink)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:14px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:14px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:14px;border-radius:4px;border:1px solid var(--line)}
+.notice{padding:10px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+@media (max-width:760px){.main{grid-template-columns:minmax(0,1fr)}}
+.months{display:grid;gap:22px;min-width:0}
+.month h2{font-family:var(--font-display);font-weight:400;font-size:20px;margin:0 0 10px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+.tile{all:unset;box-sizing:border-box;cursor:pointer;display:grid;gap:2px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--free);font-variant-numeric:tabular-nums}
+.tile:focus-visible{outline:3px solid var(--chalk);outline-offset:2px}
+.tile .d{font-size:22px;font-weight:700;line-height:1.1}
+.tile .h{font-size:13px;color:var(--muted)}
+.tile .s{font-size:13px;font-weight:700;color:var(--accent)}
+.tile.taken{background:var(--taken)} .tile.taken .s{color:var(--taken-ink)}
+.tile.mine{background:var(--taken);border-color:var(--taken-ink)}
+.tile.off,.tile.past{background:var(--off);cursor:default} .tile.off .s,.tile.past .s{color:var(--off-ink)}
+.tile.past{opacity:.55}
+.tile.sel{box-shadow:0 0 0 3px var(--chalk)}
+.panel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;gap:14px}
+.panel h3{font-family:var(--font-display);font-weight:400;font-size:22px;margin:0}
+.panel .sub{color:var(--muted);margin-top:-8px}
+label{display:grid;gap:4px;font-weight:600;font-size:14px}
+input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+textarea{min-height:96px;resize:vertical}
+input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button.btn{font:inherit;font-weight:700;border:0;border-radius:8px;padding:10px 16px;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+button.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+button.btn.warn{background:var(--taken-ink);color:var(--surface)}
+button.btn:disabled{opacity:.5;cursor:default}
+button.btn:focus-visible{outline:3px solid var(--chalk);outline-offset:2px}
+.msg{font-weight:600}
+.msg.ok{color:var(--accent)} .msg.err{color:var(--taken-ink)}
+.kv{display:grid;gap:2px}.kv .k{font-size:13px;color:var(--muted)}
+.topic{white-space:pre-wrap;overflow-wrap:anywhere}
+.admin{border-top:1px dashed var(--line);padding-top:12px;display:grid;gap:10px}
+.admin .t{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.04em}
+@media (prefers-reduced-motion:no-preference){.tile{transition:transform .12s}.tile:not(.off):not(.past):hover{transform:translateY(-2px)}}
+</style>
+</head>
+<body>
+<div class="wrap" dir="rtl" lang="he">
+  <header>
+    <h1>שיעורים פרטיים עם אסיף</h1>
+    <div class="slot"><span class="pill">יום <b>ראשון</b></span><span class="pill">שעה <b>3</b></span><span class="pill"><b>10:00–10:45</b></span><span>מורה אחד בכל שיעור</span></div>
+    <div class="legend" aria-hidden="true">
+      <span><i class="sw" style="background:var(--free)"></i>פנוי</span>
+      <span><i class="sw" style="background:var(--taken)"></i>תפוס</span>
+      <span><i class="sw" style="background:var(--off)"></i>חופש</span>
+    </div>
+  </header>
+  <div id="notice" class="notice">טוען את השיבוצים…</div>
+  <div class="main">
+    <div class="months" id="months"></div>
+    <aside class="panel" id="panel" aria-live="polite">
+      <h3>בחרו תאריך</h3>
+      <div class="sub">לחצו על יום ראשון פנוי כדי להשתבץ ולכתוב על מה תרצו לעבוד.</div>
+    </aside>
+  </div>
+</div>
+
+<script>
+// כתובת ה-Web App של Apps Script (private_lessons/Code.gs). ריק = העמוד עדיין בהקמה.
+var API = "https://script.google.com/macros/s/AKfycbxql3ZzM4AAEHdDiOUYQhS299u7KHhChY01bgt6NkdfYEMEF4zTNnt6AN3UHJxdNWIq/exec";
+var FIRST = Date.UTC(2026,9,4), LAST = Date.UTC(2027,5,27);
+
+var S = {bookings:{}, closed:{}, holidays:{}, admin:false, key:null, loaded:false, sel:null, busy:false, msg:null, confirm:false, myName:"", tokens:{}};
+
+function store(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){return null}}
+var iso = function(t){return new Date(t).toISOString().slice(0,10)};
+var asDate = function(d){var p=d.split("-");return new Date(+p[0],+p[1]-1,+p[2])};
+var fmtLong = new Intl.DateTimeFormat("he-IL",{day:"numeric",month:"long",year:"numeric"});
+var fmtMonth = new Intl.DateTimeFormat("he-IL",{month:"long",year:"numeric"});
+var fmtShort = new Intl.DateTimeFormat("he-IL",{day:"numeric",month:"numeric"});
+var fmtHeb; try{fmtHeb=new Intl.DateTimeFormat("he-IL-u-ca-hebrew",{day:"numeric",month:"long"})}catch(e){fmtHeb=null}
+
+function sundays(){var out=[];for(var t=FIRST;t<=LAST;t+=7*864e5)out.push(iso(t));return out}
+function isPast(d){var x=asDate(d);x.setHours(10,0,0,0);return x.getTime()<=Date.now()}
+function offReason(d){return S.closed[d]||S.holidays[d]||null}
+function state(d){
+  if(offReason(d))return "off";
+  if(S.bookings[d])return S.tokens[d]?"mine":"taken";
+  if(isPast(d))return "past";
+  return "free";
+}
+var LABEL={free:"פנוי",taken:"תפוס",mine:"השיעור שלך",off:"חופש",past:"עבר"};
+function el(tag,attrs,kids){var n=document.createElement(tag);if(attrs)for(var k in attrs){if(k==="text")n.textContent=attrs[k];else if(k.slice(0,2)==="on")n.addEventListener(k.slice(2),attrs[k]);else n.setAttribute(k,attrs[k])}(kids||[]).forEach(function(c){if(c)n.appendChild(c)});return n}
+
+function renderTiles(){
+  var box=document.getElementById("months");box.textContent="";
+  var groups={},order=[];
+  sundays().forEach(function(d){var k=d.slice(0,7);if(!groups[k]){groups[k]=[];order.push(k)}groups[k].push(d)});
+  order.forEach(function(k){
+    var tiles=el("div",{class:"tiles"});
+    groups[k].forEach(function(d){
+      var st=state(d),dt=asDate(d);
+      tiles.appendChild(el("button",{type:"button",class:"tile "+st+(S.sel===d?" sel":""),"aria-label":fmtLong.format(dt)+" — "+(st==="off"?offReason(d):LABEL[st]),onclick:function(){select(d)}},[
+        el("span",{class:"d",text:fmtShort.format(dt)}),
+        el("span",{class:"h",text:fmtHeb?fmtHeb.format(dt):""}),
+        el("span",{class:"s",text:st==="off"?offReason(d):LABEL[st]})
+      ]));
+    });
+    box.appendChild(el("section",{class:"month"},[el("h2",{text:fmtMonth.format(asDate(k+"-01"))}),tiles]));
+  });
+}
+
+function select(d){S.sel=d;S.msg=null;S.confirm=false;render();
+  if(window.matchMedia("(max-width:760px)").matches)document.getElementById("panel").scrollIntoView({behavior:"smooth",block:"start"});}
+
+function renderPanel(){
+  var gn=document.getElementById("t-name"),gt=document.getElementById("t-topic");
+  var keep=S.sel===S.panelDate&&gn?{n:gn.value,t:gt.value}:null;S.panelDate=S.sel;
+  var p=document.getElementById("panel");p.textContent="";
+  var d=S.sel;
+  if(!d){p.appendChild(el("h3",{text:"בחרו תאריך"}));p.appendChild(el("div",{class:"sub",text:"לחצו על יום ראשון פנוי כדי להשתבץ ולכתוב על מה תרצו לעבוד."}));return}
+  var dt=asDate(d),st=state(d),b=S.bookings[d];
+  p.appendChild(el("h3",{text:"יום ראשון, "+fmtLong.format(dt)}));
+  p.appendChild(el("div",{class:"sub",text:(fmtHeb?fmtHeb.format(dt)+" · ":"")+"שעה 3, 10:00–10:45"}));
+  if(!S.loaded){p.appendChild(el("div",{class:"msg",text:"השיבוצים עוד לא נטענו."}))}
+  else if(st==="off"){p.appendChild(el("div",{class:"msg err",text:offReason(d)+" — אין שיעור ביום הזה."}))}
+  else if(st==="past"){p.appendChild(el("div",{class:"msg",text:"התאריך הזה כבר עבר."}))}
+  else if(st==="free"){
+    var name=el("input",{id:"t-name",type:"text",autocomplete:"name",placeholder:"השם שלך",value:keep?keep.n:(S.myName||"")});
+    var topic=el("textarea",{id:"t-topic",placeholder:"למשל: בניית מערך שיעור בגאומטריה לכיתה ה, ניהול שיחה עם הורה…"});if(keep)topic.value=keep.t;
+    p.appendChild(el("label",{for:"t-name"},[document.createTextNode("שם המורה"),name]));
+    p.appendChild(el("label",{for:"t-topic"},[document.createTextNode("על מה תרצו שנעבוד?"),topic]));
+    var go=el("button",{type:"button",class:"btn",text:S.busy?"שומר…":"לשבץ אותי לתאריך הזה",onclick:function(){book(d,name.value.trim(),topic.value.trim())}});
+    if(S.busy)go.disabled=true;
+    p.appendChild(el("div",{class:"btns"},[go]));
+  }else{
+    if(S.admin&&b){
+      p.appendChild(el("div",{class:"kv"},[el("span",{class:"k",text:"מורה"}),el("span",{text:b.name||""})]));
+      p.appendChild(el("div",{class:"kv"},[el("span",{class:"k",text:"נושא השיעור"}),el("span",{class:"topic",text:b.topic||"—"})]));
+    }
+    if(st==="mine"&&!S.admin)p.appendChild(el("div",{class:"msg ok",text:"נרשמת לתאריך הזה."}));
+    if(st==="taken"&&!S.admin)p.appendChild(el("div",{class:"msg err",text:"תפוס — מורה אחר כבר השתבץ לתאריך הזה."}));
+    if(st==="mine"||S.admin){
+      if(!S.confirm)p.appendChild(el("div",{class:"btns"},[el("button",{type:"button",class:"btn ghost",text:"ביטול השיבוץ",onclick:function(){S.confirm=true;S.msg=null;render()}})]));
+      else{p.appendChild(el("div",{class:"msg err",text:"לבטל את השיעור בתאריך הזה?"}));
+        p.appendChild(el("div",{class:"btns"},[el("button",{type:"button",class:"btn warn",text:"כן, לבטל",onclick:function(){cancel(d)}}),el("button",{type:"button",class:"btn ghost",text:"השאר",onclick:function(){S.confirm=false;render()}})]))}
+    }
+  }
+  if(S.msg)p.appendChild(el("div",{class:"msg "+S.msg[0],text:S.msg[1]}));
+  if(S.admin&&S.loaded&&st!=="past"&&!S.holidays[d])p.appendChild(adminBox(d));
+}
+
+function adminBox(d){
+  var box=el("div",{class:"admin"},[el("div",{class:"t",text:"ניהול (רק בקישור הניהול)"})]);
+  if(S.closed[d]){
+    box.appendChild(el("button",{type:"button",class:"btn ghost",text:"לפתוח את היום לשיבוץ",onclick:function(){post({action:"open",date:d,key:S.key},"היום פתוח לשיבוץ.")}}));
+  }else if(!S.bookings[d]){
+    var r=el("input",{id:"t-reason",type:"text",placeholder:"סיבה (למשל: טיול שנתי)"});
+    box.appendChild(el("label",{for:"t-reason"},[document.createTextNode("לסמן כחופש"),r]));
+    box.appendChild(el("button",{type:"button",class:"btn ghost",text:"לסמן את היום כחופש",onclick:function(){post({action:"close",date:d,reason:r.value.trim()||"חופש",key:S.key},"היום סומן כחופש.")}}));
+  }
+  return box;
+}
+
+function render(){renderTiles();renderPanel()}
+
+async function call(body){
+  var res=await fetch(API,{method:"POST",body:JSON.stringify(body)});
+  return res.json();
+}
+async function post(body,okText){
+  S.busy=true;S.msg=null;render();
+  try{var r=await call(body);S.msg=r.ok?["ok",okText]:["err",r.error||"הפעולה לא הצליחה."]}
+  catch(e){S.msg=["err","אין חיבור לשרת. בדקו את האינטרנט ונסו שוב."]}
+  S.busy=false;await load();
+}
+
+async function book(d,name,topic){
+  if(!name){S.msg=["err","כתבו את השם שלכם."];render();return}
+  if(!topic){S.msg=["err","כתבו בקצרה על מה תרצו לעבוד."];render();return}
+  S.busy=true;S.msg=null;render();
+  try{
+    var r=await call({action:"book",date:d,name:name,topic:topic});
+    if(r.ok){S.tokens[d]=r.token;store("pl-tokens",JSON.stringify(S.tokens));S.myName=name;store("pl-name",name);
+      S.msg=["ok","נרשמת! השיעור נכנס ליומן של אסיף."]}
+    else S.msg=["err",r.error||"השיבוץ לא נשמר."];
+  }catch(e){S.msg=["err","אין חיבור לשרת. בדקו את האינטרנט ונסו שוב."]}
+  S.busy=false;await load();
+}
+
+async function cancel(d){
+  S.confirm=false;S.busy=true;render();
+  try{
+    var r=await call({action:"cancel",date:d,token:S.tokens[d]||"",key:S.key||""});
+    if(r.ok){delete S.tokens[d];store("pl-tokens",JSON.stringify(S.tokens));S.msg=["ok","השיבוץ בוטל והתאריך פנוי שוב."]}
+    else S.msg=["err",r.error||"הביטול לא הצליח."];
+  }catch(e){S.msg=["err","אין חיבור לשרת. נסו שוב."]}
+  S.busy=false;await load();
+}
+
+async function load(){
+  var notice=document.getElementById("notice");
+  try{
+    var res=await fetch(API+(S.key?"?key="+encodeURIComponent(S.key):""),{cache:"no-store"});
+    var j=await res.json();
+    S.bookings=j.bookings||{};S.closed=j.closed||{};S.holidays=j.holidays||{};S.admin=!!j.admin;S.loaded=true;
+    Object.keys(S.tokens).forEach(function(d){if(!S.bookings[d])delete S.tokens[d]});
+    notice.textContent=S.admin?"מצב ניהול: רואים שמות ונושאים, אפשר לבטל שיבוצים ולסמן ימי חופש.":"בחרו יום ראשון פנוי. מורה אחד בכל שיעור; תאריך שמישהו כבר בחר מסומן \"תפוס\".";
+    if(S.key&&!S.admin)notice.textContent="קישור הניהול לא תקין. מוצג העמוד הרגיל.";
+  }catch(e){notice.textContent="לא הצלחתי לטעון את השיבוצים. רעננו את הדף."}
+  render();
+}
+
+(function start(){
+  S.myName=store("pl-name")||"";
+  try{S.tokens=JSON.parse(store("pl-tokens")||"{}")||{}}catch(e){S.tokens={}}
+  var m=location.search.match(/[?&]admin=([A-Za-z0-9]+)/);
+  if(m){S.key=m[1];try{sessionStorage.setItem("pl-key",S.key)}catch(e){}history.replaceState(null,"",location.pathname)}
+  else{try{S.key=sessionStorage.getItem("pl-key")}catch(e){}}
+  render();
+  if(!API){document.getElementById("notice").textContent="העמוד בהקמה — השיבוץ ייפתח בקרוב.";return}
+  load();
+  setInterval(function(){var a=document.activeElement;if(!S.busy&&!document.hidden&&!(a&&/INPUT|TEXTAREA/.test(a.tagName)))load()},60000);
+})();
+</script>
+</body>
+</html>
