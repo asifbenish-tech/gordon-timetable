@@ -567,6 +567,10 @@ data={"cons":_cons,"rules":SYS_RULES,"trules":TR,"util":util,"gaps":gapl,"slotfr
       "days":DAY_NAMES,"legend_sed":{k:v for k,v in SED.items() if "קבוצת" not in k},
       "full_names":_FULLN,"access":_ACCESS,"houses":_HOUSES,"house_teachers":_HT,"app_map":APP_MAP,
       "built":_now().strftime("%d.%m.%Y %H:%M")}
+# ניהול משתמשים חי (users_admin/Code.gs) - רק בלוח המפורסם; לוח הצעה נשאר עם הרשימה המוטבעת
+from site_config import USERS_API, USERS_OWNER
+if USERS_API and not _os0.environ.get("PROP_BASE") and not _os0.environ.get("PROP_ACCESS"):
+    data["users_api"] = USERS_API; data["users_owner"] = USERS_OWNER
 
 # ---- לוח של הצעה (propose.py): PROP_BASE=<viewer.html מפורסם> [PROP_MID=<הצעת ביניים>] ----
 # מוסיף DATA.diff/DATA.tdiff: תא -> {"was": מה שהיה, "src": ""|"y"} (y = שונה רק בהצעה
