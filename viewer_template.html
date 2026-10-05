@@ -236,8 +236,9 @@ function tabBtns(){ const av=allowedViews();
   document.querySelectorAll("#tabs button[data-v]").forEach(b=>{
   b.style.display=av.includes(b.dataset.v)?"":"none";
   if(b.dataset.v==="teach"){
-    b.textContent = (!USER||USER.r==="admin"||USER.tv) ? "מערכות מורים"
-      : (USER.r==="coordinator" ? "מערכות מורי הבית" : "📋 המערכת האישית שלי");
+    b.textContent = (!USER||USER.r==="admin"||USER.tv||(USER.r==="custom"&&USER.t==="all")) ? "מערכות מורים"
+      : (USER.r==="coordinator" ? "מערכות מורי הבית" : USER.r==="custom"&&USER.t==="classes" ? "מערכות המורים בכיתות"
+      : "📋 המערכת האישית שלי");
   }
   b.setAttribute("aria-pressed", b.dataset.v===view ? "true":"false");
   b.onclick=()=>{view=b.dataset.v; pick=null; render();};
@@ -271,7 +272,7 @@ function tabBtns(){ const av=allowedViews();
       a2.style.cssText="padding:.35rem .6rem;border-radius:.4rem;color:var(--ink);text-decoration:none;font:500 .88rem Heebo";
       a2.onmouseenter=()=>a2.style.background="var(--chip)";a2.onmouseleave=()=>a2.style.background="";
       pm.appendChild(a2);};
-    if(!USER||USER.r==="admin"||USER.tv) item("📥 כל מערכות המורים (PDF)","מערכות שעות מורים.pdf");
+    if(!USER||USER.r==="admin"||USER.tv||(USER.r==="custom"&&USER.t==="all")) item("📥 כל מערכות המורים (PDF)","מערכות שעות מורים.pdf");
     if(USER&&USER.r==="coordinator") item("📥 מערכות "+DATA.houses[USER.h].name+" (PDF)","מערכות "+DATA.houses[USER.h].name+".pdf");
     if(!USER||USER.r==="admin"){
     item("📥 מערכות בית א (PDF)","מערכות בית א.pdf");
@@ -449,7 +450,7 @@ function expMenu(){
 const ACCESS_BASE=DATA.access||{}; let ACCESS=Object.assign({},ACCESS_BASE), USER=null, USER_H=null;
 const LS=(k,v)=>{try{return v===undefined?localStorage.getItem(k):(v===null?localStorage.removeItem(k):localStorage.setItem(k,v));}catch(e){return null;}};
 const USERS_API=DATA.users_api||"";
-let USERS_DYN=null, USERS_ADMIN=false;
+let USERS_DYN=null, USERS_ADMIN=false, USERS_ERR="";
 (function(){   // קישור הניהול מהמייל: ?ukey=... נשמר במכשיר הזה ונמחק מהכתובת
   try{const u=new URL(location.href),k=u.searchParams.get("ukey");
     if(k){LS("gordon_ukey",k);u.searchParams.delete("ukey");history.replaceState(null,"",u.pathname+u.search+u.hash);}}catch(e){}
@@ -473,7 +474,8 @@ function mergeAccess(){
 function loadUsers(){
   if(!USERS_API) return Promise.resolve();
   const k=LS("gordon_ukey");
-  return jsonp(k?{key:k}:{}).then(d=>{ if(d&&d.ok){USERS_DYN=d; USERS_ADMIN=!!d.admin; mergeAccess();} }).catch(()=>{});
+  return jsonp(k?{key:k}:{}).then(d=>{ if(d&&d.ok){USERS_DYN=d; USERS_ADMIN=!!d.admin; USERS_ERR=""; mergeAccess();}
+    else USERS_ERR=(d&&d.error)||"תשובה לא צפויה מהשרת"; }).catch(e=>{USERS_ERR=e.message;});
 }
 let usersReady=loadUsers();
 const waitUsers=()=>Promise.race([usersReady,new Promise(r=>setTimeout(r,6000))]);
@@ -491,21 +493,39 @@ function homeClassOf(name){
   for(const c in DATA.jun)  if(DATA.jun[c].home===name)  return ["jun",c];
   return null;
 }
+function customCls(kind){ const src=kind==="elem"?DATA.elem:DATA.jun;
+  return USER.cls==="*"?Object.keys(src):(USER.cls||[]).filter(c=>src[c]); }
+// מורים שמלמדים לפחות שיעור אחד באחת הכיתות (null = כל הכיתות)
+function teachersOfClasses(list){
+  return Object.keys(DATA.teachers).filter(t=>!list||DATA.teachers[t].some(ev=>{const c=String(ev[3]||"").split(" · ")[0];return list.some(x=>c.includes(x));}));
+}
 function allowedViews(){
   if(!USER||USER.r==="admin") return ["elem","jun","teach","gaps","staff","commit","rules","cons"].concat(isOwner()?["users"]:[]);
   if(USER.r==="classes") return USER.tv?["elem","jun","teach"]:["elem","jun"];   // tv = גם מערכות מורים
+  if(USER.r==="custom"){   // הרשאה מותאמת מעמוד המשתמשים: כיתות נבחרות, מורים, סדירויות
+    const v=[]; if(customCls("elem").length) v.push("elem"); if(customCls("jun").length) v.push("jun");
+    if(allowedTeachers().length) v.push("teach"); if(USER.sed) v.push("commit"); return v;
+  }
   if(USER.r==="coordinator"){const k=DATA.houses[USER.h].kind;return [k,"teach","commit"];}
   return homeClassOf(USER.n)?[homeClassOf(USER.n)[0],"teach"]:["teach"];
 }
 function allowedClasses(kind){
   if(!USER||USER.r==="admin"||USER.r==="classes") return null;   // null = כל הכיתות
   if(USER.r==="coordinator"){const hh=DATA.houses[USER.h];return hh.kind===kind?hh.classes:[];}
+  if(USER.r==="custom") return USER.cls==="*"?null:customCls(kind);
   const hc=homeClassOf(USER.n);
   return (hc&&hc[0]===kind)?[hc[1]]:[];
 }
 function allowedTeachers(){
   if(!USER||USER.r==="admin") return Object.keys(DATA.teachers);
   if(USER.r==="classes") return USER.tv?Object.keys(DATA.teachers):[];
+  if(USER.r==="custom"){
+    const own=DATA.teachers[USER.n]?[USER.n]:[];
+    if(USER.t==="all") return Object.keys(DATA.teachers);
+    if(USER.t==="own") return own;
+    if(USER.t==="classes") return [...new Set(own.concat(teachersOfClasses(USER.cls==="*"?null:customCls("elem").concat(customCls("jun")))))];
+    return [];
+  }
   if(USER.r==="coordinator"){const l=(DATA.house_teachers||{})[USER.h]||[];return l.includes(USER.n)?l:[USER.n,...l];}
   return DATA.teachers[USER.n]?[USER.n]:[];
 }
@@ -1168,61 +1188,105 @@ function rulesView(){
 // ================= ניהול משתמשים (לשונית "👥 משתמשים" - רק לאסיף) =================
 // ת"ז לא יוצאת מהדפדפן: מגובבת כאן (כמו בכניסה) ורק הגיבוב נשלח לשרת.
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function uLevels(){
-  const L=[["admin","הנהלה – רואה הכל (גם חוסרים, צוות ואילוצים)"]];
-  for(const h of Object.keys(DATA.houses||{})) L.push(["coord:"+h,"רכז/ת "+DATA.houses[h].name+" – כיתות ומורי הבית"]);
-  L.push(["classes_tv","מערכות כל הכיתות + כל המורים"],["classes","מערכות כל הכיתות בלבד"],
-         ["teacher","מורה – המערכת האישית (וכיתת החינוך)"]);
-  return L;
+function uLevelLabel(e){
+  const b=e.r==="admin"?"הנהלה":e.r==="coordinator"?"רכז/ת "+((DATA.houses[e.h]||{}).name||""):e.r==="classes"?(e.tv?"כל הכיתות + כל המורים":"כל הכיתות בלבד")
+    :e.r==="custom"?"הרשאה לפי בחירה":"מורה";
+  return b+(e.p&&e.r!=="admin"?" · החלפות":"");
 }
-function uLevelOf(e){ return e.r==="admin"?"admin":e.r==="coordinator"?"coord:"+e.h:e.r==="classes"?(e.tv?"classes_tv":"classes"):"teacher"; }
-function uLevelLabel(e){ const l=uLevels().find(x=>x[0]===uLevelOf(e)); return (l?l[1].split(" – ")[0]:e.r)+(e.p&&e.r!=="admin"?" · החלפות":""); }
 function uIdOk(id){ if(!/^\d{5,9}$/.test(id)) return false; id=id.padStart(9,"0"); let s=0;
   for(let i=0;i<9;i++){let d=+id[i]*((i%2)+1); s+=d>9?d-9:d;} return s%10===0; }
+const U_ALLCLS=()=>Object.keys(DATA.elem).concat(Object.keys(DATA.jun));
+// רשימת כיתות -> טקסט קצר: בית שלם נכתב "כל בית א"
+function uClsText(list){
+  const set=new Set(list), out=[];
+  if(U_ALLCLS().every(c=>set.has(c))) return ["כל הכיתות"];
+  for(const h of Object.keys(DATA.houses)){ const hc=DATA.houses[h].classes;
+    if(hc.every(c=>set.has(c))){ out.push("כל "+DATA.houses[h].name); hc.forEach(c=>set.delete(c)); } }
+  return out.concat(U_ALLCLS().filter(c=>set.has(c)));
+}
 // מה כל משתמש/ת רואה - מחושב מאותן פונקציות שמגבילות את הלוח עצמו (allowedViews וכו'),
 // כך שהתיאור תמיד תואם את מה שקורה בפועל.
 const U_VIEWS=[["gaps","חוסרים"],["staff","צוות – ניצול ואילוצים"],["commit","לוח סדירויות"],["rules","אילוצי המערכת"],["cons","אילוצי מורים"]];
-function uSees(e){
-  const keepU=USER; USER=e; const yes=[], no=[];
+function uEffective(e){   // ההרשאה בפועל, בצורה של הטופס (כיתות/מורים/סדירויות/החלפות)
+  const keepU=USER; USER=e;
   try{
-    const av=allowedViews();
-    for(const [k,lbl] of [["elem","יסודי"],["jun","חטיבה"]]){
-      const ac=av.includes(k)?allowedClasses(k):[];
-      if(ac===null) yes.push("כל כיתות ה"+lbl); else if(ac.length) yes.push(lbl+": "+ac.join(", ")); else no.push("כיתות ה"+lbl);
-    }
+    const av=allowedViews(), cls=[];
+    for(const k of ["elem","jun"]){ if(!av.includes(k)) continue; const ac=allowedClasses(k);
+      (ac===null?Object.keys(k==="elem"?DATA.elem:DATA.jun):ac).forEach(c=>cls.push(c)); }
     const t=av.includes("teach")?allowedTeachers():[], all=Object.keys(DATA.teachers).length;
-    if(t.length>=all) yes.push("כל מערכות המורים");
-    else if(t.length===1&&t[0]===e.n) {yes.push("המערכת האישית"); no.push("מערכות מורים אחרים");}
-    else if(t.length) {yes.push("מערכות "+t.length+" מורי הבית"); no.push("שאר המורים");}
-    else no.push("מערכות מורים");
-    for(const [k,lbl] of U_VIEWS) (av.includes(k)?yes:no).push(lbl);
-    if(e.p||e.r==="admin") yes.push("לחיצה על תא להחלפות");
+    const tv=e.r==="custom"?(e.t||"none"):t.length>=all?"all":!t.length?"none":(t.length===1&&t[0]===e.n)?"own":"classes";
+    return {cls,t:tv,tn:t.length,sed:av.includes("commit"),p:!!(e.p||e.r==="admin"),views:av};
   } finally { USER=keepU; }
-  return {yes,no,empty:!yes.some(x=>!/החלפות/.test(x))};
 }
-let UV={msg:"",err:false,edit:null,busy:false,q:""};
+function uSees(e){
+  const f=uEffective(e), yes=[], no=[];
+  if(f.cls.length) yes.push("כיתות: "+uClsText(f.cls).join(", ")); else no.push("מערכות כיתות");
+  const T={all:"כל מערכות המורים",own:"המערכת האישית",classes:"מערכות "+f.tn+" מורים (שמלמדים בכיתות שלו/ה)"};
+  if(f.t!=="none"&&f.tn) yes.push(T[f.t]); else no.push("מערכות מורים");
+  if(f.t==="own"||f.t==="classes") no.push("שאר המורים");
+  for(const [k,lbl] of U_VIEWS) (f.views.includes(k)?yes:no).push(lbl);
+  if(f.p) yes.push("לחיצה על תא להחלפות");
+  return {yes,no,empty:!f.views.length};
+}
+let UV={msg:"",err:false,edit:null,busy:false,q:"",f:null};
+function uFormFor(h){   // מצב הטופס: משתמש/ת קיים/ת (לפי הגיבוב) או חדש/ה
+  const rem=(USERS_DYN&&USERS_DYN.removed)||{};
+  if(!h) return {n:"",id:"",lvl:"custom",cls:new Set(),t:"none",sed:false,p:false};
+  const e=ACCESS[h];
+  if(!e) return {n:rem[h]||"",id:"",lvl:"custom",cls:new Set(),t:"none",sed:false,p:false};
+  const f=uEffective(e);
+  return {n:e.n,id:"",lvl:e.r==="admin"?"admin":"custom",cls:new Set(f.cls),t:f.t,sed:f.sed,p:f.p&&e.r!=="admin"};
+}
 function usersView(M){
   const key=LS("gordon_ukey"), canEdit=!!(USERS_DYN&&key&&USERS_ADMIN);
   const dyn=(USERS_DYN&&USERS_DYN.users)||{}, rem=(USERS_DYN&&USERS_DYN.removed)||{};
+  if(!UV.f) UV.f=uFormFor(UV.edit);
+  const F=UV.f, own=UV.edit&&UV.edit===DATA.users_owner;
+  // שורת מצב: מה בדיוק חסר כדי לערוך (במקום ניחוש)
+  const st=(ok,t)=>'<span style="margin-inline-end:1rem;white-space:nowrap">'+(ok?'✅':'❌')+' '+t+'</span>';
+  const status='<div style="font-size:.85rem;margin-top:.5rem">'
+    +st(!!USERS_DYN,USERS_DYN?'שרת המשתמשים מחובר':'שרת המשתמשים לא עונה'+(USERS_ERR?' ('+esc(USERS_ERR)+')':''))
+    +st(!!key,key?'קישור ניהול שמור בדפדפן הזה':'אין קישור ניהול בדפדפן הזה')
+    +st(canEdit,canEdit?'אפשר לערוך':'עריכה נעולה')+'</div>'
+    +(canEdit?'':'<div style="margin-top:.6rem;font-size:.85rem">אפשר גם להדביק כאן את קישור הניהול מהמייל: '
+      +'<input id="ukeyin" placeholder="https://…viewer.html?ukey=…" style="width:min(26rem,100%);padding:.35rem .5rem;border:1px solid var(--line);border-radius:.4rem;background:var(--bg);color:var(--ink);font:.85rem Heebo;direction:ltr"> '
+      +'<button id="ukeybtn" class="pinb">שמירה</button></div>');
   let warn="";
   if(!USERS_DYN) warn='אין כרגע חיבור לשרת המשתמשים – מוצגת הרשימה שבנויה בלוח, ואי אפשר לשמור. <button id="uretry" class="pinb">לנסות שוב</button>';
   else if(!key) warn='כדי לשנות משתמשים מהמכשיר הזה, פתחו בו פעם אחת את <b>קישור הניהול</b> שנשלח למייל שלכם (הנושא: "לוח גורדון - קישור לניהול המשתמשים").';
   else if(!USERS_ADMIN) warn='קישור הניהול שנשמר במכשיר הזה לא תקין. פתחו שוב את הקישור מהמייל.';
-  const ed=UV.edit?ACCESS[UV.edit]||{n:rem[UV.edit]||"",r:"teacher"}:null;
-  const lv=ed?uLevelOf(ed):"classes_tv";
-  const opts=uLevels().map(([v,l])=>'<option value="'+v+'"'+(v===lv?' selected':'')+'>'+esc(l)+'</option>').join("");
+  const IN='padding:.45rem .6rem;border:1px solid var(--line);border-radius:.5rem;background:var(--bg);color:var(--ink);font:1rem Heebo';
   const names=[...new Set(Object.keys(DATA.teachers).concat(Object.values(ACCESS).map(e=>e.n)))].sort((a,b)=>a.localeCompare(b,"he"));
-  const form='<section class="card"><h2>'+(ed?'עריכת הרשאה – '+esc(ed.n):'הוספת משתמש/ת')+'</h2>'
-    +'<div class="sub">'+(ed?'שינוי מה שהמשתמש/ת רואה. אין צורך בתעודת הזהות.':'תעודת הזהות לא נשמרת בשום מקום: הדפדפן הופך אותה לקוד חד-כיווני ורק הקוד נשמר.')+'</div>'
-    +'<div style="display:grid;gap:.6rem;max-width:32rem;margin-top:.8rem">'
-    +'<label>שם<br><input id="uname" list="unames" value="'+esc(ed?ed.n:"")+'" style="width:100%;padding:.45rem .6rem;border:1px solid var(--line);border-radius:.5rem;background:var(--bg);color:var(--ink);font:1rem Heebo"></label>'
+  const chk=(id,on,lbl,extra)=>'<label style="white-space:nowrap;margin-inline-end:.9rem"><input type="checkbox" '+id+(on?' checked':'')+(extra||'')+'> '+lbl+'</label>';
+  const all=U_ALLCLS(), has=l=>l.length&&l.every(c=>F.cls.has(c));
+  const quick=[["*","כל הכיתות",all],["elem","כל היסודי",Object.keys(DATA.elem)],["jun","כל החטיבה",Object.keys(DATA.jun)]]
+    .concat(Object.keys(DATA.houses).map(h=>[h,"כל "+DATA.houses[h].name,DATA.houses[h].classes]));
+  const qbtn=quick.map(([k,l,list])=>'<button class="pinb" data-uq="'+k+'" style="'+(has(list)?'background:var(--accent);color:var(--accent-ink);border-color:var(--accent)':'')+'">'+(has(list)?'✓ ':'')+esc(l)+'</button>').join("")
+    +'<button class="pinb" data-uq="none">ניקוי</button>';
+  const groups=Object.keys(DATA.houses).map(h=>'<div style="margin:.35rem 0"><b style="font-size:.85rem">'+esc(DATA.houses[h].name)+':</b> '
+    +DATA.houses[h].classes.map(c=>chk('data-ucls="'+esc(c)+'"',F.cls.has(c),esc(c))).join("")+'</div>').join("");
+  const TOPT=[["none","לא רואה מערכות מורים"],["own","רק המערכת האישית שלו/ה"],["classes","מורים שמלמדים בכיתות שסומנו"],["all","כל מערכות המורים"]];
+  const custom='<div id="ucustom" style="'+(F.lvl==="admin"?'display:none;':'')+'border:1px solid var(--line);border-radius:.6rem;padding:.6rem .8rem">'
+    +'<div style="font-weight:700;margin-bottom:.3rem">אילו כיתות רואה</div><div>'+qbtn+'</div>'+groups
+    +'<div style="font-weight:700;margin:.6rem 0 .3rem">מערכות מורים</div>'
+    +TOPT.map(([v,l])=>'<label style="display:block"><input type="radio" name="ut" value="'+v+'"'+(F.t===v?' checked':'')+'> '+l+'</label>').join("")
+    +'<div style="font-weight:700;margin:.6rem 0 .3rem">עוד</div>'
+    +chk('id="used"',F.sed,'לוח סדירויות')+chk('id="up"',F.p,'לחיצה על תא לאפשרויות החלפה')
+    +'</div>';
+  const idLabel=UV.edit?(own?'תעודת זהות (שלך – לא ניתנת להחלפה כאן)':'תעודת זהות חדשה <small style="color:var(--muted)">(רשות – הקיימת שמורה מוצפנת ולא ניתנת להצגה; הקלדה כאן מחליפה אותה)</small>')
+                       :'תעודת זהות';
+  const form='<section class="card"><h2>'+(UV.edit?'עריכה – '+esc(F.n):'הוספת משתמש/ת')+'</h2>'
+    +'<div class="sub">תעודת הזהות לא נשמרת בשום מקום: הדפדפן הופך אותה לקוד חד-כיווני ורק הקוד נשמר. לתעודת זהות נוספת לאותו אדם – "הוספה" עם אותו שם.</div>'
+    +'<div style="display:grid;gap:.6rem;max-width:40rem;margin-top:.8rem">'
+    +'<label>שם<br><input id="uname" list="unames" value="'+esc(F.n)+'" style="width:100%;'+IN+'"></label>'
     +'<datalist id="unames">'+names.map(n=>'<option value="'+esc(n)+'">').join("")+'</datalist>'
-    +(ed?'':'<label>תעודת זהות<br><input id="uid" inputmode="numeric" autocomplete="off" style="width:100%;padding:.45rem .6rem;border:1px solid var(--line);border-radius:.5rem;background:var(--bg);color:var(--ink);font:1rem Heebo;letter-spacing:.1em"></label>')
-    +'<label>מה רואה<br><select id="ulevel" style="width:100%;padding:.45rem .6rem;border:1px solid var(--line);border-radius:.5rem;background:var(--bg);color:var(--ink);font:1rem Heebo">'+opts+'</select></label>'
-    +'<label id="upwrap"><input type="checkbox" id="up"'+(ed&&ed.p?' checked':'')+'> לחיצה על תא לאפשרויות החלפה</label>'
-    +'<div id="unote" style="font-size:.85rem;color:var(--muted)"></div>'
-    +'<div><button id="usave" class="pinb" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700"'+(canEdit&&!UV.busy?'':' disabled')+'>'+(UV.busy?'שומר…':(ed?'שמירת השינוי':'הוספה'))+'</button>'
-    +(ed?' <button id="ucancel" class="pinb">ביטול</button>':'')+'</div>'
+    +'<label>'+idLabel+'<br><input id="uid" inputmode="numeric" autocomplete="off" value="'+esc(F.id)+'"'+(own?' disabled':'')+' style="width:100%;'+IN+';letter-spacing:.1em"></label>'
+    +'<label>רמת הרשאה<br><select id="ulevel" style="width:100%;'+IN+'">'
+    +'<option value="custom"'+(F.lvl!=="admin"?' selected':'')+'>לפי בחירה – כיתות, מורים ועוד</option>'
+    +'<option value="admin"'+(F.lvl==="admin"?' selected':'')+'>הנהלה – רואה הכל (גם חוסרים, צוות ואילוצים)</option></select></label>'
+    +custom
+    +'<div><button id="usave" class="pinb" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700"'+(canEdit&&!UV.busy?'':' disabled')+'>'+(UV.busy?'שומר…':(UV.edit?'שמירת השינוי':'הוספה'))+'</button>'
+    +(UV.edit?' <button id="ucancel" class="pinb">ביטול</button>':'')+'</div>'
     +(UV.msg?'<div style="font-size:.9rem;color:'+(UV.err?'#B3261E':'#2E7D32')+'">'+esc(UV.msg)+'</div>':'')
     +'</div></section>';
   const q=UV.q.trim();
@@ -1231,58 +1295,75 @@ function usersView(M){
   const rows=list.map(([h,e])=>{
     const src=dyn[h]?(ACCESS_BASE[h]?"שונה כאן":"נוסף כאן"):"";
     const dup=seen[e.n]?' <small style="color:var(--muted)">(ת"ז נוספת)</small>':''; seen[e.n]=1;
-    const own=h===DATA.users_owner;
+    const me=h===DATA.users_owner;
     const sv=uSees(e);
-    return '<tr><td style="text-align:right;vertical-align:top">'+esc(e.n)+dup+(own?' <small>(את/ה)</small>':'')+'</td>'
+    return '<tr><td style="text-align:right;vertical-align:top">'+esc(e.n)+dup+(me?' <small>(את/ה)</small>':'')+'</td>'
       +'<td style="text-align:right;vertical-align:top"><b>'+esc(uLevelLabel(e))+'</b>'
-      +'<div style="font-size:.8rem;color:#2E7D32">✓ '+esc(sv.yes.join(" · ")||"—")+'</div>'
-      +(sv.no.length?'<div style="font-size:.8rem;color:#B3261E">✗ '+esc(sv.no.join(" · "))+'</div>':'')
-      +(sv.empty?'<div style="font-size:.8rem;color:#B3261E;font-weight:700">⚠ לא רואה כלום – השם לא תואם מורה בלוח</div>':'')+'</td>'
+      +'<div style="font-size:.8rem;color:#2E7D32;text-align:right">✓ '+esc(sv.yes.join(" · ")||"—")+'</div>'
+      +(sv.no.length?'<div style="font-size:.8rem;color:#B3261E;text-align:right">✗ '+esc(sv.no.join(" · "))+'</div>':'')
+      +(sv.empty?'<div style="font-size:.8rem;color:#B3261E;font-weight:700;text-align:right">⚠ לא רואה כלום'+(e.r==="teacher"?' – השם לא תואם מורה בלוח':'')+'</div>':'')+'</td>'
       +'<td style="vertical-align:top"><small style="color:var(--muted)">'+src+'</small></td>'
       +'<td style="vertical-align:top;white-space:nowrap"><button class="pinb" data-ued="'+h+'"'+(canEdit?'':' disabled')+'>עריכה</button>'
-      +(own?'':'<button class="pinb" data-urm="'+h+'"'+(canEdit?'':' disabled')+'>הסרה</button>')+'</td></tr>';
+      +(me?'':'<button class="pinb" data-urm="'+h+'"'+(canEdit?'':' disabled')+'>הסרה</button>')+'</td></tr>';
   }).join("");
   const remRows=Object.entries(rem).map(([h,n])=>'<tr><td style="text-align:right">'+esc(n)+'</td><td colspan="2"><small style="color:var(--muted)">הוסר/ה – לא נכנס/ת ללוח</small></td>'
       +'<td><button class="pinb" data-ued="'+h+'"'+(canEdit?'':' disabled')+'>החזרה</button></td></tr>').join("");
-  M.innerHTML=(warn?'<section class="card" style="border-color:#E0B060;background:#FFF8EA"><div>'+warn+'</div></section>':'')
+  M.innerHTML=(warn||!canEdit?'<section class="card" style="border-color:#E0B060;background:#FFF8EA"><div>'+warn+'</div>'+status+'</section>':'')
     +form
     +'<section class="card"><h2>מי נכנס ללוח ('+Object.keys(ACCESS).length+')</h2>'
     +'<div class="sub">שינוי נכנס לתוקף מיד: מי שהוסר/ה מנותק/ת בטעינה הבאה של הלוח. מי שמופיע/ה כמה פעמים נכנס/ת עם כמה תעודות זהות.</div>'
-    +'<input id="uq" placeholder="חיפוש שם…" value="'+esc(UV.q)+'" style="margin:.6rem 0;padding:.4rem .6rem;border:1px solid var(--line);border-radius:.5rem;background:var(--bg);color:var(--ink);font:1rem Heebo">'
+    +'<input id="uq" placeholder="חיפוש שם…" value="'+esc(UV.q)+'" style="margin:.6rem 0;'+IN+'">'
     +'<table style="width:100%"><thead><tr><th>שם</th><th>מה רואה (✓) ומה לא (✗)</th><th></th><th></th></tr></thead><tbody>'+rows+'</tbody></table>'
     +(remRows?'<h3 style="margin-top:1rem">הוסרו</h3><table style="width:100%"><tbody>'+remRows+'</tbody></table>':'')
     +'</section>';
-  const lvEl=document.getElementById("ulevel"), note=document.getElementById("unote"), nm=document.getElementById("uname");
-  const upd=()=>{ const v=lvEl.value; document.getElementById("upwrap").style.display=v==="admin"?"none":"";
-    const n=nm.value.trim();
-    note.textContent=(v==="teacher"&&n&&!DATA.teachers[n])?"שימו לב: \""+n+"\" אינו שם של מורה בלוח, ולכן לא תוצג לו/ה מערכת אישית. לבחור שם מהרשימה.":""; };
-  lvEl.onchange=upd; nm.oninput=upd; upd();
-  const rr=document.getElementById("uretry"); if(rr) rr.onclick=async()=>{usersReady=loadUsers(); await usersReady; render();};
-  document.getElementById("uq").oninput=e=>{UV.q=e.target.value; const pos=e.target.selectionStart; usersView(M); const x=document.getElementById("uq"); x.focus(); x.setSelectionRange(pos,pos);};
-  const cc=document.getElementById("ucancel"); if(cc) cc.onclick=()=>{UV.edit=null;UV.msg="";usersView(M);};
-  M.querySelectorAll("[data-ued]").forEach(b=>b.onclick=()=>{UV.edit=b.dataset.ued;UV.msg="";usersView(M);window.scrollTo(0,0);});
+  // ---- אירועים: כל שינוי בטופס נשמר ב-UV.f ושורד ציור מחדש ----
+  const redraw=()=>{const y=window.scrollY; usersView(M); window.scrollTo(0,y);};
+  const g=id=>document.getElementById(id);
+  g("uname").oninput=e=>{F.n=e.target.value;};
+  g("uid").oninput=e=>{F.id=e.target.value;};
+  g("ulevel").onchange=e=>{F.lvl=e.target.value; g("ucustom").style.display=F.lvl==="admin"?"none":"";};
+  M.querySelectorAll("[data-ucls]").forEach(x=>x.onchange=()=>{x.checked?F.cls.add(x.dataset.ucls):F.cls.delete(x.dataset.ucls); redraw();});
+  M.querySelectorAll("[data-uq]").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.uq; if(k==="none"){F.cls.clear(); return redraw();}
+    const l=quick.find(x=>x[0]===k)[2]; if(has(l)) l.forEach(c=>F.cls.delete(c)); else l.forEach(c=>F.cls.add(c)); redraw();});
+  M.querySelectorAll('input[name="ut"]').forEach(x=>x.onchange=()=>{F.t=x.value;});
+  g("used").onchange=e=>{F.sed=e.target.checked;}; g("up").onchange=e=>{F.p=e.target.checked;};
+  const kb=g("ukeybtn");
+  if(kb) kb.onclick=async()=>{ const v=g("ukeyin").value.trim(), m=v.match(/ukey=([0-9a-f]{32})/i)||v.match(/^([0-9a-f]{32})$/i);
+    if(!m){UV.msg="לא נמצא קישור ניהול בטקסט שהודבק";UV.err=true;return usersView(M);}
+    LS("gordon_ukey",m[1].toLowerCase()); usersReady=loadUsers(); await usersReady;
+    UV.msg=USERS_ADMIN?"קישור הניהול נשמר – אפשר לערוך":"הקישור נשמר, אבל השרת לא אישר אותו"; UV.err=!USERS_ADMIN; usersView(M); };
+  const rr=g("uretry"); if(rr) rr.onclick=async()=>{usersReady=loadUsers(); await usersReady; render();};
+  g("uq").oninput=e=>{UV.q=e.target.value; const pos=e.target.selectionStart; usersView(M); const x=g("uq"); x.focus(); x.setSelectionRange(pos,pos);};
+  const cc=g("ucancel"); if(cc) cc.onclick=()=>{UV.edit=null;UV.f=null;UV.msg="";usersView(M);};
+  M.querySelectorAll("[data-ued]").forEach(b=>b.onclick=()=>{UV.edit=b.dataset.ued;UV.f=null;UV.msg="";usersView(M);window.scrollTo(0,0);});
   M.querySelectorAll("[data-urm]").forEach(b=>b.onclick=async()=>{
     const h=b.dataset.urm, e=ACCESS[h]; if(!confirm("להסיר את "+e.n+" מהלוח? היא/הוא לא יוכלו להיכנס יותר.")) return;
     await uSend({action:"remove",hash:h,name:e.n},"הוסר/ה: "+e.n);
   });
-  document.getElementById("usave").onclick=async()=>{
-    const n=nm.value.trim(), v=lvEl.value, pk=document.getElementById("up").checked;
-    if(!n){UV.msg="חסר שם";UV.err=true;return usersView(M);}
-    let h=UV.edit;
-    if(!h){ const id=(document.getElementById("uid").value||"").replace(/\D/g,"");
-      if(!uIdOk(id)){UV.msg="תעודת הזהות לא תקינה (ספרת ביקורת). לבדוק שוב.";UV.err=true;return usersView(M);}
-      h=await idHash(id); }
-    if(h===DATA.users_owner&&v!=="admin"){UV.msg="אי אפשר להוריד את ההרשאה שלך עצמך.";UV.err=true;return usersView(M);}
-    const was=ACCESS[h];
-    const role=v.startsWith("coord:")?"coordinator":v==="classes_tv"?"classes":v;
-    await uSend({action:"save",hash:h,name:n,role:role,house:v.startsWith("coord:")?v.slice(6):"",tv:v==="classes_tv"?"1":"",p:pk?"1":""},
-      (UV.edit?"עודכן: ":was?"ת\"ז זו כבר הייתה רשומה ("+was.n+") – עודכנה: ":"נוסף/ה: ")+n, true);
+  g("usave").onclick=async()=>{
+    const n=F.n.trim(), fail=m=>{UV.msg=m;UV.err=true;usersView(M);};
+    if(!n) return fail("חסר שם");
+    const id=(F.id||"").replace(/\D/g,"");
+    if((!UV.edit||id)&&!uIdOk(id)) return fail("תעודת הזהות לא תקינה (ספרת ביקורת). לבדוק שוב.");
+    const h=id?await idHash(id):UV.edit;
+    if(UV.edit&&h!==UV.edit&&ACCESS[h]) return fail("תעודת הזהות הזו כבר רשומה אצל "+ACCESS[h].n+".");
+    if(h===DATA.users_owner&&F.lvl!=="admin") return fail("אי אפשר להוריד את ההרשאה שלך עצמך.");
+    const P={action:"save",hash:h,name:n,role:F.lvl==="admin"?"admin":"custom"};
+    if(F.lvl!=="admin"){
+      if(!F.cls.size&&F.t==="none"&&!F.sed) return fail("לא נבחר שום דבר לצפייה – לסמן כיתות או מערכות מורים.");
+      P.cls=all.every(c=>F.cls.has(c))?"*":all.filter(c=>F.cls.has(c)).join(",");
+      P.t=F.t; P.sed=F.sed?"1":""; P.p=F.p?"1":"";
+    }
+    if(UV.edit&&h!==UV.edit) P.old=UV.edit;
+    const was=!UV.edit&&ACCESS[h];
+    await uSend(P,(UV.edit?(P.old?"עודכן כולל תעודת זהות חדשה: ":"עודכן: "):was?"ת\"ז זו כבר הייתה רשומה ("+was.n+") – עודכנה: ":"נוסף/ה: ")+n, true);
   };
   async function uSend(params,okMsg,resetForm){
     UV.busy=true; UV.msg=""; usersView(M);
     try{ const d=await jsonp(Object.assign({key:LS("gordon_ukey")},params),15000);
       if(!d||!d.ok){UV.msg=(d&&d.error)||"השמירה נכשלה";UV.err=true;}
-      else{ usersReady=loadUsers(); await usersReady; UV.msg=okMsg+" ✓"; UV.err=false; if(resetForm) UV.edit=null; }
+      else{ usersReady=loadUsers(); await usersReady; UV.msg=okMsg+" ✓"; UV.err=false; if(resetForm){UV.edit=null;UV.f=null;} }
     }catch(err){UV.msg="השמירה נכשלה: "+err.message;UV.err=true;}
     UV.busy=false; usersView(M);
   }
@@ -1291,6 +1372,7 @@ function render(){
   if(Object.keys(ACCESS).length&&!USER){showLogin();return;}
   pinsBtn();
   const av=allowedViews();
+  if(!av.length){ tabBtns(); $q("#main").innerHTML='<section class="card"><h2>אין הרשאת צפייה</h2><div class="sub">פנו למנהל/ת.</div></section>'; return; }
   if(!av.includes(view)) view=av[0];
   if(view==="teach"&&!pick&&USER&&USER.r!=="admin"&&DATA.teachers[USER.n]) pick=USER.n;
   tabBtns(); chipRow();
