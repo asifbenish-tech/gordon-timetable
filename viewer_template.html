@@ -449,7 +449,7 @@ function expMenu(){
 const ACCESS_BASE=DATA.access||{}; let ACCESS=Object.assign({},ACCESS_BASE), USER=null, USER_H=null;
 const LS=(k,v)=>{try{return v===undefined?localStorage.getItem(k):(v===null?localStorage.removeItem(k):localStorage.setItem(k,v));}catch(e){return null;}};
 const USERS_API=DATA.users_api||"";
-let USERS_DYN=null, USERS_ADMIN=false;
+let USERS_DYN=null, USERS_ADMIN=false, USERS_ERR="";
 (function(){   // קישור הניהול מהמייל: ?ukey=... נשמר במכשיר הזה ונמחק מהכתובת
   try{const u=new URL(location.href),k=u.searchParams.get("ukey");
     if(k){LS("gordon_ukey",k);u.searchParams.delete("ukey");history.replaceState(null,"",u.pathname+u.search+u.hash);}}catch(e){}
@@ -473,7 +473,8 @@ function mergeAccess(){
 function loadUsers(){
   if(!USERS_API) return Promise.resolve();
   const k=LS("gordon_ukey");
-  return jsonp(k?{key:k}:{}).then(d=>{ if(d&&d.ok){USERS_DYN=d; USERS_ADMIN=!!d.admin; mergeAccess();} }).catch(()=>{});
+  return jsonp(k?{key:k}:{}).then(d=>{ if(d&&d.ok){USERS_DYN=d; USERS_ADMIN=!!d.admin; USERS_ERR=""; mergeAccess();}
+    else USERS_ERR=(d&&d.error)||"תשובה לא צפויה מהשרת"; }).catch(e=>{USERS_ERR=e.message;});
 }
 let usersReady=loadUsers();
 const waitUsers=()=>Promise.race([usersReady,new Promise(r=>setTimeout(r,6000))]);
@@ -1204,6 +1205,15 @@ let UV={msg:"",err:false,edit:null,busy:false,q:""};
 function usersView(M){
   const key=LS("gordon_ukey"), canEdit=!!(USERS_DYN&&key&&USERS_ADMIN);
   const dyn=(USERS_DYN&&USERS_DYN.users)||{}, rem=(USERS_DYN&&USERS_DYN.removed)||{};
+  // שורת מצב: מה בדיוק חסר כדי לערוך (במקום ניחוש)
+  const st=(ok,t)=>'<span style="margin-inline-end:1rem;white-space:nowrap">'+(ok?'✅':'❌')+' '+t+'</span>';
+  const status='<div style="font-size:.85rem;margin-top:.5rem">'
+    +st(!!USERS_DYN,USERS_DYN?'שרת המשתמשים מחובר':'שרת המשתמשים לא עונה'+(USERS_ERR?' ('+esc(USERS_ERR)+')':''))
+    +st(!!key,key?'קישור ניהול שמור בדפדפן הזה':'אין קישור ניהול בדפדפן הזה')
+    +st(canEdit,canEdit?'אפשר לערוך':'עריכה נעולה')+'</div>'
+    +(canEdit?'':'<div style="margin-top:.6rem;font-size:.85rem">אפשר גם להדביק כאן את קישור הניהול מהמייל: '
+      +'<input id="ukeyin" placeholder="https://…viewer.html?ukey=…" style="width:min(26rem,100%);padding:.35rem .5rem;border:1px solid var(--line);border-radius:.4rem;background:var(--bg);color:var(--ink);font:.85rem Heebo;direction:ltr"> '
+      +'<button id="ukeybtn" class="pinb">שמירה</button></div>');
   let warn="";
   if(!USERS_DYN) warn='אין כרגע חיבור לשרת המשתמשים – מוצגת הרשימה שבנויה בלוח, ואי אפשר לשמור. <button id="uretry" class="pinb">לנסות שוב</button>';
   else if(!key) warn='כדי לשנות משתמשים מהמכשיר הזה, פתחו בו פעם אחת את <b>קישור הניהול</b> שנשלח למייל שלכם (הנושא: "לוח גורדון - קישור לניהול המשתמשים").';
@@ -1244,7 +1254,7 @@ function usersView(M){
   }).join("");
   const remRows=Object.entries(rem).map(([h,n])=>'<tr><td style="text-align:right">'+esc(n)+'</td><td colspan="2"><small style="color:var(--muted)">הוסר/ה – לא נכנס/ת ללוח</small></td>'
       +'<td><button class="pinb" data-ued="'+h+'"'+(canEdit?'':' disabled')+'>החזרה</button></td></tr>').join("");
-  M.innerHTML=(warn?'<section class="card" style="border-color:#E0B060;background:#FFF8EA"><div>'+warn+'</div></section>':'')
+  M.innerHTML=(warn||!canEdit?'<section class="card" style="border-color:#E0B060;background:#FFF8EA"><div>'+warn+'</div>'+status+'</section>':'')
     +form
     +'<section class="card"><h2>מי נכנס ללוח ('+Object.keys(ACCESS).length+')</h2>'
     +'<div class="sub">שינוי נכנס לתוקף מיד: מי שהוסר/ה מנותק/ת בטעינה הבאה של הלוח. מי שמופיע/ה כמה פעמים נכנס/ת עם כמה תעודות זהות.</div>'
@@ -1257,6 +1267,11 @@ function usersView(M){
     const n=nm.value.trim();
     note.textContent=(v==="teacher"&&n&&!DATA.teachers[n])?"שימו לב: \""+n+"\" אינו שם של מורה בלוח, ולכן לא תוצג לו/ה מערכת אישית. לבחור שם מהרשימה.":""; };
   lvEl.onchange=upd; nm.oninput=upd; upd();
+  const kb=document.getElementById("ukeybtn");
+  if(kb) kb.onclick=async()=>{ const v=document.getElementById("ukeyin").value.trim(), m=v.match(/ukey=([0-9a-f]{32})/i)||v.match(/^([0-9a-f]{32})$/i);
+    if(!m){UV.msg="לא נמצא קישור ניהול בטקסט שהודבק";UV.err=true;return usersView(M);}
+    LS("gordon_ukey",m[1].toLowerCase()); usersReady=loadUsers(); await usersReady;
+    UV.msg=USERS_ADMIN?"קישור הניהול נשמר – אפשר לערוך":"הקישור נשמר, אבל השרת לא אישר אותו"; UV.err=!USERS_ADMIN; usersView(M); };
   const rr=document.getElementById("uretry"); if(rr) rr.onclick=async()=>{usersReady=loadUsers(); await usersReady; render();};
   document.getElementById("uq").oninput=e=>{UV.q=e.target.value; const pos=e.target.selectionStart; usersView(M); const x=document.getElementById("uq"); x.focus(); x.setSelectionRange(pos,pos);};
   const cc=document.getElementById("ucancel"); if(cc) cc.onclick=()=>{UV.edit=null;UV.msg="";usersView(M);};
