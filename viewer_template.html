@@ -1179,6 +1179,27 @@ function uLevelOf(e){ return e.r==="admin"?"admin":e.r==="coordinator"?"coord:"+
 function uLevelLabel(e){ const l=uLevels().find(x=>x[0]===uLevelOf(e)); return (l?l[1].split(" – ")[0]:e.r)+(e.p&&e.r!=="admin"?" · החלפות":""); }
 function uIdOk(id){ if(!/^\d{5,9}$/.test(id)) return false; id=id.padStart(9,"0"); let s=0;
   for(let i=0;i<9;i++){let d=+id[i]*((i%2)+1); s+=d>9?d-9:d;} return s%10===0; }
+// מה כל משתמש/ת רואה - מחושב מאותן פונקציות שמגבילות את הלוח עצמו (allowedViews וכו'),
+// כך שהתיאור תמיד תואם את מה שקורה בפועל.
+const U_VIEWS=[["gaps","חוסרים"],["staff","צוות – ניצול ואילוצים"],["commit","לוח סדירויות"],["rules","אילוצי המערכת"],["cons","אילוצי מורים"]];
+function uSees(e){
+  const keepU=USER; USER=e; const yes=[], no=[];
+  try{
+    const av=allowedViews();
+    for(const [k,lbl] of [["elem","יסודי"],["jun","חטיבה"]]){
+      const ac=av.includes(k)?allowedClasses(k):[];
+      if(ac===null) yes.push("כל כיתות ה"+lbl); else if(ac.length) yes.push(lbl+": "+ac.join(", ")); else no.push("כיתות ה"+lbl);
+    }
+    const t=av.includes("teach")?allowedTeachers():[], all=Object.keys(DATA.teachers).length;
+    if(t.length>=all) yes.push("כל מערכות המורים");
+    else if(t.length===1&&t[0]===e.n) {yes.push("המערכת האישית"); no.push("מערכות מורים אחרים");}
+    else if(t.length) {yes.push("מערכות "+t.length+" מורי הבית"); no.push("שאר המורים");}
+    else no.push("מערכות מורים");
+    for(const [k,lbl] of U_VIEWS) (av.includes(k)?yes:no).push(lbl);
+    if(e.p||e.r==="admin") yes.push("לחיצה על תא להחלפות");
+  } finally { USER=keepU; }
+  return {yes,no,empty:!yes.some(x=>!/החלפות/.test(x))};
+}
 let UV={msg:"",err:false,edit:null,busy:false,q:""};
 function usersView(M){
   const key=LS("gordon_ukey"), canEdit=!!(USERS_DYN&&key&&USERS_ADMIN);
@@ -1211,9 +1232,14 @@ function usersView(M){
     const src=dyn[h]?(ACCESS_BASE[h]?"שונה כאן":"נוסף כאן"):"";
     const dup=seen[e.n]?' <small style="color:var(--muted)">(ת"ז נוספת)</small>':''; seen[e.n]=1;
     const own=h===DATA.users_owner;
-    return '<tr><td style="text-align:right">'+esc(e.n)+dup+(own?' <small>(את/ה)</small>':'')+'</td><td style="text-align:right">'+esc(uLevelLabel(e))+'</td>'
-      +'<td><small style="color:var(--muted)">'+src+'</small></td>'
-      +'<td><button class="pinb" data-ued="'+h+'"'+(canEdit?'':' disabled')+'>עריכה</button>'
+    const sv=uSees(e);
+    return '<tr><td style="text-align:right;vertical-align:top">'+esc(e.n)+dup+(own?' <small>(את/ה)</small>':'')+'</td>'
+      +'<td style="text-align:right;vertical-align:top"><b>'+esc(uLevelLabel(e))+'</b>'
+      +'<div style="font-size:.8rem;color:#2E7D32">✓ '+esc(sv.yes.join(" · ")||"—")+'</div>'
+      +(sv.no.length?'<div style="font-size:.8rem;color:#B3261E">✗ '+esc(sv.no.join(" · "))+'</div>':'')
+      +(sv.empty?'<div style="font-size:.8rem;color:#B3261E;font-weight:700">⚠ לא רואה כלום – השם לא תואם מורה בלוח</div>':'')+'</td>'
+      +'<td style="vertical-align:top"><small style="color:var(--muted)">'+src+'</small></td>'
+      +'<td style="vertical-align:top;white-space:nowrap"><button class="pinb" data-ued="'+h+'"'+(canEdit?'':' disabled')+'>עריכה</button>'
       +(own?'':'<button class="pinb" data-urm="'+h+'"'+(canEdit?'':' disabled')+'>הסרה</button>')+'</td></tr>';
   }).join("");
   const remRows=Object.entries(rem).map(([h,n])=>'<tr><td style="text-align:right">'+esc(n)+'</td><td colspan="2"><small style="color:var(--muted)">הוסר/ה – לא נכנס/ת ללוח</small></td>'
@@ -1223,7 +1249,7 @@ function usersView(M){
     +'<section class="card"><h2>מי נכנס ללוח ('+Object.keys(ACCESS).length+')</h2>'
     +'<div class="sub">שינוי נכנס לתוקף מיד: מי שהוסר/ה מנותק/ת בטעינה הבאה של הלוח. מי שמופיע/ה כמה פעמים נכנס/ת עם כמה תעודות זהות.</div>'
     +'<input id="uq" placeholder="חיפוש שם…" value="'+esc(UV.q)+'" style="margin:.6rem 0;padding:.4rem .6rem;border:1px solid var(--line);border-radius:.5rem;background:var(--bg);color:var(--ink);font:1rem Heebo">'
-    +'<table style="width:100%"><thead><tr><th>שם</th><th>מה רואה</th><th></th><th></th></tr></thead><tbody>'+rows+'</tbody></table>'
+    +'<table style="width:100%"><thead><tr><th>שם</th><th>מה רואה (✓) ומה לא (✗)</th><th></th><th></th></tr></thead><tbody>'+rows+'</tbody></table>'
     +(remRows?'<h3 style="margin-top:1rem">הוסרו</h3><table style="width:100%"><tbody>'+remRows+'</tbody></table>':'')
     +'</section>';
   const lvEl=document.getElementById("ulevel"), note=document.getElementById("unote"), nm=document.getElementById("uname");
