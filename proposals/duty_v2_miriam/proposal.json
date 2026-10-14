@@ -1,0 +1,36 @@
+{
+ "banner": "הצעה - לא מפורסם",
+ "base": "published",
+ "env": {
+  "STAB": "5000"
+ },
+ "freeze_elem": true,
+ "extra": "extra.py",
+ "access": [
+  "אסיף",
+  "דאפי",
+  "צופיה"
+ ],
+ "_doc": "כמו duty_v2, ובנוסף מרים מסיימת בשני עד ש6 (שעה שמינית מותרת - המנהל: אינה חובה).",
+ "title": "הצעה: חדר אוכל (גרסה 2) + מרים",
+ "rules_off": [
+  "duty_days",
+  "eighth_hour"
+ ],
+ "overrides": {
+  "data2": {
+   "TCONS": {
+    "אסיף": {
+     "day_until": {
+      "1": 5
+     }
+    },
+    "מרים": {
+     "day_until": {
+      "1": 6
+     }
+    }
+   }
+  }
+ }
+}
