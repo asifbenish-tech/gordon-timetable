@@ -117,6 +117,11 @@ button.role:hover{border-color:var(--accent)}
 .ri svg{width:26px;height:26px}
 .ri.cup{background:var(--amber-soft);color:var(--amber)}
 .ri.star{background:var(--accent-soft);color:var(--accent)}
+.ri.cart{background:var(--ok-soft);color:var(--ok)}
+.xtag{display:inline-block;margin-inline-start:6px;font-size:.7rem;font-weight:700;letter-spacing:0;border:1px solid var(--line);border-radius:999px;padding:0 7px;color:var(--muted);vertical-align:1px}
+.slot{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.slot .sl{font-size:.75rem;font-weight:700;color:var(--muted)}
+button.slot{border:2px dashed var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 10px;font-weight:600}
 .role-b{min-width:0;flex:1}
 .role-l{font-size:.78rem;font-weight:700;letter-spacing:.04em;color:var(--muted)}
 .role-n{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:2px}
@@ -275,9 +280,10 @@ const ICONS = {
   star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
   screen: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 20h8M12 16v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
   copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+  cart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 13h16M6 7v8.5M18 7v8.5M20 7V3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="7" cy="18.5" r="1.9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="17" cy="18.5" r="1.9" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
   shuffle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c5 0 6 10 11 10H21M3 17h3.5c2 0 3.2-1.6 4.2-3.5M21 7h-3.5c-2 0-3.2 1.6-4.2 3.5M18 4l3 3-3 3M18 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 };
-const ICON_NAMES = [['cup','כוס'],['cutlery','סכו"ם'],['broom','ניקיון'],['star','אחר']];
+const ICON_NAMES = [['cup','כוס'],['cutlery','סכו"ם'],['cart','עגלה'],['broom','ניקיון'],['star','אחר']];
 const TABS = [['plan','סידור היום'],['students','תלמידים'],['tables','שולחנות וצוותים'],['roles','תפקידים'],['history','היסטוריה']];
 
 const pad = n => String(n).padStart(2, '0');
@@ -398,7 +404,8 @@ function roleStats(cid, excludeDate){
   const st = {};
   for (const h of histFor(cid)){
     if (h.date === excludeDate) continue;
-    for (const [rid, ids] of Object.entries(h.roles || {})) for (const sid of ids || []){
+    for (const src of [h.roles, h.extras]) for (const [rid, ids] of Object.entries(src || {})) for (const sid of ids || []){
+      if (!sid) continue;
       const r = st[sid] || (st[sid] = {}); const x = r[rid] || (r[rid] = { n: 0, last: '' });
       x.n++; if (h.date > x.last) x.last = h.date;
     }
@@ -406,11 +413,37 @@ function roleStats(cid, excludeDate){
   return st;
 }
 function prevPlan(cid, date){ const hs = histFor(cid).filter(h => h.date < date); return hs[hs.length - 1] || null; }
-function pickForRole(cands, rid, st, prev){
+function pickForRole(cands, rid, st, prev, busy){
   if (!cands.length) return null;
-  const prevHolders = new Set(Object.values((prev && prev.roles) || {}).flat());
-  return cands.map((id, i) => ({ id, i, n: (st[id] && st[id][rid] && st[id][rid].n) || 0, last: (st[id] && st[id][rid] && st[id][rid].last) || '', recent: prevHolders.has(id) ? 1 : 0 }))
-    .sort((a, b) => a.n - b.n || a.recent - b.recent || (a.last < b.last ? -1 : a.last > b.last ? 1 : 0) || a.i - b.i)[0].id;
+  const prevHolders = new Set([...Object.values((prev && prev.roles) || {}).flat(), ...Object.values((prev && prev.extras) || {}).flat()]);
+  return cands.map((id, i) => ({ id, i, b: busy && busy.has(id) ? 1 : 0, n: (st[id] && st[id][rid] && st[id][rid].n) || 0, last: (st[id] && st[id][rid] && st[id][rid].last) || '', recent: prevHolders.has(id) ? 1 : 0 }))
+    .sort((a, b) => a.b - b.b || a.n - b.n || a.recent - b.recent || (a.last < b.last ? -1 : a.last > b.last ? 1 : 0) || a.i - b.i)[0].id;
+}
+const slotLabel = (r, i) => r.unit ? `${r.unit} ${i + 1}` : r.name;
+// Extra roles (e.g. the food carts) go to any present student, who also stays in a team.
+// Slots keep their position, so a replacement takes over the same cart.
+function fillExtras(c, plan, ok, st, prev){
+  const xr = c.roles.filter(r => r.extra);
+  const out = {}, taken = new Set();
+  for (const r of xr){
+    const n = r.count || 1;
+    const arr = ((plan.extras || {})[r.id] || []).slice(0, n).map(id => id && ok(id) && !taken.has(id) ? id : null);
+    while (arr.length < n) arr.push(null);
+    arr.forEach(id => { if (id) taken.add(id); });
+    out[r.id] = arr;
+  }
+  const main = new Set(Object.values(plan.roles || {}).flat());
+  const pool = shuffle(c.students.map(s => s.id).filter(ok));
+  for (const r of xr){
+    const arr = out[r.id];
+    for (let i = 0; i < arr.length; i++){
+      if (arr[i]) continue;
+      const pick = r.fixed && ok(r.fixed) && !taken.has(r.fixed) ? r.fixed : pickForRole(pool.filter(id => !taken.has(id)), r.id, st, prev, main);
+      if (!pick) break;
+      arr[i] = pick; taken.add(pick);
+    }
+  }
+  return out;
 }
 function teamTargets(c, total, prefer){
   const out = {}; c.teams.forEach(t => out[t.id] = 0);
@@ -446,9 +479,9 @@ function distribute(c, ids, prev){
 function makePlan(c, absent, date){
   const present = c.students.filter(s => !absent.has(s.id)).map(s => s.id);
   const st = roleStats(c.id, date), prev = prevPlan(c.id, date);
-  const plan = { date, roles: {}, teams: {}, unassigned: [] };
+  const plan = { date, roles: {}, teams: {}, unassigned: [], extras: {} };
   const used = new Set(), pool = shuffle(present);
-  for (const role of c.roles){
+  for (const role of c.roles.filter(r => !r.extra)){
     const holders = [];
     if (role.fixed && pool.includes(role.fixed) && !used.has(role.fixed)){ holders.push(role.fixed); used.add(role.fixed); }
     while (holders.length < (role.count || 1)){
@@ -462,6 +495,8 @@ function makePlan(c, absent, date){
   c.teams.forEach(t => plan.teams[t.id] = []);
   if (!W) plan.unassigned = rest;
   else Object.assign(plan.teams, distribute(c, rest, prev));
+  const presentSet = new Set(present);
+  plan.extras = fillExtras(c, plan, id => presentSet.has(id), st, prev);
   return plan;
 }
 function rebalance(c, teams, threshold){
@@ -488,7 +523,8 @@ function repair(plan0, c, absent){
   const ok = id => known.has(id) && !absent.has(id);
   const st = roleStats(c.id, plan.date), prev = prevPlan(c.id, plan.date);
   const placed = new Set(), roles = {}, teams = {}, homeless = [];
-  for (const role of c.roles){
+  const mainRoles = c.roles.filter(r => !r.extra);
+  for (const role of mainRoles){
     roles[role.id] = ((plan.roles || {})[role.id] || []).filter(id => ok(id) && !placed.has(id)).slice(0, role.count || 1);
     roles[role.id].forEach(id => placed.add(id));
   }
@@ -500,7 +536,7 @@ function repair(plan0, c, absent){
   for (const id of plan.unassigned || []) if (ok(id) && !placed.has(id)){ placed.add(id); homeless.push(id); }
   for (const s of c.students) if (ok(s.id) && !placed.has(s.id)){ placed.add(s.id); homeless.push(s.id); }
   const take = id => { let i = homeless.indexOf(id); if (i >= 0){ homeless.splice(i, 1); return; } for (const arr of Object.values(teams)){ i = arr.indexOf(id); if (i >= 0){ arr.splice(i, 1); return; } } };
-  for (const role of c.roles){
+  for (const role of mainRoles){
     while (roles[role.id].length < (role.count || 1)){
       const isHolder = id => Object.values(roles).some(a => a.includes(id));
       let pick = null;
@@ -528,6 +564,7 @@ function repair(plan0, c, absent){
     rebalance(c, teams, 3);
   }
   plan.roles = roles; plan.teams = teams;
+  plan.extras = fillExtras(c, plan, ok, st, prev);
   return plan;
 }
 function locate(plan, sid){
@@ -571,7 +608,7 @@ function saveToday(cid, patch, writeHist){
   };
   put('today', cid, data);
   const p = data.plan;
-  if (writeHist && p && p.date === todayStr()) put('history', `${cid}__${p.date}`, { cid, date: p.date, roles: p.roles, teams: p.teams, savedAt: Date.now() });
+  if (writeHist && p && p.date === todayStr()) put('history', `${cid}__${p.date}`, { cid, date: p.date, roles: p.roles, teams: p.teams, extras: p.extras || {}, savedAt: Date.now() });
 }
 function todaysPlan(cid){ const p = S.today[cid] && S.today[cid].plan; return p && p.date === todayStr() ? p : null; }
 function updateClass(cid, fn){
@@ -604,11 +641,16 @@ function toggleAttendance(sid){
   let plan = todaysPlan(c.id), msg = null;
   if (plan){
     const before = locate(plan, sid);
+    const xBefore = c.roles.filter(r => r.extra).map(r => ({ r, i: ((plan.extras || {})[r.id] || []).indexOf(sid) })).filter(x => x.i >= 0);
     const next = repair(plan, c, ab);
     if (goingAway && before && before.kind === 'role'){
       const role = c.roles.find(r => r.id === before.id);
       const repl = (next.roles[before.id] || []).filter(x => !(plan.roles[before.id] || []).includes(x));
       if (role && repl.length) msg = `${studentName(c, repl[0])} מחליפ/ה את ${studentName(c, sid)} ב${role.name}`;
+    }
+    if (goingAway) for (const { r, i } of xBefore){
+      const nw = ((next.extras || {})[r.id] || [])[i];
+      if (nw) msg = (msg ? msg + '. ' : '') + `${studentName(c, nw)} מחליפ/ה את ${studentName(c, sid)} ב${slotLabel(r, i)}`;
     }
     if (!goingAway){
       const after = locate(next, sid);
@@ -654,6 +696,17 @@ function moveToRole(sid, rid){
   else { const out = holders[holders.length - 1]; holders[holders.length - 1] = sid; l.arr[idx] = out; }
   saveToday(c.id, { plan }, true);
   toast(`${studentName(c, sid)} ב${role.name}`);
+}
+function setExtra(sid, rid, i){
+  const c = getCls(S.cid); const plan = clone(todaysPlan(c.id)); if (!plan) return;
+  const r = c.roles.find(x => x.id === rid && x.extra); if (!r) return;
+  plan.extras = plan.extras || {};
+  for (const k of Object.keys(plan.extras)) plan.extras[k] = (plan.extras[k] || []).map(x => x === sid ? null : x);
+  const arr = plan.extras[rid] || (plan.extras[rid] = []);
+  while (arr.length < (r.count || 1)) arr.push(null);
+  arr[i] = sid;
+  saveToday(c.id, { plan }, true);
+  toast(`${studentName(c, sid)} ב${slotLabel(r, i)}`);
 }
 function fillRole(){
   const c = getCls(S.cid); const plan = todaysPlan(c.id); if (!plan) return;
@@ -702,7 +755,13 @@ function planText(c){
   const t = S.today[c.id]; const plan = t && t.plan; if (!plan) return '';
   const ab = absentSet(c.id);
   const L = [`סידור חדר האוכל · ${c.name} · ${fmtDate(plan.date)}`, ''];
-  for (const r of c.roles) L.push(`${r.name}: ${((plan.roles || {})[r.id] || []).map(s => studentName(c, s)).join(', ') || '—'}`);
+  for (const r of c.roles){
+    if (r.extra){
+      const arr = (plan.extras || {})[r.id] || [], parts = [];
+      for (let i = 0; i < (r.count || 1); i++){ const s = arr[i]; parts.push(r.unit ? `${r.unit} ${i + 1}: ${s ? studentName(c, s) : '—'}` : (s ? studentName(c, s) : '—')); }
+      L.push(`${r.name}: ${parts.join(', ')}`);
+    } else L.push(`${r.name}: ${((plan.roles || {})[r.id] || []).map(s => studentName(c, s)).join(', ') || '—'}`);
+  }
   L.push('');
   for (const tm of c.teams){
     const tabs = activeTablesOf(c, tm.id); const mem = (plan.teams || {})[tm.id] || [];
@@ -758,13 +817,31 @@ function kid(c, sid, opts){
 }
 function rolesRow(c, plan, edit, ab){
   const st = plan ? roleStats(c.id, plan.date) : {};
+  const times = (sid, rid) => plan ? `<span class="times"> · פעם ${((st[sid] && st[sid][rid] && st[sid][rid].n) || 0) + 1}</span>` : '';
   return `<div class="roles">${c.roles.map(r => {
+    const iconEl = `<span class="ri ${esc(r.icon || 'star')}">${icon(r.icon)}</span>`;
+    const lab = `<span class="role-l">${esc(r.name)}${r.extra ? '<span class="xtag">בנוסף לצוות</span>' : ''}</span>`;
+    const n = r.count || 1;
+    if (r.extra){
+      const holders = plan ? ((plan.extras || {})[r.id] || []) : [];
+      const slots = [];
+      for (let i = 0; i < n; i++){
+        const sid = holders[i] || null;
+        const label = r.unit ? `${r.unit} ${i + 1}` : n > 1 ? `${i + 1}` : '';
+        const labEl = label ? `<span class="sl">${esc(label)}</span>` : '';
+        if (edit && S.sel && sid !== S.sel) slots.push(`<button type="button" class="slot" data-act="extra-slot" data-rid="${esc(r.id)}" data-i="${i}" aria-label="${esc(S.sel ? studentName(c, S.sel) : '')} ל${esc(slotLabel(r, i))}">${labEl}<span>${sid ? esc(studentName(c, sid)) : 'ריק'}</span></button>`);
+        else slots.push(`<span class="slot">${labEl}${sid ? kid(c, sid, { gone: ab.has(sid) }) + times(sid, r.id) : `<span class="empty">${plan ? 'לא נקבע' : 'טרם נקבע'}</span>`}</span>`);
+      }
+      const short = plan && holders.filter(Boolean).length < n;
+      const fill = edit && short && !S.sel ? `<button type="button" class="btn sm" data-act="fill-role">בחירה לפי התור</button>` : '';
+      return `<div class="role">${iconEl}<span class="role-b">${lab}<span class="role-n">${slots.join('')}</span></span>${fill}</div>`;
+    }
     const holders = plan ? ((plan.roles || {})[r.id] || []) : [];
-    const short = plan && holders.length < (r.count || 1);
+    const short = plan && holders.length < n;
     const target = edit && S.sel && !holders.includes(S.sel);
-    const names = holders.length ? holders.map(s => `<span>${kid(c, s, { edit: edit && !target, gone: ab.has(s) })}${plan ? `<span class="times"> · פעם ${((st[s] && st[s][r.id] && st[s][r.id].n) || 0) + 1}</span>` : ''}</span>`).join('') : `<span class="empty">${plan ? 'לא נקבע' : 'טרם נקבע'}</span>`;
+    const names = holders.length ? holders.map(sid => `<span>${kid(c, sid, { edit: edit && !target, gone: ab.has(sid) })}${times(sid, r.id)}</span>`).join('') : `<span class="empty">${plan ? 'לא נקבע' : 'טרם נקבע'}</span>`;
     const fill = edit && short && !S.sel ? `<button type="button" class="btn sm" data-act="fill-role">בחירה לפי התור</button>` : '';
-    const inner = `<span class="ri ${esc(r.icon || 'star')}">${icon(r.icon)}</span><span class="role-b"><span class="role-l">${esc(r.name)}</span><span class="role-n">${names}</span></span>${fill}`;
+    const inner = `${iconEl}<span class="role-b">${lab}<span class="role-n">${names}</span></span>${fill}`;
     return target ? `<button type="button" class="role target" data-act="role-slot" data-rid="${esc(r.id)}" aria-label="העברה ל${esc(r.name)}">${inner}</button>` : `<div class="role">${inner}</div>`;
   }).join('')}</div>`;
 }
@@ -788,11 +865,12 @@ function teamsGrid(c, plan, edit, ab){
 }
 function attendanceCard(c, plan, ab){
   const list = byName(c);
-  const roleOf = {}; if (plan) for (const r of c.roles) for (const s of (plan.roles || {})[r.id] || []) roleOf[s] = r;
+  const roleOf = {};
+  if (plan) for (const r of c.roles) for (const s of (r.extra ? (plan.extras || {})[r.id] : (plan.roles || {})[r.id]) || []) if (s) (roleOf[s] || (roleOf[s] = [])).push(r);
   const rows = list.map(s => {
     const absent = ab.has(s.id), r = roleOf[s.id];
     return `<li><button type="button" class="att${absent ? ' absent' : ''}" role="switch" aria-checked="${!absent}" data-act="att" data-sid="${s.id}" ${S.canWrite ? '' : 'disabled'}>
-      <span class="nm">${esc(s.name)}</span>${r && !absent ? `<span class="ri-mini" title="${esc(r.name)}">${icon(r.icon)}</span>` : ''}${absent ? '<span class="tag">חסר/ה</span>' : ''}<span class="sw" aria-hidden="true"></span></button></li>`;
+      <span class="nm">${esc(s.name)}</span>${r && !absent ? r.map(x => `<span class="ri-mini" title="${esc(x.name)}">${icon(x.icon)}</span>`).join('') : ''}${absent ? '<span class="tag">חסר/ה</span>' : ''}<span class="sw" aria-hidden="true"></span></button></li>`;
   }).join('');
   return `<div class="card" id="attendance">
     <div class="card-h"><h2>נוכחות היום</h2><span class="count">${list.length - list.filter(s => ab.has(s.id)).length}/${list.length}</span></div>
@@ -914,6 +992,10 @@ function rolesView(c){
       <input class="inp" id="rn-${esc(r.id)}" data-ch="role-name" data-rid="${esc(r.id)}" value="${esc(r.name)}" aria-label="שם התפקיד" ${dis}>
       <select class="inp" id="ri-${esc(r.id)}" data-ch="role-icon" data-rid="${esc(r.id)}" aria-label="סמל" ${dis}>${ICON_NAMES.map(([k, nm]) => `<option value="${k}" ${r.icon === k ? 'selected' : ''}>${nm}</option>`).join('')}</select>
       <span class="stepper" title="כמה תלמידים"><button type="button" data-act="role-dec" data-rid="${esc(r.id)}" aria-label="פחות" ${dis}>−</button><span>${r.count || 1}</span><button type="button" data-act="role-inc" data-rid="${esc(r.id)}" aria-label="יותר" ${dis}>+</button></span>
+      <select class="inp" id="rx-${esc(r.id)}" data-ch="role-extra" data-rid="${esc(r.id)}" aria-label="האם התפקיד מוציא מהצוות" ${dis}>
+        <option value="0" ${r.extra ? '' : 'selected'}>במקום צוות</option>
+        <option value="1" ${r.extra ? 'selected' : ''}>בנוסף לצוות</option>
+      </select>
       <select class="inp" id="rf-${esc(r.id)}" data-ch="role-fixed" data-rid="${esc(r.id)}" aria-label="מי מקבל את התפקיד" ${dis}>
         <option value="">כל פעם מישהו אחר (לפי התור)</option>
         ${byName(c).map(s => `<option value="${s.id}" ${r.fixed === s.id ? 'selected' : ''}>תמיד ${esc(s.name)}</option>`).join('')}
@@ -926,7 +1008,7 @@ function rolesView(c){
   return `<div class="set-grid">
     <div class="card sec">
       <h2>תפקידים</h2>
-      <p class="help">מי שמקבל/ת תפקיד לא נכנס/ת לצוות של השולחנות באותו יום. בכל חלוקה התפקיד עובר למי שעשה אותו הכי מעט פעמים, ומי שהיה בתפקיד בפעם הקודמת מקבל עדיפות נמוכה. אם בחרתם "תמיד" ותלמיד/ה חסר/ה, התפקיד עובר לפי התור.</p>
+      <p class="help">תפקיד "במקום צוות" (כמו סכו"ם וכוסות) מוציא את התלמיד/ה מהצוות באותו יום. תפקיד "בנוסף לצוות" (כמו העגלות) יכול ליפול על כל תלמיד/ה בכיתה, והוא/היא נשאר/ת גם בצוות. בכל חלוקה התפקיד עובר למי שעשה אותו הכי מעט פעמים, ומי שהיה בתפקיד בפעם הקודמת מקבל עדיפות נמוכה. אם בחרתם "תמיד" ותלמיד/ה חסר/ה, התפקיד עובר לפי התור.</p>
       <ul class="list">${roleEd}</ul>
       ${S.canWrite ? `<div class="row" style="margin-top:10px"><button type="button" class="btn" data-act="add-role">+ תפקיד חדש</button></div>` : ''}
     </div>
@@ -944,7 +1026,7 @@ function historyView(c){
     <p class="help muted" style="margin:0">${hs.length} ימים שמורים. מחיקת יום מורידה אותו גם מספירת התפקידים.</p>
     ${hs.map(h => {
       const id = `${c.id}__${h.date}`, armed = S.confirm === 'hist:' + id;
-      const roles = c.roles.map(r => `<div class="line"><span class="lab">${esc(r.name)}</span><span>${((h.roles || {})[r.id] || []).map(s => esc(studentName(c, s))).join(', ') || '—'}</span></div>`).join('');
+      const roles = c.roles.map(r => `<div class="line"><span class="lab">${esc(r.name)}</span><span>${((h.roles || {})[r.id] || (h.extras || {})[r.id] || []).filter(Boolean).map(s => esc(studentName(c, s))).join(', ') || '—'}</span></div>`).join('');
       const teams = c.teams.filter(t => ((h.teams || {})[t.id] || []).length).map(t => `<div class="line" style="--team:var(--t-${t.color})"><span class="lab"><i class="dot" style="display:inline-block;vertical-align:-1px"></i> ${esc(t.name)}</span><span>${h.teams[t.id].map(s => esc(studentName(c, s))).join(', ')}</span></div>`).join('');
       return `<div class="card"><div class="card-h hist-h"><h3>${esc(fmtDate(h.date))}${h.date === todayStr() ? ' · היום' : ''}</h3>${S.canWrite ? `<button type="button" class="btn sm danger${armed ? ' armed' : ''}" data-act="del-hist" data-id="${esc(id)}">${armed ? 'ללחוץ שוב למחיקה' : 'מחיקה'}</button>` : ''}</div><div class="hist-b">${roles}${teams}</div></div>`;
     }).join('')}
@@ -990,7 +1072,7 @@ function displayView(){
 function selBar(){
   if (!S.sel || S.view !== 'plan') return '';
   const c = getCls(S.cid); if (!c) return '';
-  return `<div class="selbar" role="status"><p>נבחר/ה: <b>${esc(studentName(c, S.sel))}</b>. הקישו על תלמיד/ה אחר/ת כדי להחליף ביניהם, על "העברה לכאן" בצוות אחר, או על כרטיס של תפקיד.</p><button type="button" class="btn" data-act="sel-cancel">ביטול</button></div>`;
+  return `<div class="selbar" role="status"><p>נבחר/ה: <b>${esc(studentName(c, S.sel))}</b>. הקישו על תלמיד/ה אחר/ת כדי להחליף ביניהם, על "העברה לכאן" בצוות אחר, על כרטיס של תפקיד, או על עגלה.</p><button type="button" class="btn" data-act="sel-cancel">ביטול</button></div>`;
 }
 function copyModal(){
   if (S.copyText == null) return '';
@@ -1078,6 +1160,7 @@ function onClick(e){
     case 'sel-cancel': S.sel = null; scheduleRender(); break;
     case 'move-team': if (S.sel){ const a = S.sel; S.sel = null; moveToTeam(a, el.dataset.tid); } break;
     case 'role-slot': if (S.sel){ const a = S.sel; S.sel = null; moveToRole(a, el.dataset.rid); } break;
+    case 'extra-slot': if (S.sel){ const a = S.sel; S.sel = null; setExtra(a, el.dataset.rid, +el.dataset.i); } break;
     case 'table': if (W){ S.sheet = Number(el.dataset.n); scheduleRender(); } break;
     case 'sheet-close': S.sheet = null; scheduleRender(); break;
     case 'sheet-active': { if (!W || !c) break; const n = S.sheet, on = el.dataset.v === '1'; updateClass(c.id, x => { x.tables[n] = Object.assign({}, x.tables[n], { active: on }); }); toast(`שולחן ${n} ${on ? 'פעיל' : 'סגור'}`); break; }
@@ -1159,6 +1242,7 @@ function onChange(e){
   else if (ch === 'stage'){ const v = cleanName(el.value); updateClass(c.id, x => { x.opts.stage = v || 'במה'; }); }
   else if (ch === 'role-name'){ const v = cleanName(el.value); if (v) updateClass(c.id, x => { const r = x.roles.find(r => r.id === el.dataset.rid); if (r) r.name = v; }); }
   else if (ch === 'role-icon'){ updateClass(c.id, x => { const r = x.roles.find(r => r.id === el.dataset.rid); if (r) r.icon = el.value; }); }
+  else if (ch === 'role-extra'){ updateClass(c.id, x => { const r = x.roles.find(r => r.id === el.dataset.rid); if (r) r.extra = el.value === '1'; }); }
   else if (ch === 'role-fixed'){ updateClass(c.id, x => { const r = x.roles.find(r => r.id === el.dataset.rid); if (r) r.fixed = el.value || null; }); }
 }
 function onKey(e){
