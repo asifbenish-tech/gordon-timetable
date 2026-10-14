@@ -1,0 +1,1224 @@
+<title>סידור חדר האוכל</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Secular+One&display=swap">
+<style>
+/* Layout: the dining-hall floor plan (stage on top, tables in columns) is the centre; attendance on the side, teams and roles around it */
+:root{
+  --bg:#EDF1F3; --surface:#FFFFFF; --surface-2:#F4F7F8; --ink:#16232B; --muted:#5A6A74; --line:#D2DBE0;
+  --accent:#1B4D8C; --accent-ink:#FFFFFF; --accent-soft:#DDE8F6;
+  --floor:#E3E9EC; --floor-dot:#C9D3D8; --stage:#22313A; --stage-ink:#F2F6F8; --chair:#AEBBC2;
+  --off:#D5DCE0; --off-ink:#7B8991;
+  --amber:#9A6200; --amber-soft:#FBEED3; --slate:#3F5664; --slate-soft:#E3EAEE;
+  --danger:#B42318; --danger-soft:#FDE7E4; --ok:#1F7A47; --ok-soft:#DFF3E7;
+  --t-red:#CF3B2E; --t-green:#21894F; --t-blue:#2A63CB; --t-purple:#8146C8; --t-orange:#C9650B; --t-teal:#0E7F84; --t-pink:#C7347D; --t-brown:#85552A; --t-none:#8D9AA1;
+  --tnum-ink:#FFFFFF;
+  --shadow:0 1px 2px rgba(22,35,43,.06),0 10px 28px -16px rgba(22,35,43,.25);
+  --font-display:"Secular One","Assistant",system-ui,sans-serif;
+  --font-body:"Assistant",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E151A; --surface:#162027; --surface-2:#1B2730; --ink:#E3EBEF; --muted:#93A3AC; --line:#2A3740;
+    --accent:#86B4F0; --accent-ink:#0B1520; --accent-soft:#1C2F45;
+    --floor:#121B21; --floor-dot:#223039; --stage:#2C3B45; --stage-ink:#EAF0F3; --chair:#3A4A54;
+    --off:#1E2930; --off-ink:#6E7E87;
+    --amber:#E8AE45; --amber-soft:#33270E; --slate:#A9BCC7; --slate-soft:#22303A;
+    --danger:#F28B80; --danger-soft:#3A1C19; --ok:#62CB8F; --ok-soft:#173326;
+    --t-red:#E35D4E; --t-green:#3BB06F; --t-blue:#5B8DEB; --t-purple:#A47AE6; --t-orange:#EB8D35; --t-teal:#2CA9AE; --t-pink:#E4659F; --t-brown:#B88352; --t-none:#62717A;
+    --tnum-ink:#0E151A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -16px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E151A; --surface:#162027; --surface-2:#1B2730; --ink:#E3EBEF; --muted:#93A3AC; --line:#2A3740;
+  --accent:#86B4F0; --accent-ink:#0B1520; --accent-soft:#1C2F45;
+  --floor:#121B21; --floor-dot:#223039; --stage:#2C3B45; --stage-ink:#EAF0F3; --chair:#3A4A54;
+  --off:#1E2930; --off-ink:#6E7E87;
+  --amber:#E8AE45; --amber-soft:#33270E; --slate:#A9BCC7; --slate-soft:#22303A;
+  --danger:#F28B80; --danger-soft:#3A1C19; --ok:#62CB8F; --ok-soft:#173326;
+  --t-red:#E35D4E; --t-green:#3BB06F; --t-blue:#5B8DEB; --t-purple:#A47AE6; --t-orange:#EB8D35; --t-teal:#2CA9AE; --t-pink:#E4659F; --t-brown:#B88352; --t-none:#62717A;
+  --tnum-ink:#0E151A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -16px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--font-body);font-size:15px;line-height:1.5}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+button:disabled{cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+svg{display:block}
+
+.wrap{max-width:1200px;margin:0 auto;padding-block:20px 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 28px;margin-bottom:14px}
+.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.06em;color:var(--muted)}
+.brand h1{font-family:var(--font-display);font-weight:400;font-size:clamp(1.6rem,4vw,2.2rem);line-height:1.1;margin:2px 0 0;text-wrap:balance}
+.classbar{display:flex;flex-wrap:wrap;gap:6px}
+.cls{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-weight:600}
+.cls[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.cls.add{border-style:dashed;color:var(--muted);background:transparent}
+
+.tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:18px;scrollbar-width:thin}
+.tab{flex:none;border:0;background:none;padding:10px 14px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+.note{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 14px;border-radius:10px;background:var(--accent-soft);color:var(--ink);margin-bottom:14px}
+.note.warn{background:var(--amber-soft)}
+.note.local{background:var(--slate-soft)}
+.note p{margin:0;flex:1 1 260px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 14px;font-weight:600;white-space:nowrap}
+.btn:hover:not(:disabled){border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover:not(:disabled){filter:brightness(1.08)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover:not(:disabled){color:var(--ink);border-color:var(--line)}
+.btn.danger{color:var(--danger)}
+.btn.danger.armed{background:var(--danger);border-color:var(--danger);color:var(--surface)}
+.btn.sm{padding:4px 10px;font-size:.85rem}
+.btn svg{width:18px;height:18px}
+
+.plan-grid{display:grid;grid-template-columns:280px minmax(0,1fr);gap:22px;align-items:start}
+.main{display:flex;flex-direction:column;gap:16px;min-width:0}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.toolbar .spacer{flex:1}
+.stat{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.stat b{color:var(--ink);font-weight:700}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.card-h h2,.card-h h3{margin:0;font-size:1rem;font-weight:700}
+.count{font-variant-numeric:tabular-nums;font-weight:700;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:1px 10px;font-size:.85rem}
+
+/* attendance */
+.att-list{list-style:none;margin:0;padding:6px;max-height:min(62vh,640px);overflow-y:auto}
+.att{width:100%;display:flex;align-items:center;gap:10px;border:0;background:none;padding:7px 8px;border-radius:8px;text-align:right}
+.att:hover:not(:disabled){background:var(--surface-2)}
+.att .nm{flex:1;min-width:0;font-weight:600}
+.att.absent .nm{text-decoration:line-through;color:var(--muted);font-weight:500}
+.att .tag{font-size:.75rem;color:var(--muted)}
+.sw{flex:none;width:34px;height:20px;border-radius:999px;background:var(--ok);position:relative;transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;right:3px;width:14px;height:14px;border-radius:50%;background:var(--surface);transition:transform .15s}
+.att.absent .sw{background:var(--off)}
+.att.absent .sw::after{transform:translateX(-14px)}
+.ri-mini{width:16px;height:16px;color:var(--amber)}
+.att-foot{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line)}
+
+/* roles */
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.role{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);text-align:right;min-width:0}
+button.role:hover{border-color:var(--accent)}
+.role.target{border:2px dashed var(--accent);padding:11px 13px}
+.ri{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--slate-soft);color:var(--slate)}
+.ri svg{width:26px;height:26px}
+.ri.cup{background:var(--amber-soft);color:var(--amber)}
+.ri.star{background:var(--accent-soft);color:var(--accent)}
+.role-b{min-width:0;flex:1}
+.role-l{font-size:.78rem;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+.role-n{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:2px}
+.role-n .empty{color:var(--muted);font-weight:600}
+.times{font-size:.75rem;color:var(--muted);font-weight:500}
+
+/* the hall */
+.hall{direction:ltr;background-color:var(--floor);background-image:radial-gradient(circle at 1px 1px,var(--floor-dot) 1px,transparent 1.6px);background-size:13px 13px;border:1px solid var(--line);border-radius:14px;padding:14px clamp(10px,2.4vw,26px) 22px;box-shadow:var(--shadow)}
+.stage{background:var(--stage);color:var(--stage-ink);font-family:var(--font-display);text-align:center;border-radius:8px;padding:7px 10px;letter-spacing:.06em;margin:0 8% 26px;font-size:1.05rem}
+.cols{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:clamp(10px,4vw,52px);align-items:center}
+.col{display:flex;flex-direction:column;gap:20px;justify-content:center;min-width:0}
+.tbl{--team:var(--t-none);position:relative;isolation:isolate;min-height:50px;width:100%;border-radius:8px;border:2px solid var(--team);background:color-mix(in srgb,var(--team) 14%,var(--surface));display:flex;align-items:center;gap:8px;padding:5px 8px;text-align:right;direction:rtl;color:var(--ink)}
+.tbl::before{content:"";position:absolute;left:12px;right:12px;top:-8px;bottom:-8px;z-index:-1;background:radial-gradient(circle,var(--chair) 2.4px,transparent 2.9px) top center/15px 6px repeat-x,radial-gradient(circle,var(--chair) 2.4px,transparent 2.9px) bottom center/15px 6px repeat-x}
+button.tbl:hover{filter:brightness(1.03);box-shadow:0 0 0 3px color-mix(in srgb,var(--team) 30%,transparent)}
+.tnum{flex:none;min-width:26px;height:26px;padding:0 4px;border-radius:13px;background:var(--team);color:var(--tnum-ink);display:grid;place-items:center;font-family:var(--font-display);font-size:.92rem;font-variant-numeric:tabular-nums}
+.tbody{min-width:0;font-size:.78rem;line-height:1.2;font-weight:600;overflow-wrap:anywhere}
+.tbody .who{display:block}
+.tbl.off{border-style:dashed;border-color:var(--off-ink);color:var(--off-ink);background:repeating-linear-gradient(135deg,var(--off) 0 5px,transparent 5px 11px),var(--surface-2)}
+.tbl.off .tnum{background:var(--off-ink);color:var(--surface)}
+.tbl.off::before{opacity:.45}
+.tbl.none{border-style:dashed}
+.hall-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:.82rem;color:var(--muted)}
+.hall-legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:4px;background:var(--team,var(--t-none))}
+.dot.off{background:repeating-linear-gradient(135deg,var(--off-ink) 0 2px,transparent 2px 4px);border:1px dashed var(--off-ink)}
+
+/* teams */
+.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.team{--team:var(--t-none);border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden;min-width:0}
+.team-h{display:flex;align-items:center;gap:10px;padding:10px 12px;background:color-mix(in srgb,var(--team) 13%,var(--surface));border-bottom:2px solid var(--team)}
+.team-h .swatch{flex:none;width:14px;height:14px;border-radius:4px;background:var(--team)}
+.team-h h3{margin:0;font-size:1rem;font-weight:700}
+.team-h .sub{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.team-h .grow{flex:1;min-width:0}
+.team-b{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;min-height:50px;align-content:flex-start}
+.team.dim{opacity:.6}
+.kid{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:3px 11px;font-weight:600;font-size:.92rem;max-width:100%}
+button.kid:hover{border-color:var(--muted)}
+.kid.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.kid.gone{text-decoration:line-through;color:var(--muted)}
+.kid .tt{font-size:.75rem;font-weight:500;color:var(--muted);font-variant-numeric:tabular-nums}
+.kid.sel .tt{color:inherit}
+.muted{color:var(--muted)}
+
+/* settings */
+.set-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:18px;align-items:start}
+.sec{padding:16px}
+.sec h2{font-size:1.05rem;margin:0 0 4px}
+.sec .help{margin:0 0 12px;color:var(--muted);font-size:.9rem;max-width:62ch}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.row+.row{margin-top:8px}
+.inp{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 10px;min-width:0}
+.inp:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px var(--accent-soft)}
+.inp.grow{flex:1}
+textarea.inp{width:100%;min-height:110px;resize:vertical}
+select.inp{padding:6px 8px}
+.list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.list li{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.list .idx{width:2ch;color:var(--muted);font-variant-numeric:tabular-nums;font-size:.85rem;text-align:center}
+.list .inp{flex:1 1 160px}
+.list .meta{font-size:.8rem;color:var(--muted)}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.stepper button{border:0;background:var(--surface-2);width:30px;height:32px;font-weight:700}
+.stepper span{min-width:34px;text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
+.modes{display:grid;gap:8px}
+.mode{display:flex;gap:10px;align-items:flex-start;text-align:right;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px}
+.mode[aria-pressed="true"]{border:2px solid var(--accent);padding:9px 11px;background:var(--accent-soft)}
+.mode b{display:block}
+.mode small{color:var(--muted)}
+.radio{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);margin-top:3px}
+.mode[aria-pressed="true"] .radio{border:5px solid var(--accent)}
+.colors{display:flex;gap:4px;flex-wrap:wrap}
+.cbtn{width:24px;height:24px;border-radius:6px;border:2px solid transparent;background:var(--team)}
+.cbtn[aria-pressed="true"]{border-color:var(--ink);box-shadow:inset 0 0 0 2px var(--surface)}
+.tbl-wrap{overflow-x:auto}
+.fair{width:100%;border-collapse:collapse;font-size:.9rem}
+.fair th,.fair td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.fair th{font-size:.78rem;color:var(--muted);font-weight:700}
+.fair td.n{font-variant-numeric:tabular-nums;font-weight:700}
+.fair td.d{color:var(--muted);font-size:.8rem}
+.hist{display:grid;gap:12px}
+.hist-h{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.hist-h h3{margin:0;font-size:1rem}
+.hist-b{padding:10px 14px;display:grid;gap:6px;font-size:.92rem}
+.hist-b .line{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.hist-b .lab{font-weight:700;min-width:7.5em}
+
+/* empty + loading */
+.empty-st{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:28px;align-items:center;padding:8px 0}
+.empty-st h2{font-family:var(--font-display);font-weight:400;font-size:1.6rem;margin:0 0 8px;text-wrap:balance}
+.empty-st p{color:var(--muted);margin:0 0 16px;max-width:52ch}
+.ghost-hall{opacity:.55;pointer-events:none}
+
+/* sheet, select bar, overlays */
+.backdrop{position:fixed;inset:0;background:rgba(10,18,24,.35);z-index:40}
+.sheet{position:fixed;z-index:41;left:50%;bottom:0;transform:translateX(-50%);width:min(460px,100%);background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));box-shadow:var(--shadow)}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sheet-h h3{margin:0;font-family:var(--font-display);font-weight:400;font-size:1.35rem}
+.lbl{font-size:.8rem;font-weight:700;color:var(--muted);margin:14px 0 6px;letter-spacing:.04em}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:10px;font-weight:700}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.tpick{display:flex;flex-wrap:wrap;gap:6px}
+.tp{--team:var(--t-none);display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:600}
+.tp[aria-pressed="true"]{border:2px solid var(--team);padding:5px 11px;background:color-mix(in srgb,var(--team) 14%,var(--surface))}
+.tp .swatch{width:12px;height:12px;border-radius:4px;background:var(--team)}
+.selbar{position:fixed;z-index:30;left:0;right:0;bottom:0;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:var(--ink);color:var(--bg);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.selbar p{margin:0;flex:1 1 240px}
+.selbar .btn{background:transparent;color:var(--bg);border-color:color-mix(in srgb,var(--bg) 40%,transparent)}
+.toast{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+.has-selbar .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.display{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.display-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.display-h h2{font-family:var(--font-display);font-weight:400;font-size:clamp(1.8rem,4vw,2.8rem);margin:0;line-height:1.1}
+.display-g{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+.display-side{display:flex;flex-direction:column;gap:14px;min-width:0}
+.display .tbl{min-height:62px}
+.display .tnum{min-width:32px;height:32px;border-radius:16px;font-size:1.1rem}
+.display .tbody{font-size:.95rem}
+.display .kid{font-size:1.1rem;padding:4px 13px}
+.display .role-n{font-size:1.35rem;font-weight:800}
+.display .team-h h3{font-size:1.15rem}
+.modal{position:fixed;z-index:61;left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,calc(100% - 32px));background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.modal textarea{min-height:240px;font-size:.9rem}
+
+@media (max-width:900px){
+  .plan-grid{grid-template-columns:minmax(0,1fr)}
+  .plan-grid .aside{order:2}
+  .display-g{grid-template-columns:minmax(0,1fr)}
+  .empty-st{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:520px){
+  .tbl{padding:4px 5px;gap:5px;min-height:46px}
+  .tnum{min-width:22px;height:22px;font-size:.8rem}
+  .tbody{font-size:.7rem}
+  .col{gap:18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div id="app" class="wrap" dir="rtl" lang="he"></div>
+
+<script>
+(function(){
+'use strict';
+document.documentElement.lang = 'he';
+document.documentElement.dir = 'rtl';
+
+/* ---------- constants & small helpers ---------- */
+const DAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+const PALETTE = [['red','אדום'],['green','ירוק'],['blue','כחול'],['purple','סגול'],['orange','כתום'],['teal','טורקיז'],['pink','ורוד'],['brown','חום']];
+const ICONS = {
+  cup: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 3.5h13l-1.7 15.6a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M6.2 9h11.6M9.6 9l.5 11.8M14.4 9l-.5 11.8" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>',
+  cutlery: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v6a2.5 2.5 0 0 0 5 0V3M8.5 11.5V21M17.5 21V3c-2.2 1.6-3 4.4-3 8h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  broom: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 3 12 11.5M7 11.5h9.5L18 21H5.5zM9.5 15.5V21M13 15.5V21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  screen: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 20h8M12 16v4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+  shuffle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h3.5c5 0 6 10 11 10H21M3 17h3.5c2 0 3.2-1.6 4.2-3.5M21 7h-3.5c-2 0-3.2 1.6-4.2 3.5M18 4l3 3-3 3M18 14l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+const ICON_NAMES = [['cup','כוס'],['cutlery','סכו"ם'],['broom','ניקיון'],['star','אחר']];
+const TABS = [['plan','סידור היום'],['students','תלמידים'],['tables','שולחנות וצוותים'],['roles','תפקידים'],['history','היסטוריה']];
+
+const pad = n => String(n).padStart(2, '0');
+const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+function fmtDate(s){ if(!s) return ''; const [y,m,d] = s.split('-').map(Number); const dt = new Date(y, m - 1, d); return `יום ${DAYS[dt.getDay()]}, ${d}.${m}`; }
+const uid = p => p + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone = o => o == null ? o : JSON.parse(JSON.stringify(o));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function stable(o){ if (Array.isArray(o)) return '[' + o.map(stable).join(',') + ']'; if (o && typeof o === 'object') return '{' + Object.keys(o).sort().map(k => JSON.stringify(k) + ':' + stable(o[k])).join(',') + '}'; return JSON.stringify(o ?? null); }
+const cleanName = s => String(s || '').replace(/\s+/g, ' ').trim().slice(0, 40);
+function lsGet(k){ try { return localStorage.getItem('foodroom.' + k); } catch { return null; } }
+function lsSet(k, v){ try { localStorage.setItem('foodroom.' + k, v); } catch {} }
+function rangeText(nums){
+  if (!nums.length) return '—';
+  const out = []; let a = nums[0], b = nums[0];
+  for (let i = 1; i <= nums.length; i++){
+    const n = nums[i];
+    if (n === b + 1){ b = n; continue; }
+    out.push(a === b ? `${a}` : b === a + 1 ? `${a}, ${b}` : `${a}–${b}`);
+    a = b = n;
+  }
+  return out.join(', ');
+}
+
+/* ---------- state ---------- */
+const S = {
+  mode: 'loading',          // loading | db | local
+  canWrite: true,
+  loaded: false,
+  classes: {},              // cid -> class doc
+  today: {},                // cid -> {date, absent, plan}
+  hist: {},                 // docId -> {cid, date, roles, teams}
+  cid: lsGet('cid'),
+  view: lsGet('view') || 'plan',
+  sel: null,                // selected student id (manual move)
+  sheet: null,              // table number being edited
+  display: false,
+  copyText: null,
+  confirm: null,
+  toast: null
+};
+if (!TABS.some(t => t[0] === S.view)) S.view = 'plan';
+
+/* ---------- storage (db capability, or memory when it is not available) ---------- */
+let DB = null, unsubHist = null;
+const pending = new Map(), running = new Set();
+function queueWrite(path, data){ pending.set(path, data); if (!running.has(path)) flush(path); }
+async function flush(path){
+  running.add(path);
+  while (pending.has(path)){
+    const data = pending.get(path); pending.delete(path);
+    for (let attempt = 0; attempt < 2; attempt++){
+      try { if (data === null) await DB.doc(path).delete(); else await DB.doc(path).set(data); break; }
+      catch (e){
+        const code = e && e.code;
+        if (code === 'unavailable' && attempt === 0){ await sleep(400 + Math.random() * 700); continue; }
+        if (code === 'invalid_argument' || code === 'not_granted'){ S.canWrite = false; toast('אין לך הרשאה לשמור שינויים כאן. העמוד פתוח לצפייה בלבד.'); }
+        else if (code === 'quota_exceeded') toast('המאגר מלא. מחקו ימים ישנים בלשונית ההיסטוריה ונסו שוב.');
+        else toast('השמירה נכשלה. בדקו את החיבור ונסו שוב.');
+        break;
+      }
+    }
+  }
+  running.delete(path);
+}
+function put(coll, id, data){
+  const key = coll === 'history' ? 'hist' : coll;
+  const next = Object.assign({}, S[key]);
+  if (data === null) delete next[id]; else next[id] = data;
+  S[key] = next;
+  if (S.mode === 'db') queueWrite(coll + '/' + id, data);
+  scheduleRender();
+}
+
+/* ---------- class helpers ---------- */
+function sortedClasses(){
+  return Object.entries(S.classes).map(([id, c]) => Object.assign({ id }, c))
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || String(a.name).localeCompare(String(b.name), 'he'));
+}
+function getCls(cid){ const c = S.classes[cid]; return c ? normalizeClass(Object.assign({ id: cid }, clone(c))) : null; }
+function saveCls(cls){ const data = Object.assign({}, cls); delete data.id; put('classes', cls.id, data); }
+function normalizeClass(c){
+  c.name = c.name || 'כיתה';
+  c.students = Array.isArray(c.students) ? c.students : [];
+  c.columns = Array.isArray(c.columns) && c.columns.length ? c.columns.map(n => Math.max(1, Math.min(14, n | 0))) : [7, 8, 7];
+  c.teams = Array.isArray(c.teams) ? c.teams : [];
+  c.roles = Array.isArray(c.roles) ? c.roles : [];
+  c.tables = c.tables && typeof c.tables === 'object' ? c.tables : {};
+  c.opts = Object.assign({ mode: 'team', stage: 'במה' }, c.opts || {});
+  for (const n of tableNums(c)) if (!c.tables[n]) c.tables[n] = { team: null, active: true };
+  return c;
+}
+function tableNums(c){ const out = []; let n = 1; for (const k of c.columns) for (let i = 0; i < k; i++) out.push(n++); return out; }
+function tableInfo(c, n){ return c.tables[n] || { team: null, active: true }; }
+const teamById = (c, id) => c.teams.find(t => t.id === id) || null;
+const studentName = (c, sid) => (c.students.find(s => s.id === sid) || {}).name || '—';
+function activeTablesOf(c, tid){ return tableNums(c).filter(n => { const t = tableInfo(c, n); return t.active !== false && t.team === tid; }); }
+function allTablesOf(c, tid){ return tableNums(c).filter(n => tableInfo(c, n).team === tid); }
+function byName(c){ return c.students.slice().sort((a, b) => a.name.localeCompare(b.name, 'he', { numeric: true })); }
+function defaultLayout(){
+  const columns = [7, 8, 7];
+  const teams = [['red','צוות אדום'],['green','צוות ירוק'],['blue','צוות כחול'],['purple','צוות סגול']].map(([color, name]) => ({ id: uid('tm_'), name, color }));
+  const tables = {}; const total = 22;
+  for (let n = 1; n <= total; n++) tables[n] = { team: teams[Math.min(3, Math.floor((n - 1) * 4 / total))].id, active: true };
+  const roles = [
+    { id: 'cutlery', name: 'סידור סכו"ם', icon: 'cutlery', count: 1, fixed: null },
+    { id: 'cups', name: 'סידור כוסות', icon: 'cup', count: 1, fixed: null }
+  ];
+  return { columns, teams, tables, roles, opts: { mode: 'team', stage: 'במה' } };
+}
+
+/* ---------- attendance & plan ---------- */
+function absentSet(cid){ const t = S.today[cid]; return new Set(t && t.date === todayStr() ? (t.absent || []) : []); }
+function histFor(cid){ return Object.values(S.hist).filter(h => h && h.cid === cid).sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0); }
+function roleStats(cid, excludeDate){
+  const st = {};
+  for (const h of histFor(cid)){
+    if (h.date === excludeDate) continue;
+    for (const [rid, ids] of Object.entries(h.roles || {})) for (const sid of ids || []){
+      const r = st[sid] || (st[sid] = {}); const x = r[rid] || (r[rid] = { n: 0, last: '' });
+      x.n++; if (h.date > x.last) x.last = h.date;
+    }
+  }
+  return st;
+}
+function prevPlan(cid, date){ const hs = histFor(cid).filter(h => h.date < date); return hs[hs.length - 1] || null; }
+function pickForRole(cands, rid, st, prev){
+  if (!cands.length) return null;
+  const prevHolders = new Set(Object.values((prev && prev.roles) || {}).flat());
+  return cands.map((id, i) => ({ id, i, n: (st[id] && st[id][rid] && st[id][rid].n) || 0, last: (st[id] && st[id][rid] && st[id][rid].last) || '', recent: prevHolders.has(id) ? 1 : 0 }))
+    .sort((a, b) => a.n - b.n || a.recent - b.recent || (a.last < b.last ? -1 : a.last > b.last ? 1 : 0) || a.i - b.i)[0].id;
+}
+function teamTargets(c, total, prefer){
+  const out = {}; c.teams.forEach(t => out[t.id] = 0);
+  const ws = c.teams.map(t => ({ id: t.id, w: activeTablesOf(c, t.id).length }));
+  const W = ws.reduce((s, t) => s + t.w, 0);
+  if (!W || !total) return { targets: out, W };
+  const rows = ws.map(t => { const q = total * t.w / W; const n = Math.floor(q + 1e-9); return { id: t.id, w: t.w, n, rem: q - n, cur: (prefer && prefer[t.id]) || 0, r: Math.random() }; });
+  const left = total - rows.reduce((s, r) => s + r.n, 0);
+  rows.filter(r => r.w > 0).sort((a, b) => (b.rem - a.rem > 1e-9 ? 1 : a.rem - b.rem > 1e-9 ? -1 : 0) || b.cur - a.cur || a.r - b.r).slice(0, left).forEach(r => r.n++);
+  rows.forEach(r => out[r.id] = r.n);
+  return { targets: out, W };
+}
+function distribute(c, ids, prev){
+  const { targets } = teamTargets(c, ids.length);
+  const order = c.teams.map(t => t.id);
+  const prevTeam = {}, prevPairs = new Set();
+  if (prev) for (const [tid, arr] of Object.entries(prev.teams || {})){
+    (arr || []).forEach(s => prevTeam[s] = tid);
+    for (let i = 0; i < arr.length; i++) for (let j = i + 1; j < arr.length; j++) prevPairs.add([arr[i], arr[j]].sort().join('|'));
+  }
+  let best = null, bestScore = Infinity;
+  for (let it = 0; it < 400; it++){
+    const sh = shuffle(ids), out = {}; let k = 0, score = 0;
+    for (const tid of order){ out[tid] = sh.slice(k, k + targets[tid]); k += targets[tid]; }
+    for (const [tid, arr] of Object.entries(out)){
+      arr.forEach(s => { if (prevTeam[s] === tid) score += 1; });
+      for (let i = 0; i < arr.length; i++) for (let j = i + 1; j < arr.length; j++) if (prevPairs.has([arr[i], arr[j]].sort().join('|'))) score += 0.3;
+    }
+    if (score < bestScore){ best = out; bestScore = score; if (score === 0) break; }
+  }
+  return best || {};
+}
+function makePlan(c, absent, date){
+  const present = c.students.filter(s => !absent.has(s.id)).map(s => s.id);
+  const st = roleStats(c.id, date), prev = prevPlan(c.id, date);
+  const plan = { date, roles: {}, teams: {}, unassigned: [] };
+  const used = new Set(), pool = shuffle(present);
+  for (const role of c.roles){
+    const holders = [];
+    if (role.fixed && pool.includes(role.fixed) && !used.has(role.fixed)){ holders.push(role.fixed); used.add(role.fixed); }
+    while (holders.length < (role.count || 1)){
+      const pick = pickForRole(pool.filter(id => !used.has(id)), role.id, st, prev);
+      if (!pick) break; holders.push(pick); used.add(pick);
+    }
+    plan.roles[role.id] = holders;
+  }
+  const rest = pool.filter(id => !used.has(id));
+  const { W } = teamTargets(c, rest.length);
+  c.teams.forEach(t => plan.teams[t.id] = []);
+  if (!W) plan.unassigned = rest;
+  else Object.assign(plan.teams, distribute(c, rest, prev));
+  return plan;
+}
+function rebalance(c, teams, threshold){
+  const total = Object.values(teams).reduce((s, a) => s + a.length, 0);
+  const sizes = {}; for (const t of c.teams) sizes[t.id] = teams[t.id].length;
+  const { targets } = teamTargets(c, total, sizes);
+  for (let guard = 0; guard < 200; guard++){
+    let over = null, under = null;
+    for (const t of c.teams){
+      const ex = teams[t.id].length - targets[t.id];
+      if (ex > 0 && (!over || ex > over.ex)) over = { id: t.id, ex };
+      if (ex < 0 && (!under || -ex > under.de)) under = { id: t.id, de: -ex };
+    }
+    if (!over || !under) break;
+    const emptyTeam = teams[under.id].length === 0 && teams[over.id].length >= 2;
+    if (!(over.ex + under.de >= threshold || emptyTeam)) break;
+    teams[under.id].push(teams[over.id].pop());
+  }
+  return teams;
+}
+function repair(plan0, c, absent){
+  const plan = clone(plan0);
+  const known = new Set(c.students.map(s => s.id));
+  const ok = id => known.has(id) && !absent.has(id);
+  const st = roleStats(c.id, plan.date), prev = prevPlan(c.id, plan.date);
+  const placed = new Set(), roles = {}, teams = {}, homeless = [];
+  for (const role of c.roles){
+    roles[role.id] = ((plan.roles || {})[role.id] || []).filter(id => ok(id) && !placed.has(id)).slice(0, role.count || 1);
+    roles[role.id].forEach(id => placed.add(id));
+  }
+  for (const t of c.teams) teams[t.id] = [];
+  for (const [tid, arr] of Object.entries(plan.teams || {})) for (const id of arr || []){
+    if (!ok(id) || placed.has(id)) continue;
+    placed.add(id); (teams[tid] || homeless).push(id);
+  }
+  for (const id of plan.unassigned || []) if (ok(id) && !placed.has(id)){ placed.add(id); homeless.push(id); }
+  for (const s of c.students) if (ok(s.id) && !placed.has(s.id)){ placed.add(s.id); homeless.push(s.id); }
+  const take = id => { let i = homeless.indexOf(id); if (i >= 0){ homeless.splice(i, 1); return; } for (const arr of Object.values(teams)){ i = arr.indexOf(id); if (i >= 0){ arr.splice(i, 1); return; } } };
+  for (const role of c.roles){
+    while (roles[role.id].length < (role.count || 1)){
+      const isHolder = id => Object.values(roles).some(a => a.includes(id));
+      let pick = null;
+      if (role.fixed && ok(role.fixed) && !isHolder(role.fixed)) pick = role.fixed;
+      else pick = pickForRole(shuffle(homeless.concat(...Object.values(teams))), role.id, st, prev);
+      if (!pick) break;
+      take(pick); roles[role.id].push(pick);
+    }
+  }
+  const { W } = teamTargets(c, 1);
+  if (!W){
+    plan.unassigned = homeless.concat(...Object.values(teams));
+    for (const k in teams) teams[k] = [];
+  } else {
+    plan.unassigned = [];
+    for (const t of c.teams) if (!activeTablesOf(c, t.id).length) homeless.push(...teams[t.id].splice(0));
+    const total = homeless.length + Object.values(teams).reduce((s, a) => s + a.length, 0);
+    const sizes = {}; for (const t of c.teams) sizes[t.id] = teams[t.id].length;
+    const { targets } = teamTargets(c, total, sizes);
+    for (const id of shuffle(homeless)){
+      let best = null;
+      for (const t of c.teams){ if (!activeTablesOf(c, t.id).length) continue; const d = targets[t.id] - teams[t.id].length; if (!best || d > best.d) best = { id: t.id, d }; }
+      teams[best.id].push(id);
+    }
+    rebalance(c, teams, 3);
+  }
+  plan.roles = roles; plan.teams = teams;
+  return plan;
+}
+function locate(plan, sid){
+  if (!plan) return null;
+  for (const [rid, a] of Object.entries(plan.roles || {})) if ((a || []).includes(sid)) return { kind: 'role', id: rid, arr: a };
+  for (const [tid, a] of Object.entries(plan.teams || {})) if ((a || []).includes(sid)) return { kind: 'team', id: tid, arr: a };
+  if ((plan.unassigned || []).includes(sid)) return { kind: 'none', id: null, arr: plan.unassigned };
+  return null;
+}
+function tableAssignees(c, plan){
+  const out = {};
+  if (!plan) return out;
+  for (const t of c.teams){
+    const tables = activeTablesOf(c, t.id), members = (plan.teams || {})[t.id] || [];
+    tables.forEach(n => out[n] = []);
+    if (!tables.length || !members.length) continue;
+    if (members.length >= tables.length) members.forEach((sid, i) => out[tables[i % tables.length]].push(sid));
+    else tables.forEach((n, i) => out[n].push(members[i % members.length]));
+  }
+  return out;
+}
+function tablesOfStudent(c, plan, sid){
+  const a = tableAssignees(c, plan);
+  return Object.keys(a).map(Number).filter(n => a[n].includes(sid)).sort((x, y) => x - y);
+}
+function isImbalanced(c, plan){
+  if (!plan) return false;
+  const teams = {}; for (const t of c.teams) teams[t.id] = ((plan.teams || {})[t.id] || []).slice();
+  const before = stable(teams);
+  return before !== stable(rebalance(c, teams, 2));
+}
+
+/* ---------- actions ---------- */
+function saveToday(cid, patch, writeHist){
+  const t = S.today[cid] || {};
+  const data = {
+    date: todayStr(),
+    absent: patch.absent !== undefined ? patch.absent : [...absentSet(cid)],
+    plan: patch.plan !== undefined ? patch.plan : (t.plan || null),
+    updatedAt: Date.now()
+  };
+  put('today', cid, data);
+  const p = data.plan;
+  if (writeHist && p && p.date === todayStr()) put('history', `${cid}__${p.date}`, { cid, date: p.date, roles: p.roles, teams: p.teams, savedAt: Date.now() });
+}
+function todaysPlan(cid){ const p = S.today[cid] && S.today[cid].plan; return p && p.date === todayStr() ? p : null; }
+function updateClass(cid, fn){
+  const c = getCls(cid); if (!c) return;
+  fn(c); normalizeClass(c); saveCls(c);
+  const plan = todaysPlan(cid);
+  if (plan){
+    const fixed = repair(plan, c, absentSet(cid));
+    if (stable(fixed) !== stable(plan)) saveToday(cid, { plan: fixed }, true);
+  }
+}
+function generate(){
+  const c = getCls(S.cid); if (!c) return;
+  if (!c.students.length){ toast('קודם מוסיפים תלמידים בלשונית "תלמידים".'); return; }
+  const plan = makePlan(c, absentSet(c.id), todayStr());
+  S.sel = null;
+  saveToday(c.id, { plan }, true);
+  toast(plan.unassigned.length ? 'אין שולחנות פעילים עם צוות, אז התלמידים לא חולקו לצוותים.' : 'חולק סידור חדש להיום');
+}
+function reuse(){
+  const c = getCls(S.cid); const old = S.today[c.id] && S.today[c.id].plan; if (!old) return;
+  const plan = repair(Object.assign(clone(old), { date: todayStr() }), c, absentSet(c.id));
+  saveToday(c.id, { plan }, true);
+  toast('הסידור הקודם הועתק להיום');
+}
+function toggleAttendance(sid){
+  const c = getCls(S.cid); const ab = absentSet(c.id);
+  const goingAway = !ab.has(sid);
+  goingAway ? ab.add(sid) : ab.delete(sid);
+  let plan = todaysPlan(c.id), msg = null;
+  if (plan){
+    const before = locate(plan, sid);
+    const next = repair(plan, c, ab);
+    if (goingAway && before && before.kind === 'role'){
+      const role = c.roles.find(r => r.id === before.id);
+      const repl = (next.roles[before.id] || []).filter(x => !(plan.roles[before.id] || []).includes(x));
+      if (role && repl.length) msg = `${studentName(c, repl[0])} מחליפ/ה את ${studentName(c, sid)} ב${role.name}`;
+    }
+    if (!goingAway){
+      const after = locate(next, sid);
+      if (after && after.kind === 'team'){ const tm = teamById(c, after.id); if (tm) msg = `${studentName(c, sid)} צורפ/ה ל${tm.name}`; }
+      if (after && after.kind === 'role'){ const r = c.roles.find(x => x.id === after.id); if (r) msg = `${studentName(c, sid)} קיבל/ה את ${r.name}`; }
+    }
+    plan = next;
+  }
+  if (plan) saveToday(c.id, { absent: [...ab], plan }, true);
+  else saveToday(c.id, { absent: [...ab] }, false);
+  if (msg) toast(msg);
+}
+function allPresent(){
+  const c = getCls(S.cid);
+  const plan = todaysPlan(c.id);
+  if (plan) saveToday(c.id, { absent: [], plan: repair(plan, c, new Set()) }, true);
+  else saveToday(c.id, { absent: [] }, false);
+}
+function swapKids(a, b){
+  const c = getCls(S.cid); const plan = clone(todaysPlan(c.id)); if (!plan) return;
+  const la = locate(plan, a), lb = locate(plan, b); if (!la || !lb) return;
+  const ia = la.arr.indexOf(a), ib = lb.arr.indexOf(b);
+  la.arr[ia] = b; lb.arr[ib] = a;
+  saveToday(c.id, { plan }, true);
+  toast(`${studentName(c, a)} ו${studentName(c, b)} התחלפו`);
+}
+function moveToTeam(sid, tid){
+  const c = getCls(S.cid); const plan = clone(todaysPlan(c.id)); if (!plan) return;
+  const l = locate(plan, sid); if (!l || l.id === tid) return;
+  l.arr.splice(l.arr.indexOf(sid), 1);
+  (plan.teams[tid] || (plan.teams[tid] = [])).push(sid);
+  saveToday(c.id, { plan }, true);
+  const tm = teamById(c, tid); toast(`${studentName(c, sid)} עבר/ה ל${tm ? tm.name : 'צוות'}`);
+}
+function moveToRole(sid, rid){
+  const c = getCls(S.cid); const plan = clone(todaysPlan(c.id)); if (!plan) return;
+  const role = c.roles.find(r => r.id === rid); if (!role) return;
+  const holders = plan.roles[rid] || (plan.roles[rid] = []);
+  if (holders.includes(sid)) return;
+  const l = locate(plan, sid); if (!l) return;
+  const idx = l.arr.indexOf(sid);
+  if (holders.length < (role.count || 1)){ l.arr.splice(idx, 1); holders.push(sid); }
+  else { const out = holders[holders.length - 1]; holders[holders.length - 1] = sid; l.arr[idx] = out; }
+  saveToday(c.id, { plan }, true);
+  toast(`${studentName(c, sid)} ב${role.name}`);
+}
+function fillRole(){
+  const c = getCls(S.cid); const plan = todaysPlan(c.id); if (!plan) return;
+  saveToday(c.id, { plan: repair(plan, c, absentSet(c.id)) }, true);
+}
+function balance(){
+  const c = getCls(S.cid); const plan = clone(todaysPlan(c.id)); if (!plan) return;
+  for (const t of c.teams) plan.teams[t.id] = plan.teams[t.id] || [];
+  rebalance(c, plan.teams, 2);
+  saveToday(c.id, { plan }, true);
+  toast('הצוותים אוזנו לפי מספר השולחנות הפעילים');
+}
+function createClass(name){
+  const base = getCls(S.cid);
+  const layout = base ? { columns: base.columns.slice(), teams: clone(base.teams), tables: clone(base.tables), roles: base.roles.map(r => Object.assign({}, r, { fixed: null })), opts: clone(base.opts) } : defaultLayout();
+  const order = sortedClasses().reduce((m, x) => Math.max(m, x.order ?? 0), 0) + 1;
+  const id = uid('c_');
+  put('classes', id, Object.assign({ name: cleanName(name) || 'כיתה חדשה', order, students: [], createdAt: Date.now() }, layout));
+  selectClass(id); S.view = 'students'; lsSet('view', 'students');
+}
+function selectClass(cid){
+  if (S.cid === cid && (unsubHist || S.mode !== 'db')) return;
+  S.cid = cid; S.sel = null; lsSet('cid', cid || '');
+  if (S.mode === 'db') subscribeHistory();
+  scheduleRender();
+}
+function ensureCid(){
+  const list = sortedClasses();
+  if (!list.length){ if (S.cid){ S.cid = null; if (unsubHist){ unsubHist(); unsubHist = null; } } return; }
+  if (!S.cid || !S.classes[S.cid]) selectClass(list[0].id);
+  else if (S.mode === 'db' && !unsubHist) subscribeHistory();
+}
+function setColumns(c, cols){
+  const oldPos = {}; let n = 1;
+  c.columns.forEach((k, ci) => { for (let r = 0; r < k; r++) oldPos[ci + ':' + r] = n++; });
+  const tables = {}; n = 1;
+  cols.forEach((k, ci) => { for (let r = 0; r < k; r++){
+    const old = oldPos[ci + ':' + r];
+    const above = r > 0 ? tables[n - 1] : null;
+    tables[n] = old ? Object.assign({}, c.tables[old]) : { team: above ? above.team : null, active: true };
+    n++;
+  } });
+  c.columns = cols; c.tables = tables;
+}
+function planText(c){
+  const t = S.today[c.id]; const plan = t && t.plan; if (!plan) return '';
+  const ab = absentSet(c.id);
+  const L = [`סידור חדר האוכל · ${c.name} · ${fmtDate(plan.date)}`, ''];
+  for (const r of c.roles) L.push(`${r.name}: ${((plan.roles || {})[r.id] || []).map(s => studentName(c, s)).join(', ') || '—'}`);
+  L.push('');
+  for (const tm of c.teams){
+    const tabs = activeTablesOf(c, tm.id); const mem = (plan.teams || {})[tm.id] || [];
+    if (!tabs.length && !mem.length) continue;
+    if (c.opts.mode === 'table') L.push(`${tm.name}: ${mem.map(s => `${studentName(c, s)} (${tablesOfStudent(c, plan, s).join(', ') || '—'})`).join(', ') || '—'}`);
+    else L.push(`${tm.name} · שולחנות ${rangeText(tabs)}: ${mem.map(s => studentName(c, s)).join(', ') || '—'}`);
+  }
+  const closed = tableNums(c).filter(n => tableInfo(c, n).active === false);
+  if (closed.length) L.push('', `שולחנות סגורים: ${rangeText(closed)}`);
+  if (ab.size) L.push(`חסרים היום: ${byName(c).filter(s => ab.has(s.id)).map(s => s.name).join(', ')}`);
+  return L.join('\n');
+}
+let toastTimer = null;
+function toast(text){ S.toast = text; clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = null; scheduleRender(); }, 3200); scheduleRender(); }
+let confirmTimer = null;
+function arm(key){ S.confirm = key; clearTimeout(confirmTimer); confirmTimer = setTimeout(() => { S.confirm = null; scheduleRender(); }, 4000); scheduleRender(); }
+
+/* ---------- views ---------- */
+function icon(name){ return ICONS[name] || ICONS.star; }
+function tile(c, n, plan, assignees, interactive){
+  const t = tableInfo(c, n), tm = teamById(c, t.team), off = t.active === false;
+  let body = '';
+  if (off) body = 'סגור';
+  else if (!tm) body = 'ללא צוות';
+  else if (c.opts.mode === 'table' && plan) body = (assignees[n] || []).map(s => `<span class="who">${esc(studentName(c, s))}</span>`).join('');
+  const cls = `tbl${off ? ' off' : ''}${!tm ? ' none' : ''}`;
+  const style = `--team:var(--t-${tm ? tm.color : 'none'})`;
+  const label = `שולחן ${n}${off ? ', סגור' : ''}${tm ? ', ' + tm.name : ''}`;
+  const inner = `<span class="tnum">${n}</span><span class="tbody">${body}</span>`;
+  return interactive
+    ? `<button type="button" class="${cls}" style="${style}" data-act="table" data-n="${n}" aria-label="${esc(label)}">${inner}</button>`
+    : `<div class="${cls}" style="${style}" aria-label="${esc(label)}">${inner}</div>`;
+}
+function hall(c, plan, interactive){
+  const assignees = tableAssignees(c, plan);
+  let n = 1;
+  const cols = c.columns.map(k => { const tiles = []; for (let i = 0; i < k; i++) tiles.push(tile(c, n++, plan, assignees, interactive)); return `<div class="col">${tiles.join('')}</div>`; }).join('');
+  return `<div class="hall"><div class="stage">${esc(c.opts.stage || 'במה')}</div><div class="cols" style="--cols:${c.columns.length}">${cols}</div></div>`;
+}
+function legend(c){
+  const items = c.teams.map(t => `<span style="--team:var(--t-${t.color})"><i class="dot"></i>${esc(t.name)} · ${activeTablesOf(c, t.id).length}</span>`);
+  const closed = tableNums(c).filter(n => tableInfo(c, n).active === false).length;
+  if (closed) items.push(`<span><i class="dot off"></i>סגורים · ${closed}</span>`);
+  return `<div class="hall-legend">${items.join('')}</div>`;
+}
+function kid(c, sid, opts){
+  const o = opts || {};
+  const sel = S.sel === sid;
+  const extra = o.tables ? `<span class="tt">${o.tables}</span>` : '';
+  const cls = `kid${sel ? ' sel' : ''}${o.gone ? ' gone' : ''}`;
+  return o.edit ? `<button type="button" class="${cls}" data-act="kid" data-sid="${sid}" aria-pressed="${sel}">${esc(studentName(c, sid))}${extra}</button>`
+               : `<span class="${cls}">${esc(studentName(c, sid))}${extra}</span>`;
+}
+function rolesRow(c, plan, edit, ab){
+  const st = plan ? roleStats(c.id, plan.date) : {};
+  return `<div class="roles">${c.roles.map(r => {
+    const holders = plan ? ((plan.roles || {})[r.id] || []) : [];
+    const short = plan && holders.length < (r.count || 1);
+    const target = edit && S.sel && !holders.includes(S.sel);
+    const names = holders.length ? holders.map(s => `<span>${kid(c, s, { edit: edit && !target, gone: ab.has(s) })}${plan ? `<span class="times"> · פעם ${((st[s] && st[s][r.id] && st[s][r.id].n) || 0) + 1}</span>` : ''}</span>`).join('') : `<span class="empty">${plan ? 'לא נקבע' : 'טרם נקבע'}</span>`;
+    const fill = edit && short && !S.sel ? `<button type="button" class="btn sm" data-act="fill-role">בחירה לפי התור</button>` : '';
+    const inner = `<span class="ri ${esc(r.icon || 'star')}">${icon(r.icon)}</span><span class="role-b"><span class="role-l">${esc(r.name)}</span><span class="role-n">${names}</span></span>${fill}`;
+    return target ? `<button type="button" class="role target" data-act="role-slot" data-rid="${esc(r.id)}" aria-label="העברה ל${esc(r.name)}">${inner}</button>` : `<div class="role">${inner}</div>`;
+  }).join('')}</div>`;
+}
+function teamsGrid(c, plan, edit, ab){
+  const selLoc = S.sel ? locate(plan, S.sel) : null;
+  const cards = c.teams.map(t => {
+    const act = activeTablesOf(c, t.id), all = allTablesOf(c, t.id);
+    const mem = plan ? ((plan.teams || {})[t.id] || []) : [];
+    const sub = all.length ? `שולחנות ${rangeText(act)}${act.length < all.length ? ` · ${all.length - act.length} סגורים` : ''} · ${mem.length} תלמידים` : 'אין שולחנות לצוות';
+    const canMove = edit && S.sel && act.length && !(selLoc && selLoc.kind === 'team' && selLoc.id === t.id);
+    const chips = mem.map(s => kid(c, s, { edit, gone: ab.has(s), tables: c.opts.mode === 'table' ? tablesOfStudent(c, plan, s).join(', ') : '' })).join('');
+    return `<div class="team${act.length ? '' : ' dim'}" style="--team:var(--t-${t.color})">
+      <div class="team-h"><span class="swatch"></span><div class="grow"><h3>${esc(t.name)}</h3><div class="sub">${sub}</div></div>${canMove ? `<button type="button" class="btn sm" data-act="move-team" data-tid="${esc(t.id)}">העברה לכאן</button>` : ''}</div>
+      <div class="team-b">${chips || `<span class="muted">${plan ? (act.length ? 'אין תלמידים בצוות' : 'כל השולחנות של הצוות סגורים') : 'יתמלא בחלוקה'}</span>`}</div>
+    </div>`;
+  });
+  if (plan && (plan.unassigned || []).length){
+    cards.push(`<div class="team"><div class="team-h"><span class="swatch"></span><div class="grow"><h3>בלי צוות</h3><div class="sub">אין שולחן פעיל עם צוות</div></div></div><div class="team-b">${plan.unassigned.map(s => kid(c, s, { edit, gone: ab.has(s) })).join('')}</div></div>`);
+  }
+  return `<div class="teams">${cards.join('')}</div>`;
+}
+function attendanceCard(c, plan, ab){
+  const list = byName(c);
+  const roleOf = {}; if (plan) for (const r of c.roles) for (const s of (plan.roles || {})[r.id] || []) roleOf[s] = r;
+  const rows = list.map(s => {
+    const absent = ab.has(s.id), r = roleOf[s.id];
+    return `<li><button type="button" class="att${absent ? ' absent' : ''}" role="switch" aria-checked="${!absent}" data-act="att" data-sid="${s.id}" ${S.canWrite ? '' : 'disabled'}>
+      <span class="nm">${esc(s.name)}</span>${r && !absent ? `<span class="ri-mini" title="${esc(r.name)}">${icon(r.icon)}</span>` : ''}${absent ? '<span class="tag">חסר/ה</span>' : ''}<span class="sw" aria-hidden="true"></span></button></li>`;
+  }).join('');
+  return `<div class="card" id="attendance">
+    <div class="card-h"><h2>נוכחות היום</h2><span class="count">${list.length - list.filter(s => ab.has(s.id)).length}/${list.length}</span></div>
+    ${list.length ? `<ul class="att-list">${rows}</ul>` : `<p class="sec muted" style="margin:0">אין עדיין תלמידים בכיתה. מוסיפים אותם בלשונית "תלמידים".</p>`}
+    ${S.canWrite && ab.size ? `<div class="att-foot"><button type="button" class="btn sm" data-act="all-present">כולם נוכחים</button></div>` : ''}
+  </div>`;
+}
+function planView(c){
+  const t = S.today[c.id]; const plan = (t && t.plan) || null;
+  const today = todayStr(); const isToday = !!plan && plan.date === today;
+  const ab = absentSet(c.id);
+  const edit = isToday && S.canWrite;
+  const nums = tableNums(c);
+  const activeN = nums.filter(n => { const x = tableInfo(c, n); return x.active !== false && teamById(c, x.team); }).length;
+  const present = c.students.filter(s => !ab.has(s.id)).length;
+  let banner = '';
+  if (!plan) banner = `<div class="note"><p>עוד לא חולק סידור להיום. סמנו מי נוכח, בדקו אילו שולחנות פתוחים, ולחצו על "חלוקה חדשה".</p></div>`;
+  else if (!isToday) banner = `<div class="note warn"><p>מוצג הסידור של ${esc(fmtDate(plan.date))}. אפשר לחלק סידור חדש להיום, או להמשיך עם אותו סידור.</p>${S.canWrite ? `<button type="button" class="btn sm" data-act="reuse">להמשיך עם הסידור הזה היום</button>` : ''}</div>`;
+  else if (!activeN) banner = `<div class="note warn"><p>כל השולחנות סגורים או בלי צוות. פתחו שולחנות כדי לחלק את התלמידים.</p></div>`;
+  const toolbar = `<div class="toolbar">
+    ${S.canWrite ? `<button type="button" class="btn primary" data-act="gen">${ICONS.shuffle}${isToday ? 'חלוקה מחדש' : 'חלוקה חדשה'}</button>` : ''}
+    ${plan ? `<button type="button" class="btn" data-act="display-open">${ICONS.screen}תצוגה לכיתה</button><button type="button" class="btn" data-act="copy">${ICONS.copy}העתקת הסידור</button>` : ''}
+    ${edit && isImbalanced(c, plan) ? `<button type="button" class="btn ghost" data-act="balance">איזון הצוותים</button>` : ''}
+    <span class="spacer"></span>
+    <span class="stat"><b>${present}</b>/${c.students.length} נוכחים · <b>${activeN}</b>/${nums.length} שולחנות פעילים</span>
+  </div>`;
+  return `<div class="plan-grid">
+    <aside class="aside">${attendanceCard(c, plan, ab)}</aside>
+    <section class="main" aria-label="הסידור">
+      ${toolbar}${banner}
+      ${c.roles.length ? rolesRow(c, plan, edit, ab) : ''}
+      <div>${hall(c, plan, S.canWrite)}${legend(c)}</div>
+      ${teamsGrid(c, plan, edit, ab)}
+    </section>
+  </div>`;
+}
+function studentsView(c){
+  const st = roleStats(c.id, null);
+  const delArmed = S.confirm === 'class:' + c.id;
+  const rows = byName(c).map((s, i) => {
+    const counts = c.roles.map(r => `${r.name.replace(/^סידור /, '')} ${(st[s.id] && st[s.id][r.id] && st[s.id][r.id].n) || 0}`).join(' · ');
+    const armed = S.confirm === 'st:' + s.id;
+    return `<li><span class="idx">${i + 1}</span>
+      <input class="inp" id="sn-${s.id}" data-ch="student-name" data-sid="${s.id}" value="${esc(s.name)}" aria-label="שם התלמיד/ה" ${S.canWrite ? '' : 'disabled'}>
+      <span class="meta">${esc(counts)}</span>
+      ${S.canWrite ? `<button type="button" class="btn sm danger${armed ? ' armed' : ''}" data-act="del-student" data-sid="${s.id}">${armed ? 'ללחוץ שוב למחיקה' : 'מחיקה'}</button>` : ''}</li>`;
+  }).join('');
+  return `<div class="set-grid">
+    <div class="card sec">
+      <h2>הכיתה</h2>
+      <p class="help">השם מופיע בכפתורי הכיתות למעלה ובכותרת של התצוגה לכיתה.</p>
+      <div class="row"><input class="inp grow" id="class-name" data-ch="class-name" value="${esc(c.name)}" aria-label="שם הכיתה" ${S.canWrite ? '' : 'disabled'}>
+      ${S.canWrite ? `<button type="button" class="btn danger${delArmed ? ' armed' : ''}" data-act="del-class">${delArmed ? 'ללחוץ שוב: הכיתה וההיסטוריה שלה יימחקו' : 'מחיקת הכיתה'}</button>` : ''}</div>
+      ${S.canWrite ? `<h2 style="margin-top:22px">הוספת תלמידים</h2>
+      <p class="help">אחד אחד, או הדבקה של רשימה שלמה (שם בכל שורה, אפשר להעתיק עמודה מגיליון). שמות שכבר קיימים לא יתווספו שוב.</p>
+      <div class="row"><input class="inp grow" id="new-student" placeholder="שם התלמיד/ה" aria-label="שם תלמיד/ה חדש/ה"><button type="button" class="btn primary" data-act="add-student">הוספה</button></div>
+      <div class="row"><textarea class="inp" id="bulk" placeholder="נועה כהן&#10;יונתן לוי&#10;..." aria-label="רשימת שמות"></textarea></div>
+      <div class="row"><button type="button" class="btn" data-act="bulk-add">הוספת כל השמות מהרשימה</button></div>` : ''}
+    </div>
+    <div class="card sec">
+      <h2>תלמידי הכיתה <span class="count">${c.students.length}</span></h2>
+      <p class="help">שינוי שם נשמר כשיוצאים מהשדה. ליד כל שם: כמה פעמים כבר קיבל/ה כל תפקיד.</p>
+      ${rows ? `<ul class="list">${rows}</ul>` : '<p class="muted">עוד אין תלמידים.</p>'}
+    </div>
+  </div>`;
+}
+function tablesView(c){
+  const dis = S.canWrite ? '' : 'disabled';
+  const colsEd = c.columns.map((k, i) => `<div class="row"><span style="min-width:6.5em">עמודה ${i + 1}${i === 0 ? ' (שמאל)' : i === c.columns.length - 1 ? ' (ימין)' : ''}</span>
+    <span class="stepper"><button type="button" data-act="col-dec" data-i="${i}" aria-label="פחות שולחנות" ${dis}>−</button><span>${k}</span><button type="button" data-act="col-inc" data-i="${i}" aria-label="עוד שולחן" ${dis}>+</button></span>
+    ${S.canWrite && c.columns.length > 1 ? `<button type="button" class="btn sm ghost" data-act="col-del" data-i="${i}">הסרת העמודה</button>` : ''}</div>`).join('');
+  const teamsEd = c.teams.map(t => {
+    const armed = S.confirm === 'team:' + t.id;
+    return `<li style="--team:var(--t-${t.color})">
+      <input class="inp" id="tn-${t.id}" data-ch="team-name" data-tid="${t.id}" value="${esc(t.name)}" aria-label="שם הצוות" ${dis}>
+      <span class="colors" role="group" aria-label="צבע">${PALETTE.map(([col, nm]) => `<button type="button" class="cbtn" style="--team:var(--t-${col})" data-act="team-color" data-tid="${t.id}" data-color="${col}" aria-pressed="${t.color === col}" aria-label="${nm}" title="${nm}" ${dis}></button>`).join('')}</span>
+      <span class="meta">${allTablesOf(c, t.id).length} שולחנות</span>
+      ${S.canWrite ? `<button type="button" class="btn sm danger${armed ? ' armed' : ''}" data-act="del-team" data-tid="${t.id}">${armed ? 'ללחוץ שוב' : 'מחיקה'}</button>` : ''}
+    </li>`;
+  }).join('');
+  const mode = c.opts.mode;
+  return `<div class="set-grid">
+    <div class="card sec" style="grid-column:1/-1">
+      <h2>מפת חדר האוכל</h2>
+      <p class="help">לחיצה על שולחן פותחת אותו לעריכה: פעיל או סגור, ולאיזה צוות הוא שייך. שולחן סגור לא נכנס לחלוקה, והתלמידים מתחלקים לפי מספר השולחנות הפעילים של כל צוות.</p>
+      ${S.canWrite ? `<div class="row" style="margin-bottom:12px"><button type="button" class="btn sm" data-act="all-on">פתיחת כל השולחנות</button><button type="button" class="btn sm" data-act="all-off">סגירת כל השולחנות</button></div>` : ''}
+      ${hall(c, todaysPlan(c.id), S.canWrite)}${legend(c)}
+    </div>
+    <div class="card sec">
+      <h2>איך מחלקים</h2>
+      <p class="help">אפשר לשנות בכל רגע. החלוקה לצוותים נשארת, רק התצוגה משתנה.</p>
+      <div class="modes">
+        <button type="button" class="mode" data-act="mode" data-v="team" aria-pressed="${mode !== 'table'}" ${dis}><span class="radio"></span><span><b>הצוות אחראי יחד על השולחנות שלו</b><small>כל תלמידי הצוות הירוק מטפלים בכל השולחנות הירוקים.</small></span></button>
+        <button type="button" class="mode" data-act="mode" data-v="table" aria-pressed="${mode === 'table'}" ${dis}><span class="radio"></span><span><b>כל תלמיד/ה מקבל/ת שולחנות משלו</b><small>בתוך הצוות השולחנות מתחלקים בין התלמידים, והשם מופיע על השולחן במפה.</small></span></button>
+      </div>
+      <h2 style="margin-top:20px">הכיתוב בראש המפה</h2>
+      <div class="row"><input class="inp grow" id="stage-name" data-ch="stage" value="${esc(c.opts.stage)}" aria-label="הכיתוב בראש המפה" ${dis}></div>
+    </div>
+    <div class="card sec">
+      <h2>צוותים</h2>
+      <p class="help">כל צוות מסומן בצבע. משייכים שולחנות לצוות דרך המפה.</p>
+      <ul class="list">${teamsEd}</ul>
+      ${S.canWrite ? `<div class="row" style="margin-top:10px"><button type="button" class="btn" data-act="add-team">+ צוות חדש</button></div>` : ''}
+    </div>
+    <div class="card sec">
+      <h2>מבנה החדר</h2>
+      <p class="help">כמה שולחנות יש בכל עמודה, משמאל לימין כפי שרואים מהבמה. המספור רץ לאורך העמודות.</p>
+      ${colsEd}
+      ${S.canWrite && c.columns.length < 6 ? `<div class="row" style="margin-top:10px"><button type="button" class="btn" data-act="col-add">+ עמודה</button></div>` : ''}
+    </div>
+  </div>`;
+}
+function rolesView(c){
+  const dis = S.canWrite ? '' : 'disabled';
+  const roleEd = c.roles.map(r => {
+    const armed = S.confirm === 'role:' + r.id;
+    return `<li>
+      <span class="ri ${esc(r.icon || 'star')}" style="width:36px;height:36px">${icon(r.icon)}</span>
+      <input class="inp" id="rn-${esc(r.id)}" data-ch="role-name" data-rid="${esc(r.id)}" value="${esc(r.name)}" aria-label="שם התפקיד" ${dis}>
+      <select class="inp" id="ri-${esc(r.id)}" data-ch="role-icon" data-rid="${esc(r.id)}" aria-label="סמל" ${dis}>${ICON_NAMES.map(([k, nm]) => `<option value="${k}" ${r.icon === k ? 'selected' : ''}>${nm}</option>`).join('')}</select>
+      <span class="stepper" title="כמה תלמידים"><button type="button" data-act="role-dec" data-rid="${esc(r.id)}" aria-label="פחות" ${dis}>−</button><span>${r.count || 1}</span><button type="button" data-act="role-inc" data-rid="${esc(r.id)}" aria-label="יותר" ${dis}>+</button></span>
+      <select class="inp" id="rf-${esc(r.id)}" data-ch="role-fixed" data-rid="${esc(r.id)}" aria-label="מי מקבל את התפקיד" ${dis}>
+        <option value="">כל פעם מישהו אחר (לפי התור)</option>
+        ${byName(c).map(s => `<option value="${s.id}" ${r.fixed === s.id ? 'selected' : ''}>תמיד ${esc(s.name)}</option>`).join('')}
+      </select>
+      ${S.canWrite ? `<button type="button" class="btn sm danger${armed ? ' armed' : ''}" data-act="del-role" data-rid="${esc(r.id)}">${armed ? 'ללחוץ שוב' : 'מחיקה'}</button>` : ''}
+    </li>`;
+  }).join('');
+  const st = roleStats(c.id, null);
+  const fair = byName(c).map(s => `<tr><td>${esc(s.name)}</td>${c.roles.map(r => { const x = st[s.id] && st[s.id][r.id]; return `<td class="n">${x ? x.n : 0}</td><td class="d">${x ? esc(fmtDate(x.last)) : '—'}</td>`; }).join('')}</tr>`).join('');
+  return `<div class="set-grid">
+    <div class="card sec">
+      <h2>תפקידים</h2>
+      <p class="help">מי שמקבל/ת תפקיד לא נכנס/ת לצוות של השולחנות באותו יום. בכל חלוקה התפקיד עובר למי שעשה אותו הכי מעט פעמים, ומי שהיה בתפקיד בפעם הקודמת מקבל עדיפות נמוכה. אם בחרתם "תמיד" ותלמיד/ה חסר/ה, התפקיד עובר לפי התור.</p>
+      <ul class="list">${roleEd}</ul>
+      ${S.canWrite ? `<div class="row" style="margin-top:10px"><button type="button" class="btn" data-act="add-role">+ תפקיד חדש</button></div>` : ''}
+    </div>
+    <div class="card sec">
+      <h2>מי כבר עשה מה</h2>
+      <p class="help">ספירה מכל הימים השמורים בהיסטוריה, כולל היום.</p>
+      ${c.students.length && c.roles.length ? `<div class="tbl-wrap"><table class="fair"><thead><tr><th>תלמיד/ה</th>${c.roles.map(r => `<th>${esc(r.name)}</th><th>פעם אחרונה</th>`).join('')}</tr></thead><tbody>${fair}</tbody></table></div>` : '<p class="muted">אין עדיין נתונים.</p>'}
+    </div>
+  </div>`;
+}
+function historyView(c){
+  const hs = histFor(c.id).slice().reverse();
+  if (!hs.length) return `<div class="card sec"><h2>היסטוריה</h2><p class="help">כל סידור שמחלקים נשמר כאן לפי תאריך (אחד ליום). מכאן נספר התור של התפקידים.</p><p class="muted">עוד אין ימים שמורים.</p></div>`;
+  return `<div class="hist">
+    <p class="help muted" style="margin:0">${hs.length} ימים שמורים. מחיקת יום מורידה אותו גם מספירת התפקידים.</p>
+    ${hs.map(h => {
+      const id = `${c.id}__${h.date}`, armed = S.confirm === 'hist:' + id;
+      const roles = c.roles.map(r => `<div class="line"><span class="lab">${esc(r.name)}</span><span>${((h.roles || {})[r.id] || []).map(s => esc(studentName(c, s))).join(', ') || '—'}</span></div>`).join('');
+      const teams = c.teams.filter(t => ((h.teams || {})[t.id] || []).length).map(t => `<div class="line" style="--team:var(--t-${t.color})"><span class="lab"><i class="dot" style="display:inline-block;vertical-align:-1px"></i> ${esc(t.name)}</span><span>${h.teams[t.id].map(s => esc(studentName(c, s))).join(', ')}</span></div>`).join('');
+      return `<div class="card"><div class="card-h hist-h"><h3>${esc(fmtDate(h.date))}${h.date === todayStr() ? ' · היום' : ''}</h3>${S.canWrite ? `<button type="button" class="btn sm danger${armed ? ' armed' : ''}" data-act="del-hist" data-id="${esc(id)}">${armed ? 'ללחוץ שוב למחיקה' : 'מחיקה'}</button>` : ''}</div><div class="hist-b">${roles}${teams}</div></div>`;
+    }).join('')}
+  </div>`;
+}
+function emptyView(){
+  const demo = normalizeClass(Object.assign({ id: 'demo', name: '', students: [] }, defaultLayout()));
+  return `<div class="empty-st">
+    <div>
+      <h2>${S.mode === 'loading' ? 'טוען את הכיתות…' : 'מתחילים מכיתה אחת'}</h2>
+      ${S.mode === 'loading' ? '<p>עוד רגע יופיעו הכיתות, הנוכחות והסידור של היום.</p>' : `<p>יוצרים כיתה, מוסיפים את שמות התלמידים, ומסמנים במפה אילו שולחנות פתוחים. כל יום מסמנים מי נוכח ולוחצים על "חלוקה חדשה".</p>
+      ${S.canWrite ? `<div class="row"><input class="inp grow" id="new-class-name" placeholder="שם הכיתה, למשל ו׳2" aria-label="שם הכיתה"><button type="button" class="btn primary" data-act="create-class">יצירת כיתה</button></div>` : '<p class="muted">עוד לא נוצרו כיתות.</p>'}`}
+    </div>
+    <div class="ghost-hall" aria-hidden="true">${hall(demo, null, false)}</div>
+  </div>`;
+}
+function sheetView(){
+  if (S.sheet == null) return '';
+  const c = getCls(S.cid); if (!c) return '';
+  const n = S.sheet, t = tableInfo(c, n), active = t.active !== false;
+  return `<div class="backdrop" data-act="sheet-close"></div>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="שולחן ${n}">
+    <div class="sheet-h"><h3>שולחן ${n}</h3><button type="button" class="btn ghost" data-act="sheet-close">סגירה</button></div>
+    <div class="seg" role="group" aria-label="מצב השולחן"><button type="button" data-act="sheet-active" data-v="1" aria-pressed="${active}">פעיל</button><button type="button" data-act="sheet-active" data-v="0" aria-pressed="${!active}">סגור</button></div>
+    <div class="lbl">שייך לצוות</div>
+    <div class="tpick">${c.teams.map(tm => `<button type="button" class="tp" style="--team:var(--t-${tm.color})" data-act="sheet-team" data-tid="${tm.id}" aria-pressed="${t.team === tm.id}"><span class="swatch"></span>${esc(tm.name)}</button>`).join('')}
+    <button type="button" class="tp" data-act="sheet-team" data-tid="" aria-pressed="${!t.team}">בלי צוות</button></div>
+  </div>`;
+}
+function displayView(){
+  if (!S.display) return '';
+  const c = getCls(S.cid); if (!c) return '';
+  const plan = S.today[c.id] && S.today[c.id].plan; if (!plan) return '';
+  const ab = absentSet(c.id);
+  return `<div class="display" role="dialog" aria-modal="true" aria-label="תצוגה לכיתה">
+    <div class="display-h"><div><div class="eyebrow">${esc(fmtDate(plan.date))}</div><h2>חדר האוכל · ${esc(c.name)}</h2></div><button type="button" class="btn" data-act="display-close">סגירת התצוגה</button></div>
+    <div class="display-g">
+      <div>${hall(c, plan, false)}</div>
+      <div class="display-side">${c.roles.length ? rolesRow(c, plan, false, ab) : ''}${teamsGrid(c, plan, false, ab)}</div>
+    </div>
+  </div>`;
+}
+function selBar(){
+  if (!S.sel || S.view !== 'plan') return '';
+  const c = getCls(S.cid); if (!c) return '';
+  return `<div class="selbar" role="status"><p>נבחר/ה: <b>${esc(studentName(c, S.sel))}</b>. הקישו על תלמיד/ה אחר/ת כדי להחליף ביניהם, על "העברה לכאן" בצוות אחר, או על כרטיס של תפקיד.</p><button type="button" class="btn" data-act="sel-cancel">ביטול</button></div>`;
+}
+function copyModal(){
+  if (S.copyText == null) return '';
+  return `<div class="backdrop" data-act="copy-close"></div><div class="modal" role="dialog" aria-modal="true" aria-label="הסידור כטקסט">
+    <div class="sheet-h"><h3 style="font-size:1.1rem">הסידור כטקסט</h3><button type="button" class="btn ghost" data-act="copy-close">סגירה</button></div>
+    <p class="help muted" style="margin:0 0 8px">ההעתקה האוטומטית לא עבדה כאן. סמנו את הטקסט והעתיקו ידנית.</p>
+    <textarea class="inp" id="copy-area" readonly>${esc(S.copyText)}</textarea></div>`;
+}
+function localNote(){
+  if (S.mode !== 'local') return '';
+  return `<div class="note local"><p>העמוד לא מחובר לשמירה כרגע, ולכן שינויים יישארו רק עד שהעמוד ייסגר. כדי לשמור, פותחים את הקישור כשמחוברים לחשבון Claude.</p></div>`;
+}
+function view(){
+  const list = sortedClasses();
+  const c = S.cid ? getCls(S.cid) : null;
+  const header = `<header class="top">
+    <div class="brand"><div class="eyebrow">${esc(fmtDate(todayStr()))}${S.mode === 'db' && !S.canWrite ? ' · צפייה בלבד' : ''}</div><h1>סידור חדר האוכל</h1></div>
+    ${list.length ? `<nav class="classbar" aria-label="כיתות">${list.map(x => `<button type="button" class="cls" aria-pressed="${x.id === S.cid}" data-act="class" data-cid="${x.id}">${esc(x.name)}</button>`).join('')}${S.canWrite ? `<button type="button" class="cls add" data-act="add-class">+ כיתה חדשה</button>` : ''}</nav>` : ''}
+  </header>`;
+  let body;
+  if (!c) body = emptyView();
+  else {
+    const tabs = `<nav class="tabs" role="tablist" aria-label="מסכים">${TABS.map(([k, nm]) => `<button type="button" class="tab" role="tab" aria-selected="${S.view === k}" data-act="tab" data-v="${k}">${nm}</button>`).join('')}</nav>`;
+    const v = S.view === 'students' ? studentsView(c) : S.view === 'tables' ? tablesView(c) : S.view === 'roles' ? rolesView(c) : S.view === 'history' ? historyView(c) : planView(c);
+    body = tabs + v;
+  }
+  return header + localNote() + body + sheetView() + selBar() + displayView() + copyModal() + (S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : '');
+}
+
+/* ---------- render ---------- */
+let renderQueued = false;
+function scheduleRender(){ if (renderQueued) return; renderQueued = true; queueMicrotask(() => { renderQueued = false; render(); }); }
+function render(){
+  const app = document.getElementById('app');
+  const a = document.activeElement;
+  const fid = a && a.id && app.contains(a) ? a.id : null;
+  let s0 = null, s1 = null, val;
+  if (fid && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')){ val = a.value; try { s0 = a.selectionStart; s1 = a.selectionEnd; } catch {} }
+  const winY = window.scrollY;
+  app.innerHTML = view();
+  document.body.classList.toggle('has-selbar', !!(S.sel && S.view === 'plan'));
+  if (fid){
+    const el = document.getElementById(fid);
+    if (el){
+      if (val !== undefined) el.value = val;
+      try { el.focus({ preventScroll: true }); } catch {}
+      try { if (s0 != null) el.setSelectionRange(s0, s1); } catch {}
+    }
+  }
+  if (Math.abs(window.scrollY - winY) > 2) window.scrollTo(0, winY);
+}
+
+/* ---------- events ---------- */
+function onClick(e){
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const act = el.dataset.act, c = S.cid ? getCls(S.cid) : null;
+  const W = S.canWrite;
+  switch (act){
+    case 'tab': S.view = el.dataset.v; S.sel = null; lsSet('view', S.view); scheduleRender(); break;
+    case 'class': selectClass(el.dataset.cid); break;
+    case 'add-class': if (W) createClass('כיתה חדשה'); break;
+    case 'create-class': { if (!W) break; const inp = document.getElementById('new-class-name'); const name = inp ? cleanName(inp.value) : ''; if (!name){ toast('כתבו שם לכיתה'); break; } createClass(name); break; }
+    case 'gen': if (W) generate(); break;
+    case 'reuse': if (W) reuse(); break;
+    case 'balance': if (W) balance(); break;
+    case 'fill-role': if (W) fillRole(); break;
+    case 'att': if (W) toggleAttendance(el.dataset.sid); break;
+    case 'all-present': if (W) allPresent(); break;
+    case 'display-open': S.display = true; S.sel = null; try { const p = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); if (p && p.catch) p.catch(() => {}); } catch {} scheduleRender(); break;
+    case 'display-close': S.display = false; try { if (document.fullscreenElement){ const p = document.exitFullscreen(); if (p && p.catch) p.catch(() => {}); } } catch {} scheduleRender(); break;
+    case 'copy': {
+      if (!c) break; const text = planText(c);
+      const fallback = () => { S.copyText = text; scheduleRender(); setTimeout(() => { const ta = document.getElementById('copy-area'); if (ta){ ta.focus(); ta.select(); } }, 30); };
+      try { navigator.clipboard.writeText(text).then(() => toast('הסידור הועתק. אפשר להדביק בוואטסאפ.'), fallback); } catch { fallback(); }
+      break;
+    }
+    case 'copy-close': S.copyText = null; scheduleRender(); break;
+    case 'kid': {
+      const sid = el.dataset.sid;
+      if (!S.sel) S.sel = sid;
+      else if (S.sel === sid) S.sel = null;
+      else { const a = S.sel; S.sel = null; swapKids(a, sid); }
+      scheduleRender(); break;
+    }
+    case 'sel-cancel': S.sel = null; scheduleRender(); break;
+    case 'move-team': if (S.sel){ const a = S.sel; S.sel = null; moveToTeam(a, el.dataset.tid); } break;
+    case 'role-slot': if (S.sel){ const a = S.sel; S.sel = null; moveToRole(a, el.dataset.rid); } break;
+    case 'table': if (W){ S.sheet = Number(el.dataset.n); scheduleRender(); } break;
+    case 'sheet-close': S.sheet = null; scheduleRender(); break;
+    case 'sheet-active': { if (!W || !c) break; const n = S.sheet, on = el.dataset.v === '1'; updateClass(c.id, x => { x.tables[n] = Object.assign({}, x.tables[n], { active: on }); }); toast(`שולחן ${n} ${on ? 'פעיל' : 'סגור'}`); break; }
+    case 'sheet-team': { if (!W || !c) break; const n = S.sheet, tid = el.dataset.tid || null; updateClass(c.id, x => { x.tables[n] = Object.assign({}, x.tables[n], { team: tid }); }); break; }
+    case 'all-on': if (W && c) updateClass(c.id, x => { for (const n of tableNums(x)) x.tables[n].active = true; }); break;
+    case 'all-off': if (W && c) updateClass(c.id, x => { for (const n of tableNums(x)) x.tables[n].active = false; }); break;
+    case 'mode': if (W && c) updateClass(c.id, x => { x.opts.mode = el.dataset.v; }); break;
+    case 'add-student': {
+      if (!W || !c) break; const inp = document.getElementById('new-student'); const name = cleanName(inp && inp.value);
+      if (!name) break;
+      if (c.students.some(s => s.name === name)){ toast(`${name} כבר ברשימה`); break; }
+      inp.value = '';
+      updateClass(c.id, x => { x.students.push({ id: uid('s_'), name }); });
+      toast(`${name} נוסף/ה לכיתה`); break;
+    }
+    case 'bulk-add': {
+      if (!W || !c) break; const ta = document.getElementById('bulk'); if (!ta) break;
+      const have = new Set(c.students.map(s => s.name)); const add = [];
+      for (const line of ta.value.split(/[\n\t]+/)){ const n = cleanName(line); if (n && !have.has(n)){ have.add(n); add.push(n); } }
+      if (!add.length){ toast('לא נמצאו שמות חדשים ברשימה'); break; }
+      ta.value = '';
+      updateClass(c.id, x => { for (const n of add) x.students.push({ id: uid('s_'), name: n }); });
+      toast(`נוספו ${add.length} תלמידים`); break;
+    }
+    case 'del-student': {
+      if (!W || !c) break; const sid = el.dataset.sid;
+      if (S.confirm !== 'st:' + sid){ arm('st:' + sid); break; }
+      S.confirm = null; const nm = studentName(c, sid);
+      updateClass(c.id, x => { x.students = x.students.filter(s => s.id !== sid); x.roles.forEach(r => { if (r.fixed === sid) r.fixed = null; }); });
+      toast(`${nm} הוסר/ה מהכיתה`); break;
+    }
+    case 'del-class': {
+      if (!W || !c) break;
+      if (S.confirm !== 'class:' + c.id){ arm('class:' + c.id); break; }
+      S.confirm = null;
+      for (const h of histFor(c.id)) put('history', `${c.id}__${h.date}`, null);
+      put('today', c.id, null); put('classes', c.id, null);
+      S.cid = null; S.view = 'plan'; lsSet('view', 'plan'); if (unsubHist){ unsubHist(); unsubHist = null; }
+      ensureCid(); toast('הכיתה נמחקה'); break;
+    }
+    case 'add-team': if (W && c) updateClass(c.id, x => { const used = new Set(x.teams.map(t => t.color)); const col = (PALETTE.find(p => !used.has(p[0])) || PALETTE[0]); x.teams.push({ id: uid('tm_'), name: 'צוות ' + col[1], color: col[0] }); }); break;
+    case 'team-color': if (W && c) updateClass(c.id, x => { const t = x.teams.find(t => t.id === el.dataset.tid); if (t) t.color = el.dataset.color; }); break;
+    case 'del-team': {
+      if (!W || !c) break; const tid = el.dataset.tid;
+      if (S.confirm !== 'team:' + tid){ arm('team:' + tid); break; }
+      S.confirm = null;
+      updateClass(c.id, x => { x.teams = x.teams.filter(t => t.id !== tid); for (const n of tableNums(x)) if (x.tables[n].team === tid) x.tables[n].team = null; });
+      break;
+    }
+    case 'col-inc': case 'col-dec': if (W && c) updateClass(c.id, x => { const cols = x.columns.slice(); const i = +el.dataset.i; cols[i] = Math.max(1, Math.min(14, cols[i] + (act === 'col-inc' ? 1 : -1))); setColumns(x, cols); }); break;
+    case 'col-add': if (W && c) updateClass(c.id, x => { setColumns(x, x.columns.concat([5])); }); break;
+    case 'col-del': if (W && c) updateClass(c.id, x => { const cols = x.columns.slice(); cols.splice(+el.dataset.i, 1); setColumns(x, cols); }); break;
+    case 'add-role': if (W && c) updateClass(c.id, x => { x.roles.push({ id: uid('r_'), name: 'תפקיד חדש', icon: 'star', count: 1, fixed: null }); }); break;
+    case 'role-inc': case 'role-dec': if (W && c) updateClass(c.id, x => { const r = x.roles.find(r => r.id === el.dataset.rid); if (r) r.count = Math.max(1, Math.min(10, (r.count || 1) + (act === 'role-inc' ? 1 : -1))); }); break;
+    case 'del-role': {
+      if (!W || !c) break; const rid = el.dataset.rid;
+      if (S.confirm !== 'role:' + rid){ arm('role:' + rid); break; }
+      S.confirm = null; updateClass(c.id, x => { x.roles = x.roles.filter(r => r.id !== rid); }); break;
+    }
+    case 'del-hist': {
+      if (!W) break; const id = el.dataset.id;
+      if (S.confirm !== 'hist:' + id){ arm('hist:' + id); break; }
+      S.confirm = null; put('history', id, null); break;
+    }
+  }
+}
+function onChange(e){
+  const el = e.target.closest('[data-ch]'); if (!el || !S.canWrite) return;
+  const c = S.cid ? getCls(S.cid) : null; if (!c) return;
+  const ch = el.dataset.ch;
+  if (ch === 'class-name'){ const v = cleanName(el.value); if (v && v !== c.name) updateClass(c.id, x => { x.name = v; }); }
+  else if (ch === 'student-name'){
+    const v = cleanName(el.value), sid = el.dataset.sid;
+    if (!v){ el.value = studentName(c, sid); return; }
+    if (c.students.some(s => s.name === v && s.id !== sid)){ toast(`${v} כבר ברשימה`); el.value = studentName(c, sid); return; }
+    updateClass(c.id, x => { const s = x.students.find(s => s.id === sid); if (s) s.name = v; });
+  }
+  else if (ch === 'team-name'){ const v = cleanName(el.value); if (v) updateClass(c.id, x => { const t = x.teams.find(t => t.id === el.dataset.tid); if (t) t.name = v; }); }
+  else if (ch === 'stage'){ const v = cleanName(el.value); updateClass(c.id, x => { x.opts.stage = v || 'במה'; }); }
+  else if (ch === 'role-name'){ const v = cleanName(el.value); if (v) updateClass(c.id, x => { const r = x.roles.find(r => r.id === el.dataset.rid); if (r) r.name = v; }); }
+  else if (ch === 'role-icon'){ updateClass(c.id, x => { const r = x.roles.find(r => r.id === el.dataset.rid); if (r) r.icon = el.value; }); }
+  else if (ch === 'role-fixed'){ updateClass(c.id, x => { const r = x.roles.find(r => r.id === el.dataset.rid); if (r) r.fixed = el.value || null; }); }
+}
+function onKey(e){
+  if (e.key === 'Escape'){
+    if (S.copyText != null) S.copyText = null;
+    else if (S.sheet != null) S.sheet = null;
+    else if (S.display){ S.display = false; }
+    else if (S.sel) S.sel = null;
+    else return;
+    scheduleRender(); return;
+  }
+  if (e.key === 'Enter' && e.target && e.target.id === 'new-student'){ e.preventDefault(); const b = document.querySelector('[data-act="add-student"]'); if (b) b.click(); }
+  if (e.key === 'Enter' && e.target && e.target.id === 'new-class-name'){ e.preventDefault(); const b = document.querySelector('[data-act="create-class"]'); if (b) b.click(); }
+}
+document.addEventListener('click', onClick);
+document.addEventListener('change', onChange);
+document.addEventListener('keydown', onKey);
+
+/* ---------- boot ---------- */
+function onSubError(err){
+  if (err && (err.code === 'revoked' || err.code === 'not_granted')) { S.canWrite = false; }
+  else if (err && err.code === 'unavailable') setTimeout(subscribeAll, 2000);
+  scheduleRender();
+}
+let unsubClasses = null, unsubToday = null;
+function subscribeAll(){
+  if (unsubClasses) unsubClasses(); if (unsubToday) unsubToday();
+  unsubClasses = DB.collection('classes').onSnapshot(snap => {
+    const next = {}; for (const d of snap.docs) next[d.id] = d.data();
+    S.classes = next; S.loaded = true; S.mode = 'db'; ensureCid(); scheduleRender();
+  }, onSubError);
+  unsubToday = DB.collection('today').onSnapshot(snap => {
+    const next = {}; for (const d of snap.docs) next[d.id] = d.data();
+    S.today = next; scheduleRender();
+  }, onSubError);
+  if (S.cid) subscribeHistory();
+}
+function subscribeHistory(){
+  if (unsubHist){ unsubHist(); unsubHist = null; }
+  S.hist = {};
+  if (!DB || !S.cid) return;
+  const cid = S.cid;
+  unsubHist = DB.collection('history').where('cid', '==', cid).onSnapshot(snap => {
+    if (S.cid !== cid) return;
+    const next = {}; for (const d of snap.docs) next[d.id] = d.data();
+    S.hist = next; scheduleRender();
+  }, onSubError);
+}
+async function boot(){
+  render();
+  let db = null;
+  try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch { db = null; }
+  if (!db){ S.mode = 'local'; S.loaded = true; S.cid = null; render(); return; }
+  DB = db;
+  try {
+    const user = await window.claude.use('user');
+    if (user){ const can = await user.can('data.write'); if (can === false) S.canWrite = false; }
+  } catch {}
+  subscribeAll();
+}
+boot();
+})();
+</script>
