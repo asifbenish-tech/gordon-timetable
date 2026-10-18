@@ -829,7 +829,7 @@ MISSING=[hx[k] for k in hx if k[3]=="חסר מורה" and k[1][0]!=5]
 for c in HCLASSES:
     _lt=5 if GRADE[c] in "זח" else 6
     for h in range(1,_lt+1): m.Add(hfree[(c,(2,h))]==0)
-    if GRADE[c] in "זח": m.Add(hfree[(c,(2,6))]==1)     # סוף יום המגמות
+    if GRADE[c] in "זח" and c not in TUE6_STAY: m.Add(hfree[(c,(2,6))]==1)     # סוף יום המגמות (חריגים: hdata.TUE6_STAY)
 
 # (הבלוקים הועברו ל-rules.py: tamir_subjects, leah, het_monday5, track_day, sifrut_historia, thursday_67)
 
