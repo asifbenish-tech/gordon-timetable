@@ -1,0 +1,10 @@
+{
+ "id": "juno_studio",
+ "start": "n0",
+ "nodes": {
+  "n0": {
+   "speaker": "juno",
+   "text": "dlg.juno_studio.n0"
+  }
+ }
+}

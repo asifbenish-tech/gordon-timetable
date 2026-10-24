@@ -1,0 +1,36 @@
+{
+ "id": "mirror",
+ "bpm": 120,
+ "bars": 2,
+ "caption": "caption.song.mirror",
+ "stems": [
+  {
+   "id": "click",
+   "file": "audio/stems/mirror/click",
+   "hitsFile": "audio/stems/mirror/click.hits.json",
+   "color": "#f4f4f4",
+   "label": "thread.mirror.click",
+   "instrument": "click",
+   "tether": "dancers",
+   "role": "rhythm"
+  },
+  {
+   "id": "beat",
+   "file": "audio/stems/mirror/beat",
+   "hitsFile": "audio/stems/mirror/beat.hits.json",
+   "color": "#e0403a",
+   "label": "thread.mirror.beat",
+   "instrument": "kick",
+   "role": "rhythm"
+  },
+  {
+   "id": "stab",
+   "file": "audio/stems/mirror/stab",
+   "hitsFile": "audio/stems/mirror/stab.hits.json",
+   "color": "#ff4fd8",
+   "label": "thread.mirror.stab",
+   "instrument": "saw",
+   "role": "harmony"
+  }
+ ]
+}

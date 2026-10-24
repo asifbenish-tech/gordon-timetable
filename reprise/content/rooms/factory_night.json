@@ -1,0 +1,156 @@
+{
+ "id": "factory_night",
+ "act": "act2",
+ "location": "factory",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_factory_night_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_factory_night",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_elevator": [
+   60,
+   284
+  ],
+  "from_press": [
+   588,
+   284
+  ]
+ },
+ "song": "juno",
+ "hotspots": [
+  {
+   "id": "posters",
+   "rect": [
+    60,
+    80,
+    120,
+    80
+   ],
+   "look": "look.factory_night.posters",
+   "name": "name.posters"
+  },
+  {
+   "id": "workbench",
+   "rect": [
+    400,
+    206,
+    130,
+    50
+   ],
+   "look": "look.factory_night.workbench",
+   "name": "name.workbench"
+  },
+  {
+   "id": "juno",
+   "rect": [
+    298,
+    198,
+    36,
+    64
+   ],
+   "look": "look.factory_night.juno",
+   "name": "name.juno",
+   "person": true,
+   "talk": "juno",
+   "sprite": {
+    "image": "juno",
+    "x": 316,
+    "y": 262,
+    "lit": true
+   }
+  },
+  {
+   "id": "pedal",
+   "rect": [
+    336,
+    254,
+    44,
+    16
+   ],
+   "look": "look.factory_night.pedal",
+   "name": "name.loop_pedal",
+   "songSource": "juno"
+  },
+  {
+   "id": "mute_pedal",
+   "rect": [
+    384,
+    254,
+    22,
+    16
+   ],
+   "look": "look.factory_night.mute_pedal",
+   "name": "name.mute_pedal",
+   "listen": "script:act2.mute_pedal"
+  },
+  {
+   "id": "elevator",
+   "rect": [
+    0,
+    150,
+    40,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.talent_elevator",
+   "exit": {
+    "to": "talent_elevator",
+    "entry": "from_factory"
+   }
+  },
+  {
+   "id": "floor_door",
+   "rect": [
+    600,
+    150,
+    40,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.floor_door",
+   "exit": {
+    "to": "press_floor",
+    "entry": "from_night",
+    "when": "flag:juno_ally",
+    "blocked": "factory.juno_first"
+   }
+  }
+ ],
+ "logic": "juno",
+ "ambient": "#8c7464",
+ "lights": [
+  {
+   "x": 316,
+   "y": 150,
+   "radius": 180,
+   "color": "#ffb060",
+   "intensity": 1.4
+  }
+ ]
+}

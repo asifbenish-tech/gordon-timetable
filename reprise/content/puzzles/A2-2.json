@@ -1,0 +1,23 @@
+{
+ "id": "A2-2",
+ "title": "puzzle.A2-2",
+ "room": "press_floor",
+ "focus": "beat_press",
+ "needs": [
+  "puzzle:A2-1"
+ ],
+ "gives": [
+  "draft:quickening"
+ ],
+ "solvedWhen": "learned_quickening",
+ "hints": [
+  "hint.A2-2.look",
+  "hint.A2-2.nudge",
+  "hint.A2-2.answer"
+ ],
+ "bot": [
+  "walk:press_floor",
+  "listen:beat_press",
+  "learn:quickening"
+ ]
+}

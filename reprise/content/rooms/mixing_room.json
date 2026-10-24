@@ -1,0 +1,123 @@
+{
+ "id": "mixing_room",
+ "act": "act1",
+ "location": "spire",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_mixing_room_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_mixing_room",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_floor40": [
+   56,
+   284
+  ]
+ },
+ "song": "again_again",
+ "hotspots": [
+  {
+   "id": "window",
+   "rect": [
+    452,
+    70,
+    160,
+    120
+   ],
+   "look": "look.mixing_room.window",
+   "name": "name.window"
+  },
+  {
+   "id": "monitors",
+   "rect": [
+    236,
+    130,
+    190,
+    64
+   ],
+   "look": "look.mixing_room.monitors",
+   "name": "name.monitors",
+   "songSource": "again_again"
+  },
+  {
+   "id": "desk",
+   "rect": [
+    220,
+    226,
+    210,
+    44
+   ],
+   "look": "look.mixing_room.desk",
+   "name": "name.mixing_desk",
+   "listen": "script:act1.watch_engineer"
+  },
+  {
+   "id": "engineer",
+   "rect": [
+    298,
+    196,
+    36,
+    46
+   ],
+   "look": "look.mixing_room.engineer",
+   "name": "name.engineer",
+   "person": true,
+   "talk": "engineer",
+   "sprite": {
+    "image": "engineer",
+    "x": 316,
+    "y": 252,
+    "lit": true
+   }
+  },
+  {
+   "id": "door",
+   "rect": [
+    0,
+    150,
+    40,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.corridor",
+   "exit": {
+    "to": "floor40",
+    "entry": "from_mixing"
+   }
+  }
+ ],
+ "ambient": "#b8a8c8",
+ "lights": [
+  {
+   "x": 330,
+   "y": 160,
+   "radius": 200,
+   "color": "#80c0ff",
+   "intensity": 1.2
+  }
+ ]
+}

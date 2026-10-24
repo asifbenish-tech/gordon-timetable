@@ -1,0 +1,20 @@
+{
+ "id": "dominic_end",
+ "start": "n0",
+ "nodes": {
+  "n0": {
+   "speaker": "dominic",
+   "text": "dlg.dominic_end.n0",
+   "next": "n1"
+  },
+  "n1": {
+   "speaker": "dominic",
+   "text": "dlg.dominic_end.n1",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "dominic",
+   "text": "dlg.dominic_end.n2"
+  }
+ }
+}

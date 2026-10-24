@@ -1,0 +1,35 @@
+{
+ "id": "park",
+ "bpm": 84,
+ "bars": 8,
+ "caption": "caption.song.park",
+ "stems": [
+  {
+   "id": "theme",
+   "file": "audio/stems/park/theme",
+   "hitsFile": "audio/stems/park/theme.hits.json",
+   "color": "#c9b8ff",
+   "label": "thread.park.theme",
+   "instrument": "clarinet",
+   "role": "melody"
+  },
+  {
+   "id": "harp",
+   "file": "audio/stems/park/harp",
+   "hitsFile": "audio/stems/park/harp.hits.json",
+   "color": "#e0e8ff",
+   "label": "thread.park.harp",
+   "instrument": "harp",
+   "role": "harmony"
+  },
+  {
+   "id": "pad",
+   "file": "audio/stems/park/pad",
+   "hitsFile": "audio/stems/park/pad.hits.json",
+   "color": "#8a9a80",
+   "label": "thread.park.pad",
+   "instrument": "pad",
+   "role": "harmony"
+  }
+ ]
+}

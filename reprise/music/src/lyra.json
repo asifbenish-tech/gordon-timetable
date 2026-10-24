@@ -1,0 +1,16 @@
+{
+ "id": "lyra",
+ "bpm": 84,
+ "bars": 4,
+ "tracks": {
+  "hum": {
+   "instrument": "hum",
+   "draft": "unmasking",
+   "notes": "@0:1 @1:1 @2:1 @3:1 | @2:1 @1:1 @0:2 | @0:1 @1:1 @2:1 @3:1 | @3:.5 @2:.5 @1:1 @0:2"
+  },
+  "piano": {
+   "instrument": "piano",
+   "notes": "[c3,g3,c4]:2 [a2,e3,a3]:2 | [f2,c3,f3]:2 [g2,d3,g3]:2 | [c3,g3,e4]:2 [a2,e3,c4]:2 | [f2,c3,a3]:2 [g2,d3,b3]:1 [c3,g3,c4]:1"
+  }
+ }
+}

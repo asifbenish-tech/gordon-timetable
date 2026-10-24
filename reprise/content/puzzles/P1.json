@@ -1,0 +1,22 @@
+{
+ "id": "P1",
+ "title": "puzzle.P1",
+ "room": "crossing",
+ "focus": "lead_swan",
+ "needs": [],
+ "gives": [
+  "draft:opening",
+  "draft:healing"
+ ],
+ "solvedWhen": "p1_echoed",
+ "hints": [
+  "hint.P1.look",
+  "hint.P1.nudge",
+  "hint.P1.answer"
+ ],
+ "bot": [
+  "cast:opening>self",
+  "cast:healing>self",
+  "flag:p1_echoed"
+ ]
+}

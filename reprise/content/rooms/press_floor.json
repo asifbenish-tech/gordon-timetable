@@ -1,0 +1,151 @@
+{
+ "id": "press_floor",
+ "act": "act2",
+ "location": "factory",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_press_floor_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_press_floor",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_night": [
+   44,
+   284
+  ],
+  "from_lounge": [
+   540,
+   284
+  ]
+ },
+ "song": "factory",
+ "hotspots": [
+  {
+   "id": "hook_mill",
+   "rect": [
+    262,
+    90,
+    124,
+    130
+   ],
+   "look": "look.press_floor.hook_mill",
+   "name": "name.hook_mill"
+  },
+  {
+   "id": "beat_press",
+   "rect": [
+    136,
+    110,
+    98,
+    152
+   ],
+   "look": "look.press_floor.beat_press",
+   "name": "name.beat_press",
+   "sprite": {
+    "image": "beat_press",
+    "x": 185,
+    "y": 264,
+    "lit": true
+   },
+   "listen": "script:act2.beat_press",
+   "drafts": {
+    "quickening": "say:press.quicken_press",
+    "quickening_rev": "say:press.slow_press"
+   }
+  },
+  {
+   "id": "conveyor",
+   "rect": [
+    400,
+    226,
+    200,
+    34
+   ],
+   "look": "look.press_floor.conveyor",
+   "name": "name.conveyor",
+   "sprite": {
+    "image": "conveyor",
+    "x": 500,
+    "y": 262
+   },
+   "drafts": {
+    "quickening": "script:act2.conveyor_quick",
+    "quickening_rev": "say:press.slow_conveyor",
+    "hushing": "say:press.hush_conveyor"
+   }
+  },
+  {
+   "id": "conveyor_up",
+   "rect": [
+    560,
+    110,
+    80,
+    112
+   ],
+   "look": "look.exit",
+   "name": "name.conveyor_top",
+   "exit": {
+    "to": "focus_lounge",
+    "entry": "from_conveyor",
+    "check": "conveyor"
+   }
+  },
+  {
+   "id": "back",
+   "rect": [
+    0,
+    150,
+    36,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.night_shift",
+   "exit": {
+    "to": "factory_night",
+    "entry": "from_press"
+   }
+  }
+ ],
+ "logic": "press",
+ "ambient": "#a07858",
+ "lights": [
+  {
+   "x": 185,
+   "y": 120,
+   "radius": 200,
+   "color": "#ff9040",
+   "intensity": 1.3
+  },
+  {
+   "x": 500,
+   "y": 200,
+   "radius": 160,
+   "color": "#ffb060",
+   "intensity": 0.9
+  }
+ ]
+}

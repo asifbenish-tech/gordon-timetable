@@ -1,0 +1,19 @@
+{
+ "id": "crossing",
+ "bpm": 72,
+ "bars": 8,
+ "tracks": {
+  "choir": {
+   "instrument": "choir",
+   "notes": "[a3,c4,e4]:4 | [f3,a3,c4,e4]:4 | [a3,c4,e4]:4 | [g3,b3,d4,e4]:4"
+  },
+  "shimmer": {
+   "instrument": "harp",
+   "notes": "e5:1 a5:1 c6:1 e6:1 | c6:1 a5:1 f5:1 c5:1"
+  },
+  "wind": {
+   "instrument": "riser",
+   "notes": "c4:8"
+  }
+ }
+}

@@ -1,0 +1,21 @@
+{
+ "id": "P4",
+ "title": "puzzle.P4",
+ "room": "park_gate",
+ "focus": "gate",
+ "needs": [
+  "draft:opening"
+ ],
+ "gives": [],
+ "solvedWhen": "gate_open",
+ "hints": [
+  "hint.P4.look",
+  "hint.P4.nudge",
+  "hint.P4.answer"
+ ],
+ "bot": [
+  "walk:park_gate",
+  "cast:opening>hotspot:gate",
+  "flag:gate_open"
+ ]
+}

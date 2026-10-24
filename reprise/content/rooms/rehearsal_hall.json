@@ -1,0 +1,207 @@
+{
+ "id": "rehearsal_hall",
+ "act": "act1",
+ "location": "spire",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_rehearsal_hall_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_rehearsal_hall",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_corridor": [
+   44,
+   284
+  ],
+  "from_elevator": [
+   580,
+   284
+  ]
+ },
+ "song": "again_again",
+ "hotspots": [
+  {
+   "id": "booth",
+   "rect": [
+    256,
+    110,
+    160,
+    150
+   ],
+   "look": "look.rehearsal_hall.booth",
+   "name": "name.booth"
+  },
+  {
+   "id": "hook_engine",
+   "rect": [
+    56,
+    50,
+    176,
+    186
+   ],
+   "look": "look.rehearsal_hall.hook_engine",
+   "name": "name.hook_engine",
+   "songSource": "again_again",
+   "drafts": {
+    "tuning_rev": "script:act1.detune_engine",
+    "tuning": "say:hall.tune_engine"
+   }
+  },
+  {
+   "id": "dancers",
+   "rect": [
+    428,
+    196,
+    118,
+    72
+   ],
+   "look": "look.rehearsal_hall.dancers",
+   "name": "name.dancers",
+   "person": true,
+   "sprite": {
+    "image": "dancers",
+    "x": 487,
+    "y": 268,
+    "lit": true
+   }
+  },
+  {
+   "id": "lyrix",
+   "rect": [
+    306,
+    176,
+    46,
+    88
+   ],
+   "look": "look.rehearsal_hall.lyrix",
+   "name": "name.lyrix",
+   "person": true,
+   "when": "!flag:lyra_unmasked",
+   "talk": "lyrix",
+   "sprite": {
+    "image": "lyrix_holo",
+    "x": 330,
+    "y": 264
+   },
+   "drafts": {
+    "unmasking": "script:act1.unmask_lyrix",
+    "opening": "say:hall.open_lyrix",
+    "healing": "say:hall.heal_lyrix",
+    "waking": "say:hall.wake_lyrix"
+   }
+  },
+  {
+   "id": "lyra",
+   "rect": [
+    310,
+    196,
+    34,
+    66
+   ],
+   "look": "look.rehearsal_hall.lyra",
+   "name": "name.lyra",
+   "person": true,
+   "when": "flag:lyra_unmasked",
+   "talk": "lyra",
+   "sprite": {
+    "image": "lyra",
+    "x": 327,
+    "y": 264,
+    "lit": true
+   }
+  },
+  {
+   "id": "choreographer",
+   "rect": [
+    556,
+    198,
+    34,
+    66
+   ],
+   "look": "look.rehearsal_hall.choreographer",
+   "name": "name.choreographer",
+   "person": true,
+   "talk": "choreographer",
+   "sprite": {
+    "image": "choreographer",
+    "x": 573,
+    "y": 266,
+    "lit": true
+   }
+  },
+  {
+   "id": "door",
+   "rect": [
+    0,
+    150,
+    30,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.corridor",
+   "exit": {
+    "to": "mirror_corridor",
+    "entry": "from_hall"
+   }
+  },
+  {
+   "id": "elevator",
+   "rect": [
+    600,
+    130,
+    40,
+    130
+   ],
+   "look": "look.exit",
+   "name": "name.talent_elevator",
+   "exit": {
+    "to": "talent_elevator",
+    "entry": "from_hall",
+    "when": "flag:lyra_unmasked",
+    "blocked": "hall.elevator_staff"
+   }
+  }
+ ],
+ "logic": "hall",
+ "ambient": "#c8b0d8",
+ "lights": [
+  {
+   "x": 140,
+   "y": 140,
+   "radius": 200,
+   "color": "#ff5ad0",
+   "intensity": 1.2
+  },
+  {
+   "x": 336,
+   "y": 150,
+   "radius": 160,
+   "color": "#66e0ff",
+   "intensity": 1.2
+  }
+ ]
+}

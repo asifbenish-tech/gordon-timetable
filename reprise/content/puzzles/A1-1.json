@@ -1,0 +1,21 @@
+{
+ "id": "A1-1",
+ "title": "puzzle.A1-1",
+ "room": "spire_lobby",
+ "focus": "receptionist",
+ "needs": [
+  "puzzle:P6"
+ ],
+ "gives": [],
+ "solvedWhen": "floor40",
+ "hints": [
+  "hint.A1-1.look",
+  "hint.A1-1.nudge",
+  "hint.A1-1.answer"
+ ],
+ "bot": [
+  "walk:spire_lobby",
+  "talk:receptionist",
+  "flag:floor40"
+ ]
+}

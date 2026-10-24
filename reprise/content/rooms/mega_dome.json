@@ -1,0 +1,190 @@
+{
+ "id": "mega_dome",
+ "act": "act2",
+ "location": "arena",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_mega_dome_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_mega_dome",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   264
+  ],
+  [
+   620,
+   264
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_outside": [
+   44,
+   284
+  ]
+ },
+ "song": "arena",
+ "hotspots": [
+  {
+   "id": "stage",
+   "rect": [
+    176,
+    176,
+    310,
+    34
+   ],
+   "look": "look.mega_dome.stage",
+   "name": "name.stage"
+  },
+  {
+   "id": "pa",
+   "rect": [
+    36,
+    36,
+    146,
+    130
+   ],
+   "look": "look.mega_dome.pa",
+   "name": "name.arena_pa",
+   "songSource": "arena"
+  },
+  {
+   "id": "booth",
+   "rect": [
+    480,
+    112,
+    130,
+    98
+   ],
+   "look": "look.mega_dome.booth",
+   "name": "name.booth"
+  },
+  {
+   "id": "dancers",
+   "rect": [
+    196,
+    184,
+    118,
+    72
+   ],
+   "look": "look.mega_dome.dancers",
+   "name": "name.dancers",
+   "person": true,
+   "sprite": {
+    "image": "dancers",
+    "x": 255,
+    "y": 256,
+    "lit": true
+   },
+   "songSource": "arena"
+  },
+  {
+   "id": "lyra",
+   "rect": [
+    326,
+    190,
+    34,
+    66
+   ],
+   "look": "look.mega_dome.lyra",
+   "name": "name.lyra",
+   "person": true,
+   "talk": "lyra_show",
+   "sprite": {
+    "image": "lyra",
+    "x": 343,
+    "y": 256,
+    "lit": true
+   }
+  },
+  {
+   "id": "mic",
+   "rect": [
+    362,
+    204,
+    14,
+    48
+   ],
+   "look": "look.mega_dome.mic",
+   "name": "name.mic",
+   "sprite": {
+    "image": "mic",
+    "x": 369,
+    "y": 252,
+    "frameWhen": [
+     [
+      1,
+      "flag:mic_open"
+     ]
+    ]
+   }
+  },
+  {
+   "id": "dominic",
+   "rect": [
+    518,
+    136,
+    40,
+    60
+   ],
+   "look": "look.mega_dome.dominic",
+   "name": "name.dominic",
+   "person": true,
+   "talk": "dominic_show",
+   "sprite": {
+    "image": "dominic",
+    "x": 538,
+    "y": 206,
+    "lit": true
+   }
+  },
+  {
+   "id": "exit",
+   "rect": [
+    0,
+    150,
+    36,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.arena_outside",
+   "exit": {
+    "to": "arena_outside",
+    "entry": "from_dome"
+   }
+  }
+ ],
+ "logic": "show",
+ "ambient": "#9080b8",
+ "lights": [
+  {
+   "x": 343,
+   "y": 120,
+   "radius": 220,
+   "color": "#ffffff",
+   "intensity": 1.5
+  },
+  {
+   "x": 120,
+   "y": 80,
+   "radius": 200,
+   "color": "#ff40c0",
+   "intensity": 1.0
+  }
+ ]
+}

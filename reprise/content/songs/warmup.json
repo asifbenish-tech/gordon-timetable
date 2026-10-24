@@ -1,0 +1,36 @@
+{
+ "id": "warmup",
+ "bpm": 90,
+ "bars": 2,
+ "caption": "caption.song.warmup",
+ "stems": [
+  {
+   "id": "piano",
+   "file": "audio/stems/warmup/piano",
+   "hitsFile": "audio/stems/warmup/piano.hits.json",
+   "color": "#d8c0a0",
+   "label": "thread.warmup.piano",
+   "instrument": "piano",
+   "role": "harmony"
+  },
+  {
+   "id": "voice",
+   "file": "audio/stems/warmup/voice",
+   "hitsFile": "audio/stems/warmup/voice.hits.json",
+   "color": "#e6a0c0",
+   "label": "thread.warmup.voice",
+   "instrument": "coach",
+   "role": "melody",
+   "level": 0.3
+  },
+  {
+   "id": "metronome",
+   "file": "audio/stems/warmup/metronome",
+   "hitsFile": "audio/stems/warmup/metronome.hits.json",
+   "color": "#c0c0c0",
+   "label": "thread.warmup.metronome",
+   "instrument": "click",
+   "role": "rhythm"
+  }
+ ]
+}

@@ -1,0 +1,23 @@
+{
+ "id": "panel",
+ "bpm": 110,
+ "bars": 2,
+ "tracks": {
+  "drums": {
+   "instrument": "kick",
+   "steps": "x.......x.......|x.......x......."
+  },
+  "bassline": {
+   "instrument": "bass",
+   "notes": "c2:2 g1:2 | a1:2 f1:2"
+  },
+  "topline": {
+   "instrument": "vocal",
+   "notes": "e4:1 d4:1 c4:2 | e4:1 g4:1 e4:2"
+  },
+  "jingle": {
+   "instrument": "jingle",
+   "notes": "r:3 c4:.25 e4:.25 g4:.5 | r:3 g4:.25 e4:.25 c5:.5"
+  }
+ }
+}

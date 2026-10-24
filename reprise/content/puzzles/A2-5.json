@@ -1,0 +1,34 @@
+{
+ "id": "A2-5",
+ "title": "puzzle.A2-5",
+ "room": "focus_lounge",
+ "focus": "panel",
+ "needs": [
+  "puzzle:A2-3",
+  "puzzle:A2-4"
+ ],
+ "gives": [],
+ "solvedWhen": "preset_pass",
+ "hints": [
+  "hint.A2-5.look",
+  "hint.A2-5.nudge",
+  "hint.A2-5.answer"
+ ],
+ "bot": [
+  "walk:focus_lounge",
+  "clear:1",
+  "clear:2",
+  "comb:panel",
+  "cast:tuning>thread:topline",
+  "spool:1",
+  "arm",
+  "cast:quickening>thread:drums",
+  "spool:2",
+  "arm",
+  "cast:hushing>thread:jingle",
+  "wait:3",
+  "flag:preset_pass",
+  "clear:1",
+  "clear:2"
+ ]
+}

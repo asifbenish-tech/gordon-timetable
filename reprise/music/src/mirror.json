@@ -1,0 +1,20 @@
+{
+ "id": "mirror",
+ "bpm": 120,
+ "bars": 2,
+ "tracks": {
+  "click": {
+   "instrument": "click",
+   "pitch": "c6",
+   "steps": "X...x...x...x..."
+  },
+  "beat": {
+   "instrument": "kick",
+   "steps": "x...x...x...x..."
+  },
+  "stab": {
+   "instrument": "saw",
+   "notes": "r:.5 [a3,c4,e4]:.5 r:1 r:.5 [a3,c4,e4]:.5 r:1 | r:.5 [g3,b3,d4]:.5 r:1 r:.5 [g3,b3,d4]:.5 r:1"
+  }
+ }
+}

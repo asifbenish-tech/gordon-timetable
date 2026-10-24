@@ -1,0 +1,34 @@
+{
+ "id": "A2-6",
+ "title": "puzzle.A2-6",
+ "room": "floor3",
+ "focus": "speakers",
+ "needs": [
+  "draft:hushing",
+  "puzzle:A2-5"
+ ],
+ "gives": [],
+ "solvedWhen": "gate_passed",
+ "hints": [
+  "hint.A2-6.look",
+  "hint.A2-6.nudge",
+  "hint.A2-6.answer"
+ ],
+ "bot": [
+  "walk:floor3",
+  "clear:1",
+  "clear:2",
+  "comb:speakers",
+  "spool:1",
+  "copy:kick",
+  "spool:2",
+  "arm",
+  "cast:hushing>thread:kick",
+  "close",
+  "wait:2",
+  "exit:gate",
+  "flag:gate_passed",
+  "clear:1",
+  "clear:2"
+ ]
+}

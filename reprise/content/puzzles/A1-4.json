@@ -1,0 +1,23 @@
+{
+ "id": "A1-4",
+ "title": "puzzle.A1-4",
+ "room": "mirror_corridor",
+ "focus": "speakers",
+ "needs": [
+  "tool:combing"
+ ],
+ "gives": [],
+ "solvedWhen": "dancers_frozen",
+ "hints": [
+  "hint.A1-4.look",
+  "hint.A1-4.nudge",
+  "hint.A1-4.answer"
+ ],
+ "bot": [
+  "walk:mirror_corridor",
+  "comb:speakers",
+  "pull:click",
+  "close",
+  "flag:dancers_frozen"
+ ]
+}

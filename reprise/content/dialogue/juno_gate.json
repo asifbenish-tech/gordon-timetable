@@ -1,0 +1,20 @@
+{
+ "id": "juno_gate",
+ "start": "n0",
+ "nodes": {
+  "n0": {
+   "speaker": "juno",
+   "text": "dlg.juno_gate.n0",
+   "next": "n1"
+  },
+  "n1": {
+   "speaker": "bobbin",
+   "text": "dlg.juno_gate.n1",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "juno",
+   "text": "dlg.juno_gate.n2"
+  }
+ }
+}

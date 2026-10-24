@@ -1,0 +1,30 @@
+{
+ "id": "A1-5",
+ "title": "puzzle.A1-5",
+ "room": "rehearsal_hall",
+ "focus": "hook_engine",
+ "needs": [
+  "draft:tuning",
+  "puzzle:A1-4"
+ ],
+ "gives": [
+  "draft:unmasking"
+ ],
+ "solvedWhen": "golden_revealed:again_again",
+ "hints": [
+  "hint.A1-5.look",
+  "hint.A1-5.nudge",
+  "hint.A1-5.answer"
+ ],
+ "bot": [
+  "walk:rehearsal_hall",
+  "comb:hook_engine",
+  "pull:kick",
+  "pull:bass",
+  "pull:supersaw",
+  "isolate:vocal",
+  "cast:tuning>thread:vocal",
+  "learn:unmasking",
+  "close"
+ ]
+}

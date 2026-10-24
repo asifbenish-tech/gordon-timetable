@@ -1,0 +1,37 @@
+{
+ "id": "piano_room",
+ "bpm": 84,
+ "bars": 2,
+ "caption": "caption.song.piano_room",
+ "stems": [
+  {
+   "id": "piano_old",
+   "file": "audio/stems/piano_room/piano_old",
+   "hitsFile": "audio/stems/piano_room/piano_old.hits.json",
+   "color": "#a08060",
+   "label": "thread.piano_room.piano_old",
+   "instrument": "piano_old",
+   "when": "!flag:piano_tuned",
+   "role": "harmony"
+  },
+  {
+   "id": "piano",
+   "file": "audio/stems/piano_room/piano",
+   "hitsFile": "audio/stems/piano_room/piano.hits.json",
+   "color": "#e8c890",
+   "label": "thread.piano_room.piano",
+   "instrument": "piano",
+   "when": "flag:piano_tuned",
+   "role": "harmony"
+  },
+  {
+   "id": "radiator",
+   "file": "audio/stems/piano_room/radiator",
+   "hitsFile": "audio/stems/piano_room/radiator.hits.json",
+   "color": "#706860",
+   "label": "thread.piano_room.radiator",
+   "instrument": "hum_machine",
+   "level": 0.4
+  }
+ ]
+}

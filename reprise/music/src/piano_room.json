@@ -1,0 +1,19 @@
+{
+ "id": "piano_room",
+ "bpm": 84,
+ "bars": 2,
+ "tracks": {
+  "piano_old": {
+   "instrument": "piano_old",
+   "notes": "c3:.5 e3:.5 g3:.5 c4:.5 e4:.5 g4:.5 c5:1 | [f3,a3,c4]:2 [g3,b3,d4]:1 [c3,e3,g3,c4]:1"
+  },
+  "piano": {
+   "instrument": "piano",
+   "notes": "c3:.5 e3:.5 g3:.5 c4:.5 e4:.5 g4:.5 c5:1 | [f3,a3,c4]:2 [g3,b3,d4]:1 [c3,e3,g3,c4]:1"
+  },
+  "radiator": {
+   "instrument": "hum_machine",
+   "notes": "a1:8"
+  }
+ }
+}

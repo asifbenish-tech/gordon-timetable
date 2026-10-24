@@ -1,0 +1,31 @@
+{
+ "id": "juno",
+ "start": "ally",
+ "nodes": {
+  "ally": {
+   "speaker": "juno",
+   "text": "dlg.juno.ally",
+   "when": "flag:juno_ally",
+   "else": "a1"
+  },
+  "a1": {
+   "speaker": "juno",
+   "text": "dlg.juno.a1",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "bobbin",
+   "text": "dlg.juno.n2",
+   "next": "n3"
+  },
+  "n3": {
+   "speaker": "juno",
+   "text": "dlg.juno.n3",
+   "next": "n4"
+  },
+  "n4": {
+   "speaker": "juno",
+   "text": "dlg.juno.n4"
+  }
+ }
+}

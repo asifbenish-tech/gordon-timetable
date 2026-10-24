@@ -1,0 +1,25 @@
+{
+ "id": "A1-3",
+ "title": "puzzle.A1-3",
+ "room": "fitting_room",
+ "focus": "coach",
+ "needs": [
+  "tool:combing"
+ ],
+ "gives": [
+  "draft:tuning"
+ ],
+ "solvedWhen": "learned_tuning",
+ "hints": [
+  "hint.A1-3.look",
+  "hint.A1-3.nudge",
+  "hint.A1-3.answer"
+ ],
+ "bot": [
+  "walk:fitting_room",
+  "comb:coach",
+  "isolate:voice",
+  "close",
+  "learn:tuning"
+ ]
+}

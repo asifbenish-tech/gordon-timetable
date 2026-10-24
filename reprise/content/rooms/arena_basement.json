@@ -1,0 +1,115 @@
+{
+ "id": "arena_basement",
+ "act": "act2",
+ "location": "arena",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_arena_basement_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_arena_basement",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_outside": [
+   60,
+   284
+  ]
+ },
+ "song": "piano_room",
+ "hotspots": [
+  {
+   "id": "boxes",
+   "rect": [
+    440,
+    196,
+    130,
+    66
+   ],
+   "look": "look.arena_basement.boxes",
+   "name": "name.boxes"
+  },
+  {
+   "id": "piano_old",
+   "rect": [
+    290,
+    196,
+    104,
+    66
+   ],
+   "look": "look.arena_basement.piano_old",
+   "name": "name.piano",
+   "when": "!flag:piano_tuned",
+   "songSource": "piano_room",
+   "drafts": {
+    "tuning": "script:act2.tune_piano",
+    "tuning_rev": "say:basement.detune_piano",
+    "healing": "say:basement.heal_piano"
+   }
+  },
+  {
+   "id": "piano",
+   "rect": [
+    290,
+    196,
+    104,
+    66
+   ],
+   "look": "look.arena_basement.piano",
+   "name": "name.piano",
+   "when": "flag:piano_tuned",
+   "songSource": "piano_room",
+   "drafts": {
+    "tuning_rev": "say:basement.detune_tuned",
+    "tuning": "say:basement.retune"
+   }
+  },
+  {
+   "id": "stairs",
+   "rect": [
+    0,
+    150,
+    40,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.stairs_up",
+   "exit": {
+    "to": "arena_outside",
+    "entry": "from_basement"
+   }
+  }
+ ],
+ "ambient": "#807068",
+ "lights": [
+  {
+   "x": 340,
+   "y": 120,
+   "radius": 160,
+   "color": "#ffd8a0",
+   "intensity": 1.4
+  }
+ ]
+}

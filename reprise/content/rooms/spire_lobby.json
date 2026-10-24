@@ -1,0 +1,170 @@
+{
+ "id": "spire_lobby",
+ "act": "act1",
+ "location": "spire",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_spire_lobby_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_spire_lobby",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_street": [
+   44,
+   284
+  ],
+  "from_floor40": [
+   484,
+   276
+  ]
+ },
+ "song": "again_again",
+ "hotspots": [
+  {
+   "id": "mirrors",
+   "rect": [
+    340,
+    80,
+    96,
+    140
+   ],
+   "look": "look.spire_lobby.mirrors",
+   "name": "name.mirrors"
+  },
+  {
+   "id": "sign",
+   "rect": [
+    530,
+    90,
+    96,
+    30
+   ],
+   "look": "look.spire_lobby.sign",
+   "name": "name.sign"
+  },
+  {
+   "id": "desk",
+   "rect": [
+    214,
+    232,
+    120,
+    40
+   ],
+   "look": "look.spire_lobby.desk",
+   "name": "name.desk"
+  },
+  {
+   "id": "receptionist",
+   "rect": [
+    250,
+    196,
+    48,
+    50
+   ],
+   "look": "look.spire_lobby.receptionist",
+   "name": "name.receptionist",
+   "person": true,
+   "talk": "receptionist",
+   "sprite": {
+    "image": "receptionist",
+    "x": 274,
+    "y": 262,
+    "lit": true
+   }
+  },
+  {
+   "id": "hologram",
+   "rect": [
+    108,
+    150,
+    54,
+    112
+   ],
+   "look": "look.spire_lobby.hologram",
+   "name": "name.hologram",
+   "sprite": {
+    "image": "lyrix_holo",
+    "x": 135,
+    "y": 264
+   },
+   "drafts": {
+    "opening": "say:lobby.holo_opening",
+    "unmasking": "say:lobby.holo_unmask",
+    "unmasking_rev": "say:lobby.holo_mask"
+   }
+  },
+  {
+   "id": "elevator",
+   "rect": [
+    452,
+    140,
+    64,
+    120
+   ],
+   "look": "look.exit",
+   "name": "name.elevator",
+   "exit": {
+    "to": "floor40",
+    "entry": "from_lobby",
+    "when": "flag:floor40",
+    "blocked": "lobby.elevator_appointment"
+   }
+  },
+  {
+   "id": "doors",
+   "rect": [
+    0,
+    150,
+    36,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.street",
+   "exit": {
+    "to": "street",
+    "entry": "from_lobby"
+   }
+  }
+ ],
+ "ambient": "#c8b4d8",
+ "lights": [
+  {
+   "x": 135,
+   "y": 180,
+   "radius": 140,
+   "color": "#66e0ff",
+   "intensity": 1.4
+  },
+  {
+   "x": 320,
+   "y": 60,
+   "radius": 260,
+   "color": "#ff9ae8",
+   "intensity": 0.9
+  }
+ ]
+}

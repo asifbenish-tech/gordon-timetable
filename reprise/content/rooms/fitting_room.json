@@ -1,0 +1,125 @@
+{
+ "id": "fitting_room",
+ "act": "act1",
+ "location": "spire",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_fitting_room_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_fitting_room",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_floor40": [
+   56,
+   284
+  ]
+ },
+ "song": "warmup",
+ "hotspots": [
+  {
+   "id": "mirror",
+   "rect": [
+    140,
+    90,
+    130,
+    140
+   ],
+   "look": "look.fitting_room.mirror",
+   "name": "name.mirror"
+  },
+  {
+   "id": "piano",
+   "rect": [
+    426,
+    206,
+    96,
+    52
+   ],
+   "look": "look.fitting_room.piano",
+   "name": "name.coach_piano",
+   "songSource": "warmup"
+  },
+  {
+   "id": "metronome",
+   "rect": [
+    498,
+    188,
+    16,
+    22
+   ],
+   "look": "look.fitting_room.metronome",
+   "name": "name.metronome",
+   "songSource": "warmup"
+  },
+  {
+   "id": "coach",
+   "rect": [
+    356,
+    198,
+    36,
+    68
+   ],
+   "look": "look.fitting_room.coach",
+   "name": "name.coach",
+   "person": true,
+   "talk": "coach",
+   "songSource": "warmup",
+   "sprite": {
+    "image": "coach",
+    "x": 374,
+    "y": 266,
+    "lit": true
+   }
+  },
+  {
+   "id": "door",
+   "rect": [
+    0,
+    150,
+    40,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.corridor",
+   "exit": {
+    "to": "floor40",
+    "entry": "from_fitting"
+   }
+  }
+ ],
+ "logic": "fitting",
+ "ambient": "#c0b0d0",
+ "lights": [
+  {
+   "x": 380,
+   "y": 120,
+   "radius": 220,
+   "color": "#fff0d0",
+   "intensity": 1.1
+  }
+ ]
+}

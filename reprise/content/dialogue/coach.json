@@ -1,0 +1,31 @@
+{
+ "id": "coach",
+ "start": "after",
+ "nodes": {
+  "after": {
+   "speaker": "coach",
+   "text": "dlg.coach.after",
+   "when": "draft:tuning",
+   "else": "a1"
+  },
+  "a1": {
+   "speaker": "coach",
+   "text": "dlg.coach.a1",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "bobbin",
+   "text": "dlg.coach.n2",
+   "next": "n3"
+  },
+  "n3": {
+   "speaker": "coach",
+   "text": "dlg.coach.n3",
+   "next": "n4"
+  },
+  "n4": {
+   "speaker": "coach",
+   "text": "dlg.coach.n4"
+  }
+ }
+}

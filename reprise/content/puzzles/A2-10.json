@@ -1,0 +1,36 @@
+{
+ "id": "A2-10",
+ "title": "puzzle.A2-10",
+ "room": "mega_dome",
+ "focus": "pa",
+ "needs": [
+  "puzzle:A2-8",
+  "puzzle:A2-9",
+  "draft:hushing"
+ ],
+ "gives": [
+  "note:g"
+ ],
+ "solvedWhen": "encore",
+ "hints": [
+  "hint.A2-10.look",
+  "hint.A2-10.nudge",
+  "hint.A2-10.answer"
+ ],
+ "bot": [
+  "walk:mega_dome",
+  "comb:pa",
+  "drop:2>thread:click",
+  "drop:1>thread:supersaw",
+  "wait:2",
+  "spool:3",
+  "arm",
+  "cast:hushing>thread:chant",
+  "spool:4",
+  "arm",
+  "cast:hushing>thread:prerecorded",
+  "wait:3",
+  "cast:tuning>thread:live",
+  "flag:encore"
+ ]
+}

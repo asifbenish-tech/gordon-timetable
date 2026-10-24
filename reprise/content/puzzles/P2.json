@@ -1,0 +1,23 @@
+{
+ "id": "P2",
+ "title": "puzzle.P2",
+ "room": "pond",
+ "focus": "skein",
+ "needs": [
+  "draft:healing"
+ ],
+ "gives": [
+  "flag:skein"
+ ],
+ "solvedWhen": "skein_healed",
+ "hints": [
+  "hint.P2.look",
+  "hint.P2.nudge",
+  "hint.P2.answer"
+ ],
+ "bot": [
+  "walk:pond",
+  "cast:healing>hotspot:skein",
+  "flag:skein_healed"
+ ]
+}

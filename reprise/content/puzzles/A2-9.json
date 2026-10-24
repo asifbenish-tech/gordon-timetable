@@ -1,0 +1,24 @@
+{
+ "id": "A2-9",
+ "title": "puzzle.A2-9",
+ "room": "arena_outside",
+ "focus": "marcus",
+ "needs": [
+  "puzzle:A2-7"
+ ],
+ "gives": [],
+ "solvedWhen": "spooled:marcus:groove",
+ "hints": [
+  "hint.A2-9.look",
+  "hint.A2-9.nudge",
+  "hint.A2-9.answer"
+ ],
+ "bot": [
+  "walk:arena_outside",
+  "comb:marcus",
+  "spool:2",
+  "copy:groove",
+  "close",
+  "flag:spooled:marcus:groove"
+ ]
+}

@@ -1,0 +1,35 @@
+{
+ "id": "commuter",
+ "start": "n0",
+ "nodes": {
+  "n0": {
+   "speaker": "commuter",
+   "text": "dlg.commuter.n0",
+   "next": "n1"
+  },
+  "n1": {
+   "speaker": "bobbin",
+   "text": "dlg.commuter.n1",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "commuter",
+   "text": "dlg.commuter.n2",
+   "next": "n3"
+  },
+  "n3": {
+   "speaker": "bobbin",
+   "text": "dlg.commuter.n3",
+   "next": "n4"
+  },
+  "n4": {
+   "speaker": "commuter",
+   "text": "dlg.commuter.n4",
+   "next": "n5"
+  },
+  "n5": {
+   "speaker": "commuter",
+   "text": "dlg.commuter.n5"
+  }
+ }
+}

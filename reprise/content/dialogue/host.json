@@ -1,0 +1,25 @@
+{
+ "id": "host",
+ "start": "n0",
+ "nodes": {
+  "n0": {
+   "speaker": "host",
+   "text": "dlg.host.n0",
+   "next": "n1"
+  },
+  "n1": {
+   "speaker": "bobbin",
+   "text": "dlg.host.n1",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "host",
+   "text": "dlg.host.n2",
+   "next": "n3"
+  },
+  "n3": {
+   "speaker": "host",
+   "text": "dlg.host.n3"
+  }
+ }
+}

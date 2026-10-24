@@ -1,0 +1,33 @@
+{
+ "id": "arena",
+ "bpm": 120,
+ "bars": 4,
+ "tracks": {
+  "click": {
+   "instrument": "click",
+   "pitch": "c6",
+   "steps": "X...x...x...x..."
+  },
+  "drums": {
+   "instrument": "kick",
+   "steps": "X...X...X...X..."
+  },
+  "supersaw": {
+   "instrument": "saw",
+   "notes": "[a3,c4,e4]:.75 [a3,c4,e4]:.75 [a3,c4,e4]:.5 r:1 [a3,c4,e4]:.5 [a3,c4,e4]:.5 | [f3,a3,c4]:.75 [f3,a3,c4]:.75 [f3,a3,c4]:.5 r:2 | [c4,e4,g4]:.75 [c4,e4,g4]:.75 [c4,e4,g4]:.5 r:1 [c4,e4,g4]:.5 [c4,e4,g4]:.5 | [g3,b3,d4]:.75 [g3,b3,d4]:.75 [g3,b3,d4]:.5 r:2"
+  },
+  "prerecorded": {
+   "instrument": "vocal",
+   "notes": "e4:.5 e4:.5 c4:1 e4:.5 e4:.5 c4:1 | a3:1 c4:1 b3:2 | e4:.5 e4:.5 c4:1 e4:.5 e4:.5 c4:1 | g3:1 a3:1 b3:2"
+  },
+  "chant": {
+   "instrument": "chant",
+   "notes": "[e4,g4,c5]:1 [d4,g4,b4]:.5 [c4,e4,a4]:1.5 r:1 | r:4"
+  },
+  "live": {
+   "instrument": "hum",
+   "draft": "unmasking",
+   "notes": "@0:1 @1:1 @2:1 @3:1 | @2:1 @1:1 @0:2 | @0:1 @1:1 @2:1 @3:1 | @3:.5 @2:.5 @1:1 @0:2"
+  }
+ }
+}

@@ -1,0 +1,32 @@
+{
+ "id": "title",
+ "bpm": 80,
+ "bars": 4,
+ "caption": "caption.song.title",
+ "stems": [
+  {
+   "id": "clarinet",
+   "file": "audio/stems/title/clarinet",
+   "hitsFile": "audio/stems/title/clarinet.hits.json",
+   "color": "#c9b8ff",
+   "label": "thread.title.clarinet",
+   "instrument": "clarinet"
+  },
+  {
+   "id": "strings",
+   "file": "audio/stems/title/strings",
+   "hitsFile": "audio/stems/title/strings.hits.json",
+   "color": "#9a8cc8",
+   "label": "thread.title.strings",
+   "instrument": "strings"
+  },
+  {
+   "id": "piano",
+   "file": "audio/stems/title/piano",
+   "hitsFile": "audio/stems/title/piano.hits.json",
+   "color": "#e8c890",
+   "label": "thread.title.piano",
+   "instrument": "piano"
+  }
+ ]
+}

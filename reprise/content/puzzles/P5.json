@@ -1,0 +1,23 @@
+{
+ "id": "P5",
+ "title": "puzzle.P5",
+ "room": "street",
+ "focus": "marcus",
+ "needs": [
+  "puzzle:P4"
+ ],
+ "gives": [
+  "draft:waking"
+ ],
+ "solvedWhen": "learned_waking",
+ "hints": [
+  "hint.P5.look",
+  "hint.P5.nudge",
+  "hint.P5.answer"
+ ],
+ "bot": [
+  "walk:street",
+  "listen:marcus",
+  "learn:waking"
+ ]
+}

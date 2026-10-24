@@ -1,0 +1,45 @@
+{
+ "id": "panel",
+ "bpm": 110,
+ "bars": 2,
+ "caption": "caption.song.panel",
+ "stems": [
+  {
+   "id": "drums",
+   "file": "audio/stems/panel/drums",
+   "hitsFile": "audio/stems/panel/drums.hits.json",
+   "color": "#e0703a",
+   "label": "thread.panel.drums",
+   "instrument": "kick",
+   "role": "rhythm"
+  },
+  {
+   "id": "bassline",
+   "file": "audio/stems/panel/bassline",
+   "hitsFile": "audio/stems/panel/bassline.hits.json",
+   "color": "#f0a050",
+   "label": "thread.panel.bassline",
+   "instrument": "bass",
+   "role": "harmony"
+  },
+  {
+   "id": "topline",
+   "file": "audio/stems/panel/topline",
+   "hitsFile": "audio/stems/panel/topline.hits.json",
+   "color": "#c8ccd8",
+   "label": "thread.panel.topline",
+   "instrument": "vocal",
+   "knot": "tuning",
+   "role": "melody"
+  },
+  {
+   "id": "jingle",
+   "file": "audio/stems/panel/jingle",
+   "hitsFile": "audio/stems/panel/jingle.hits.json",
+   "color": "#f3e04b",
+   "label": "thread.panel.jingle",
+   "instrument": "jingle",
+   "sealed": true
+  }
+ ]
+}

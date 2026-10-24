@@ -1,0 +1,18 @@
+{
+ "id": "P3",
+ "title": "puzzle.P3",
+ "room": "pond",
+ "needs": [
+  "puzzle:P2"
+ ],
+ "gives": [],
+ "solvedWhen": "human",
+ "hints": [
+  "hint.P3.look",
+  "hint.P3.nudge",
+  "hint.P3.answer"
+ ],
+ "bot": [
+  "flag:human"
+ ]
+}

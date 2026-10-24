@@ -1,0 +1,15 @@
+{
+ "id": "host_pass",
+ "start": "n0",
+ "nodes": {
+  "n0": {
+   "speaker": "host",
+   "text": "dlg.host_pass.n0",
+   "next": "n1"
+  },
+  "n1": {
+   "speaker": "host",
+   "text": "dlg.host_pass.n1"
+  }
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "id": "title",
+ "bpm": 80,
+ "bars": 4,
+ "tracks": {
+  "clarinet": {
+   "instrument": "clarinet",
+   "notes": "f3:.125 g3:.125 f3:.125 g3:.125 f3:.125 g3:.125 f3:.125 g3:.125 a3:.125 c4:.125 e4:.125 g4:.125 bb4:.125 c5:.125 d5:.125 e5:.125 c6:2 | bb5:.5 a5:.5 g5:.5 eb5:.5 g5:1 c5:1 | r:4 | r:2 e5:.5 g5:.5 a5:1"
+  },
+  "strings": {
+   "instrument": "strings",
+   "notes": "[c3,e3,g3,bb3]:4 | [f3,a3,c4,eb4]:4 | [c3,e3,g3,a3]:4 | [g2,f3,b3,d4]:4"
+  },
+  "piano": {
+   "instrument": "piano",
+   "notes": "r:1 [e3,bb3]:.5 r:2.5 | r:1 [eb3,a3]:.5 r:2.5 | r:1 [e3,a3]:.5 r:2.5 | r:1 [f3,b3]:.5 r:2.5"
+  }
+ }
+}

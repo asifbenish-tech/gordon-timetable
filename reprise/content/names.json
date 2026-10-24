@@ -1,0 +1,25 @@
+{
+  "default": "original",
+  "sets": {
+    "loom": {
+      "bobbin": "Bobbin",
+      "bobbinFull": "Bobbin Threadbare",
+      "guild": "the Guild of Weavers",
+      "Guild": "The Guild of Weavers",
+      "title": "LOOM II: Reprise",
+      "titleShort": "LOOM II",
+      "subtitle": "Reprise",
+      "island": "Loom Island"
+    },
+    "original": {
+      "bobbin": "Tam",
+      "bobbinFull": "Tam Threadwell",
+      "guild": "the Weavers",
+      "Guild": "The Weavers",
+      "title": "Reprise",
+      "titleShort": "Reprise",
+      "subtitle": "a weaver's song",
+      "island": "the Island"
+    }
+  }
+}

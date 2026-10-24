@@ -1,0 +1,23 @@
+{
+ "id": "A1-6",
+ "title": "puzzle.A1-6",
+ "room": "rehearsal_hall",
+ "focus": "lyrix",
+ "needs": [
+  "draft:unmasking"
+ ],
+ "gives": [
+  "note:f"
+ ],
+ "solvedWhen": "lyra_unmasked",
+ "hints": [
+  "hint.A1-6.look",
+  "hint.A1-6.nudge",
+  "hint.A1-6.answer"
+ ],
+ "bot": [
+  "walk:rehearsal_hall",
+  "cast:unmasking>hotspot:lyrix",
+  "flag:lyra_unmasked"
+ ]
+}

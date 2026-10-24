@@ -1,0 +1,144 @@
+{
+ "id": "park_gate",
+ "act": "prologue",
+ "location": "park",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_park_gate_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_park_gate",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_pond": [
+   44,
+   282
+  ],
+  "from_street": [
+   490,
+   284
+  ]
+ },
+ "song": "park",
+ "hotspots": [
+  {
+   "id": "hedge",
+   "rect": [
+    40,
+    140,
+    380,
+    100
+   ],
+   "look": "look.park_gate.hedge",
+   "name": "name.hedge"
+  },
+  {
+   "id": "sign",
+   "rect": [
+    560,
+    160,
+    50,
+    34
+   ],
+   "look": "look.park_gate.sign",
+   "name": "name.sign"
+  },
+  {
+   "id": "gate",
+   "rect": [
+    440,
+    140,
+    100,
+    122
+   ],
+   "look": "look.exit",
+   "name": "name.gate",
+   "exit": {
+    "to": "street",
+    "entry": "from_park",
+    "when": "flag:gate_open",
+    "blocked": "gate.locked"
+   },
+   "sprite": {
+    "image": "gate_park",
+    "x": 490,
+    "y": 264,
+    "frameWhen": [
+     [
+      1,
+      "flag:gate_open"
+     ],
+     [
+      0,
+      "true"
+     ]
+    ]
+   },
+   "drafts": {
+    "opening": "script:prologue.open_gate",
+    "opening_rev": "say:gate.closing",
+    "healing": "say:gate.healing"
+   }
+  },
+  {
+   "id": "keypad",
+   "rect": [
+    544,
+    200,
+    14,
+    20
+   ],
+   "look": "look.park_gate.keypad",
+   "name": "name.keypad"
+  },
+  {
+   "id": "path",
+   "rect": [
+    0,
+    190,
+    30,
+    106
+   ],
+   "look": "look.exit",
+   "name": "name.path",
+   "exit": {
+    "to": "pond",
+    "entry": "from_gate"
+   }
+  }
+ ],
+ "logic": "park_gate",
+ "ambient": "#a0a0b0",
+ "lights": [
+  {
+   "x": 520,
+   "y": 120,
+   "radius": 200,
+   "color": "#ffe2b0",
+   "intensity": 1.0
+  }
+ ]
+}

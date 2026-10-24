@@ -1,0 +1,23 @@
+{
+ "id": "juno",
+ "bpm": 100,
+ "bars": 2,
+ "tracks": {
+  "drums": {
+   "instrument": "kick",
+   "steps": "X.....x.x...x...|X.....x...x.x..."
+  },
+  "bass": {
+   "instrument": "bass",
+   "notes": "a1:1.5 c2:.5 r:1 e2:1 | f1:1.5 a1:.5 r:1 g1:1"
+  },
+  "hook": {
+   "instrument": "saw",
+   "notes": "[a3,c4,e4]:.75 [a3,c4,e4]:.75 [a3,c4,e4]:.5 r:2 | [f3,a3,c4]:.75 [f3,a3,c4]:.75 [f3,a3,c4]:.5 r:2"
+  },
+  "riff": {
+   "instrument": "arp",
+   "notes": "e4:.75 g4:.25 a4:.5 b4:.5 d5:.75 b4:.25 a4:1 | e4:.5 r:.25 g4:.25 a4:.75 e5:.25 d5:.5 b4:.5 g4:.5 a4:.5"
+  }
+ }
+}

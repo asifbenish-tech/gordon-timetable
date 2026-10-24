@@ -1,0 +1,134 @@
+{
+ "id": "mirror_corridor",
+ "act": "act1",
+ "location": "spire",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_mirror_corridor_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_mirror_corridor",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_floor40": [
+   50,
+   284
+  ],
+  "from_hall": [
+   588,
+   284
+  ]
+ },
+ "song": "mirror",
+ "hotspots": [
+  {
+   "id": "mirrors",
+   "rect": [
+    60,
+    80,
+    200,
+    150
+   ],
+   "look": "look.mirror_corridor.mirrors",
+   "name": "name.mirrors"
+  },
+  {
+   "id": "speakers",
+   "rect": [
+    210,
+    40,
+    240,
+    40
+   ],
+   "look": "look.mirror_corridor.speakers",
+   "name": "name.speakers",
+   "songSource": "mirror"
+  },
+  {
+   "id": "dancers",
+   "rect": [
+    296,
+    196,
+    118,
+    72
+   ],
+   "look": "look.mirror_corridor.dancers",
+   "name": "name.dancers",
+   "person": true,
+   "when": "!flag:dancers_gone",
+   "songSource": "mirror",
+   "sprite": {
+    "image": "dancers",
+    "x": 355,
+    "y": 268,
+    "lit": true
+   }
+  },
+  {
+   "id": "door_back",
+   "rect": [
+    0,
+    150,
+    36,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.corridor",
+   "exit": {
+    "to": "floor40",
+    "entry": "from_corridor"
+   }
+  },
+  {
+   "id": "door_hall",
+   "rect": [
+    604,
+    150,
+    36,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.door_hall",
+   "exit": {
+    "to": "rehearsal_hall",
+    "entry": "from_corridor",
+    "when": "flag:dancers_frozen",
+    "blocked": "corridor.dancers_block"
+   }
+  }
+ ],
+ "logic": "corridor",
+ "ambient": "#d0b8e0",
+ "lights": [
+  {
+   "x": 320,
+   "y": 60,
+   "radius": 300,
+   "color": "#ff9ae8",
+   "intensity": 1.0
+  }
+ ]
+}

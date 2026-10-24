@@ -1,0 +1,25 @@
+{
+ "id": "marcus",
+ "bpm": 92,
+ "bars": 2,
+ "tracks": {
+  "groove": {
+   "instrument": "bucket",
+   "swing": 0.3,
+   "notes": "c3:.5 r:.25 c3:.25 g3:.5 c3:.5 r:.5 c3:.5 g3:.5 r:.5 | c3:.5 c3:.25 c3:.25 g3:.5 r:.5 c3:.25 c3:.25 r:.5 g3:.25 g3:.25 g3:.25 g3:.25"
+  },
+  "rims": {
+   "instrument": "snare",
+   "pitch": "c4",
+   "steps": "....x.......x..o|....x..o....x.xx"
+  },
+  "traffic": {
+   "instrument": "crowd",
+   "notes": "c3:8"
+  },
+  "billboard": {
+   "instrument": "saw",
+   "notes": "[a3,c4,e4]:.75 [a3,c4,e4]:.75 [a3,c4,e4]:.5 r:2 | [f3,a3,c4]:.75 [f3,a3,c4]:.75 [f3,a3,c4]:.5 r:2"
+  }
+ }
+}

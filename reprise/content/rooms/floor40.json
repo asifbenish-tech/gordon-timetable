@@ -1,0 +1,159 @@
+{
+ "id": "floor40",
+ "act": "act1",
+ "location": "spire",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_floor40_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_floor40",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_lobby": [
+   70,
+   284
+  ],
+  "from_mixing": [
+   186,
+   280
+  ],
+  "from_fitting": [
+   330,
+   280
+  ],
+  "from_corridor": [
+   572,
+   280
+  ]
+ },
+ "song": "again_again",
+ "hotspots": [
+  {
+   "id": "poster",
+   "rect": [
+    226,
+    88,
+    64,
+    52
+   ],
+   "look": "look.floor40.poster",
+   "name": "name.poster"
+  },
+  {
+   "id": "plant",
+   "rect": [
+    108,
+    204,
+    26,
+    46
+   ],
+   "look": "look.floor40.plant",
+   "name": "name.plant"
+  },
+  {
+   "id": "wardrobe",
+   "rect": [
+    396,
+    132,
+    100,
+    118
+   ],
+   "look": "look.floor40.wardrobe",
+   "name": "name.wardrobe"
+  },
+  {
+   "id": "elevator",
+   "rect": [
+    40,
+    150,
+    60,
+    110
+   ],
+   "look": "look.exit",
+   "name": "name.elevator",
+   "exit": {
+    "to": "spire_lobby",
+    "entry": "from_floor40"
+   }
+  },
+  {
+   "id": "door_mixing",
+   "rect": [
+    156,
+    156,
+    60,
+    100
+   ],
+   "look": "look.exit",
+   "name": "name.door_mixing",
+   "exit": {
+    "to": "mixing_room",
+    "entry": "from_floor40"
+   }
+  },
+  {
+   "id": "door_fitting",
+   "rect": [
+    300,
+    156,
+    60,
+    100
+   ],
+   "look": "look.exit",
+   "name": "name.door_fitting",
+   "exit": {
+    "to": "fitting_room",
+    "entry": "from_floor40"
+   }
+  },
+  {
+   "id": "door_corridor",
+   "rect": [
+    540,
+    156,
+    64,
+    100
+   ],
+   "look": "look.exit",
+   "name": "name.door_corridor",
+   "exit": {
+    "to": "mirror_corridor",
+    "entry": "from_floor40"
+   }
+  }
+ ],
+ "ambient": "#c8b4d8",
+ "lights": [
+  {
+   "x": 320,
+   "y": 40,
+   "radius": 300,
+   "color": "#ffb0f0",
+   "intensity": 0.9
+  }
+ ]
+}

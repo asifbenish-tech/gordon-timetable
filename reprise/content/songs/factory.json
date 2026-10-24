@@ -1,0 +1,46 @@
+{
+ "id": "factory",
+ "bpm": 128,
+ "bars": 2,
+ "caption": "caption.song.factory",
+ "stems": [
+  {
+   "id": "kick",
+   "file": "audio/stems/factory/kick",
+   "hitsFile": "audio/stems/factory/kick.hits.json",
+   "color": "#e0403a",
+   "label": "thread.factory.kick",
+   "instrument": "kick",
+   "sealed": true,
+   "tether": "gate",
+   "role": "rhythm"
+  },
+  {
+   "id": "clap",
+   "file": "audio/stems/factory/clap",
+   "hitsFile": "audio/stems/factory/clap.hits.json",
+   "color": "#f0d0b0",
+   "label": "thread.factory.clap",
+   "instrument": "clap",
+   "role": "rhythm"
+  },
+  {
+   "id": "bass",
+   "file": "audio/stems/factory/bass",
+   "hitsFile": "audio/stems/factory/bass.hits.json",
+   "color": "#f08c3a",
+   "label": "thread.factory.bass",
+   "instrument": "bass",
+   "role": "harmony"
+  },
+  {
+   "id": "arp",
+   "file": "audio/stems/factory/arp",
+   "hitsFile": "audio/stems/factory/arp.hits.json",
+   "color": "#4fb3c8",
+   "label": "thread.factory.arp",
+   "instrument": "arp",
+   "role": "melody"
+  }
+ ]
+}

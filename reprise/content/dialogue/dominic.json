@@ -1,0 +1,54 @@
+{
+ "id": "dominic",
+ "start": "after",
+ "nodes": {
+  "after": {
+   "speaker": "dominic",
+   "text": "dlg.dominic.after",
+   "when": "flag:show_tonight",
+   "else": "a1"
+  },
+  "a1": {
+   "speaker": "dominic",
+   "text": "dlg.dominic.a1",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "bobbin",
+   "text": "dlg.dominic.n2",
+   "next": "n3"
+  },
+  "n3": {
+   "speaker": "dominic",
+   "text": "dlg.dominic.n3",
+   "next": "n4"
+  },
+  "n4": {
+   "speaker": "bobbin",
+   "text": "dlg.dominic.n4",
+   "next": "n5"
+  },
+  "n5": {
+   "speaker": "dominic",
+   "text": "dlg.dominic.n5",
+   "next": "n6"
+  },
+  "n6": {
+   "speaker": "dominic",
+   "text": "dlg.dominic.n6",
+   "next": "n7"
+  },
+  "n7": {
+   "speaker": "bobbin",
+   "text": "dlg.dominic.n7",
+   "next": "n8"
+  },
+  "n8": {
+   "speaker": "juno",
+   "text": "dlg.dominic.n8",
+   "effects": [
+    "setFlag:show_tonight"
+   ]
+  }
+ }
+}

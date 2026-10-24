@@ -1,0 +1,32 @@
+{
+ "id": "crossing",
+ "bpm": 72,
+ "bars": 8,
+ "caption": "caption.song.crossing",
+ "stems": [
+  {
+   "id": "choir",
+   "file": "audio/stems/crossing/choir",
+   "hitsFile": "audio/stems/crossing/choir.hits.json",
+   "color": "#b8b0ff",
+   "label": "thread.crossing.choir",
+   "instrument": "choir"
+  },
+  {
+   "id": "shimmer",
+   "file": "audio/stems/crossing/shimmer",
+   "hitsFile": "audio/stems/crossing/shimmer.hits.json",
+   "color": "#e0e8ff",
+   "label": "thread.crossing.shimmer",
+   "instrument": "harp"
+  },
+  {
+   "id": "wind",
+   "file": "audio/stems/crossing/wind",
+   "hitsFile": "audio/stems/crossing/wind.hits.json",
+   "color": "#6a6a90",
+   "label": "thread.crossing.wind",
+   "instrument": "riser"
+  }
+ ]
+}

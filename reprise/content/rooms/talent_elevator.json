@@ -1,0 +1,168 @@
+{
+ "id": "talent_elevator",
+ "act": "act1",
+ "location": "spire",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_talent_elevator_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_talent_elevator",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_hall": [
+   80,
+   284
+  ],
+  "from_factory": [
+   320,
+   284
+  ]
+ },
+ "song": "again_again",
+ "hotspots": [
+  {
+   "id": "panel",
+   "rect": [
+    480,
+    136,
+    44,
+    84
+   ],
+   "look": "look.talent_elevator.panel",
+   "name": "name.panel"
+  },
+  {
+   "id": "scanner",
+   "rect": [
+    436,
+    150,
+    36,
+    44
+   ],
+   "look": "look.talent_elevator.scanner",
+   "name": "name.scanner",
+   "sprite": {
+    "image": "scanner",
+    "x": 454,
+    "y": 194,
+    "frameWhen": [
+     [
+      1,
+      "flag:masked"
+     ],
+     [
+      0,
+      "true"
+     ]
+    ]
+   },
+   "drafts": {
+    "unmasking_rev": "say:elevator.mask_scanner",
+    "unmasking": "say:elevator.unmask_scanner",
+    "opening": "say:elevator.open_scanner"
+   }
+  },
+  {
+   "id": "lyra",
+   "rect": [
+    176,
+    198,
+    34,
+    66
+   ],
+   "look": "look.talent_elevator.lyra",
+   "name": "name.lyra",
+   "person": true,
+   "talk": "lyra_elevator",
+   "sprite": {
+    "image": "lyra",
+    "x": 193,
+    "y": 264,
+    "lit": true
+   }
+  },
+  {
+   "id": "doors",
+   "rect": [
+    256,
+    110,
+    130,
+    156
+   ],
+   "look": "look.exit",
+   "name": "name.elevator_doors",
+   "exit": {
+    "to": "factory_night",
+    "entry": "from_elevator",
+    "when": "flag:masked",
+    "blocked": "elevator.scanner_says"
+   },
+   "drafts": {
+    "opening": "say:elevator.open_doors"
+   }
+  },
+  {
+   "id": "back",
+   "rect": [
+    0,
+    150,
+    40,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.rehearsal_hall",
+   "exit": {
+    "to": "rehearsal_hall",
+    "entry": "from_elevator"
+   }
+  },
+  {
+   "id": "_self",
+   "rect": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "look": "look.self",
+   "name": "name.self",
+   "drafts": {
+    "unmasking_rev": "script:act1.mask_self"
+   }
+  }
+ ],
+ "ambient": "#b8a8c8",
+ "lights": [
+  {
+   "x": 454,
+   "y": 170,
+   "radius": 120,
+   "color": "#ff4040",
+   "intensity": 1.2
+  }
+ ]
+}

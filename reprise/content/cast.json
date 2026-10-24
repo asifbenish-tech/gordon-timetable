@@ -1,0 +1,213 @@
+{
+ "speakers": [
+  {
+   "id": "bobbin",
+   "name": "speaker.bobbin",
+   "portrait": "por_bobbin",
+   "signature": [
+    72,
+    76
+   ],
+   "instrument": "clarinet",
+   "color": "#c9b8ff"
+  },
+  {
+   "id": "skein",
+   "name": "speaker.skein",
+   "portrait": "por_skein",
+   "signature": [
+    67,
+    66
+   ],
+   "instrument": "swan",
+   "color": "#ffffff"
+  },
+  {
+   "id": "lead_swan",
+   "name": "speaker.lead_swan",
+   "portrait": "",
+   "signature": [
+    71,
+    67
+   ],
+   "instrument": "swan",
+   "color": "#e8e4ff"
+  },
+  {
+   "id": "receptionist",
+   "name": "speaker.receptionist",
+   "portrait": "por_receptionist",
+   "signature": [
+    84,
+    88
+   ],
+   "instrument": "jingle",
+   "color": "#ff9ae8"
+  },
+  {
+   "id": "lyrix",
+   "name": "speaker.lyrix",
+   "portrait": "por_lyrix",
+   "signature": [
+    88,
+    84
+   ],
+   "instrument": "jingle",
+   "color": "#66e0ff"
+  },
+  {
+   "id": "lyra",
+   "name": "speaker.lyra",
+   "portrait": "por_lyra",
+   "signature": [
+    69,
+    72
+   ],
+   "instrument": "piano",
+   "color": "#ffd8a8"
+  },
+  {
+   "id": "engineer",
+   "name": "speaker.engineer",
+   "portrait": "por_engineer",
+   "signature": [
+    48,
+    55
+   ],
+   "instrument": "bass",
+   "color": "#80c0ff"
+  },
+  {
+   "id": "coach",
+   "name": "speaker.coach",
+   "portrait": "por_coach",
+   "signature": [
+    72,
+    79
+   ],
+   "instrument": "piano",
+   "color": "#e6a0c0"
+  },
+  {
+   "id": "marcus",
+   "name": "speaker.marcus",
+   "portrait": "por_marcus",
+   "signature": [
+    48,
+    55
+   ],
+   "instrument": "bucket",
+   "color": "#d49a5a"
+  },
+  {
+   "id": "commuter",
+   "name": "speaker.commuter",
+   "portrait": "por_commuter",
+   "signature": [
+    60,
+    59
+   ],
+   "instrument": "pad",
+   "color": "#a0b0c0"
+  },
+  {
+   "id": "choreographer",
+   "name": "speaker.choreographer",
+   "portrait": "por_choreographer",
+   "signature": [
+    86,
+    86
+   ],
+   "instrument": "click",
+   "color": "#ff7070"
+  },
+  {
+   "id": "juno",
+   "name": "speaker.juno",
+   "portrait": "por_juno",
+   "signature": [
+    64,
+    67
+   ],
+   "instrument": "arp",
+   "color": "#7fe0a0"
+  },
+  {
+   "id": "foreman",
+   "name": "speaker.foreman",
+   "portrait": "",
+   "signature": [
+    40,
+    40
+   ],
+   "instrument": "press",
+   "color": "#ff9040"
+  },
+  {
+   "id": "host",
+   "name": "speaker.host",
+   "portrait": "por_host",
+   "signature": [
+    79,
+    76
+   ],
+   "instrument": "jingle",
+   "color": "#ffe0a0"
+  },
+  {
+   "id": "dominic",
+   "name": "speaker.dominic",
+   "portrait": "por_dominic",
+   "signature": [
+    43,
+    50
+   ],
+   "instrument": "bass",
+   "color": "#ffb070"
+  },
+  {
+   "id": "jogger",
+   "name": "speaker.jogger",
+   "portrait": "",
+   "signature": [
+    74,
+    74
+   ],
+   "instrument": "click",
+   "color": "#c0c0c0"
+  },
+  {
+   "id": "scanner",
+   "name": "speaker.scanner",
+   "portrait": "",
+   "signature": [
+    96,
+    96
+   ],
+   "instrument": "click",
+   "color": "#ff6060"
+  },
+  {
+   "id": "klaxon",
+   "name": "speaker.klaxon",
+   "portrait": "",
+   "signature": [
+    62,
+    61
+   ],
+   "instrument": "saw",
+   "color": "#ff4040"
+  },
+  {
+   "id": "panelist",
+   "name": "speaker.panelist",
+   "portrait": "",
+   "signature": [
+    70,
+    72
+   ],
+   "instrument": "pad",
+   "color": "#d0c0a0"
+  }
+ ]
+}

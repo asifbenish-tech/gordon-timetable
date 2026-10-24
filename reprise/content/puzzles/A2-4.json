@@ -1,0 +1,23 @@
+{
+ "id": "A2-4",
+ "title": "puzzle.A2-4",
+ "room": "factory_night",
+ "focus": "mute_pedal",
+ "needs": [
+  "puzzle:A2-1"
+ ],
+ "gives": [
+  "draft:hushing"
+ ],
+ "solvedWhen": "learned_hushing",
+ "hints": [
+  "hint.A2-4.look",
+  "hint.A2-4.nudge",
+  "hint.A2-4.answer"
+ ],
+ "bot": [
+  "walk:factory_night",
+  "listen:mute_pedal",
+  "learn:hushing"
+ ]
+}

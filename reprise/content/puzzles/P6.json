@@ -1,0 +1,21 @@
+{
+ "id": "P6",
+ "title": "puzzle.P6",
+ "room": "street",
+ "focus": "commuter",
+ "needs": [
+  "draft:waking"
+ ],
+ "gives": [],
+ "solvedWhen": "commuter_woken",
+ "hints": [
+  "hint.P6.look",
+  "hint.P6.nudge",
+  "hint.P6.answer"
+ ],
+ "bot": [
+  "walk:street",
+  "cast:waking>hotspot:commuter",
+  "flag:commuter_woken"
+ ]
+}

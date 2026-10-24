@@ -1,0 +1,103 @@
+{
+ "id": "crossing",
+ "act": "prologue",
+ "location": "crossing",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_crossing_far",
+   "scroll": 0
+  },
+  {
+   "image": "bg_crossing",
+   "scroll": 1
+  }
+ ],
+ "walk": [
+  [
+   230,
+   220
+  ],
+  [
+   250,
+   220
+  ],
+  [
+   250,
+   232
+  ],
+  [
+   230,
+   232
+  ]
+ ],
+ "entries": {
+  "start": [
+   240,
+   226
+  ]
+ },
+ "song": "crossing",
+ "hotspots": [
+  {
+   "id": "nebula",
+   "rect": [
+    0,
+    0,
+    640,
+    110
+   ],
+   "look": "look.crossing.nebula",
+   "name": "name.nebula"
+  },
+  {
+   "id": "flock",
+   "rect": [
+    210,
+    130,
+    170,
+    76
+   ],
+   "look": "look.crossing.flock",
+   "name": "name.flock",
+   "sprite": {
+    "image": "flock_flight",
+    "x": 295,
+    "y": 206
+   }
+  },
+  {
+   "id": "lead_swan",
+   "rect": [
+    404,
+    116,
+    56,
+    40
+   ],
+   "look": "look.crossing.lead_swan",
+   "name": "name.lead_swan",
+   "person": true,
+   "sprite": {
+    "image": "lead_swan",
+    "x": 432,
+    "y": 156
+   },
+   "listen": "script:prologue.flock_call"
+  },
+  {
+   "id": "_self",
+   "rect": [
+    0,
+    0,
+    0,
+    0
+   ],
+   "look": "look.self",
+   "name": "name.self",
+   "drafts": {}
+  }
+ ],
+ "swan": true,
+ "logic": "crossing",
+ "ambient": "#9a8cc8"
+}

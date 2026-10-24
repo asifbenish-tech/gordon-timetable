@@ -1,0 +1,28 @@
+{
+ "id": "A2-3",
+ "title": "puzzle.A2-3",
+ "room": "press_floor",
+ "focus": "conveyor",
+ "needs": [
+  "draft:quickening"
+ ],
+ "gives": [],
+ "solvedWhen": "rode_conveyor",
+ "hints": [
+  "hint.A2-3.look",
+  "hint.A2-3.nudge",
+  "hint.A2-3.answer"
+ ],
+ "bot": [
+  "walk:press_floor",
+  "clear:1",
+  "clear:2",
+  "spool:1",
+  "arm",
+  "cast:quickening>hotspot:conveyor",
+  "wait:1",
+  "exit:conveyor_up",
+  "flag:rode_conveyor",
+  "clear:1"
+ ]
+}

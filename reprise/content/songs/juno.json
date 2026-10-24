@@ -1,0 +1,47 @@
+{
+ "id": "juno",
+ "bpm": 100,
+ "bars": 2,
+ "caption": "caption.song.juno",
+ "stems": [
+  {
+   "id": "drums",
+   "file": "audio/stems/juno/drums",
+   "hitsFile": "audio/stems/juno/drums.hits.json",
+   "color": "#c06040",
+   "label": "thread.juno.drums",
+   "instrument": "kick",
+   "role": "rhythm"
+  },
+  {
+   "id": "bass",
+   "file": "audio/stems/juno/bass",
+   "hitsFile": "audio/stems/juno/bass.hits.json",
+   "color": "#f08c3a",
+   "label": "thread.juno.bass",
+   "instrument": "bass",
+   "masksGolden": 0.35,
+   "role": "harmony"
+  },
+  {
+   "id": "hook",
+   "file": "audio/stems/juno/hook",
+   "hitsFile": "audio/stems/juno/hook.hits.json",
+   "color": "#ff4fd8",
+   "label": "thread.juno.hook",
+   "instrument": "saw",
+   "masksGolden": 0.65,
+   "role": "harmony"
+  },
+  {
+   "id": "riff",
+   "file": "audio/stems/juno/riff",
+   "hitsFile": "audio/stems/juno/riff.hits.json",
+   "color": "#f3c64b",
+   "label": "thread.juno.riff",
+   "instrument": "arp",
+   "golden": true,
+   "role": "melody"
+  }
+ ]
+}

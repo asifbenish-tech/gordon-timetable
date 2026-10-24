@@ -1,0 +1,26 @@
+{
+ "id": "A2-8",
+ "title": "puzzle.A2-8",
+ "room": "arena_basement",
+ "focus": "piano_old",
+ "needs": [
+  "draft:tuning",
+  "puzzle:A2-7"
+ ],
+ "gives": [],
+ "solvedWhen": "spooled:piano_room:piano",
+ "hints": [
+  "hint.A2-8.look",
+  "hint.A2-8.nudge",
+  "hint.A2-8.answer"
+ ],
+ "bot": [
+  "walk:arena_basement",
+  "cast:tuning>hotspot:piano_old",
+  "comb:piano",
+  "spool:1",
+  "copy:piano",
+  "close",
+  "flag:spooled:piano_room:piano"
+ ]
+}

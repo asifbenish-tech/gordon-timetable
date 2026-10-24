@@ -1,0 +1,66 @@
+{
+ "id": "arena",
+ "bpm": 120,
+ "bars": 4,
+ "caption": "caption.song.arena",
+ "stems": [
+  {
+   "id": "click",
+   "file": "audio/stems/arena/click",
+   "hitsFile": "audio/stems/arena/click.hits.json",
+   "color": "#f4f4f4",
+   "label": "thread.arena.click",
+   "instrument": "click",
+   "tether": "dancers",
+   "role": "rhythm"
+  },
+  {
+   "id": "drums",
+   "file": "audio/stems/arena/drums",
+   "hitsFile": "audio/stems/arena/drums.hits.json",
+   "color": "#e0403a",
+   "label": "thread.arena.drums",
+   "instrument": "kick",
+   "role": "rhythm"
+  },
+  {
+   "id": "supersaw",
+   "file": "audio/stems/arena/supersaw",
+   "hitsFile": "audio/stems/arena/supersaw.hits.json",
+   "color": "#ff4fd8",
+   "label": "thread.arena.supersaw",
+   "instrument": "saw",
+   "role": "harmony"
+  },
+  {
+   "id": "prerecorded",
+   "file": "audio/stems/arena/prerecorded",
+   "hitsFile": "audio/stems/arena/prerecorded.hits.json",
+   "color": "#c8ccd8",
+   "label": "thread.arena.prerecorded",
+   "instrument": "vocal",
+   "tether": "mic",
+   "role": "melody"
+  },
+  {
+   "id": "chant",
+   "file": "audio/stems/arena/chant",
+   "hitsFile": "audio/stems/arena/chant.hits.json",
+   "color": "#b0b0ff",
+   "label": "thread.arena.chant",
+   "instrument": "chant",
+   "when": "flag:chant_added"
+  },
+  {
+   "id": "live",
+   "file": "audio/stems/arena/live",
+   "hitsFile": "audio/stems/arena/live.hits.json",
+   "color": "#ffd8a8",
+   "label": "thread.arena.live",
+   "instrument": "hum",
+   "when": "flag:mic_open",
+   "knot": "tuning",
+   "role": "melody"
+  }
+ ]
+}

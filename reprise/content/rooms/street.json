@@ -1,0 +1,195 @@
+{
+ "id": "street",
+ "act": "prologue",
+ "location": "street",
+ "width": 960,
+ "layers": [
+  {
+   "image": "bg_street_sky",
+   "scroll": 0.2
+  },
+  {
+   "image": "bg_street_mid",
+   "scroll": 0.5
+  },
+  {
+   "image": "bg_street",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   10,
+   252
+  ],
+  [
+   950,
+   252
+  ],
+  [
+   958,
+   298
+  ],
+  [
+   2,
+   298
+  ]
+ ],
+ "entries": {
+  "from_park": [
+   60,
+   282
+  ],
+  "from_lobby": [
+   650,
+   268
+  ],
+  "from_arena": [
+   880,
+   282
+  ]
+ },
+ "song": "marcus",
+ "hotspots": [
+  {
+   "id": "billboard",
+   "rect": [
+    300,
+    40,
+    220,
+    100
+   ],
+   "look": "look.street.billboard",
+   "name": "name.billboard"
+  },
+  {
+   "id": "speaker_pole",
+   "rect": [
+    136,
+    110,
+    18,
+    140
+   ],
+   "look": "look.street.speaker_pole",
+   "name": "name.speaker_pole"
+  },
+  {
+   "id": "park",
+   "rect": [
+    0,
+    160,
+    40,
+    136
+   ],
+   "look": "look.exit",
+   "name": "name.park_gate",
+   "exit": {
+    "to": "park_gate",
+    "entry": "from_street"
+   }
+  },
+  {
+   "id": "marcus",
+   "rect": [
+    196,
+    210,
+    56,
+    72
+   ],
+   "look": "look.street.marcus",
+   "name": "name.marcus",
+   "person": true,
+   "sprite": {
+    "image": "marcus",
+    "x": 224,
+    "y": 284,
+    "lit": true
+   },
+   "songSource": "marcus",
+   "listen": "script:prologue.listen_marcus"
+  },
+  {
+   "id": "stairs",
+   "rect": [
+    600,
+    150,
+    100,
+    100
+   ],
+   "look": "look.exit",
+   "name": "name.spire_stairs",
+   "exit": {
+    "to": "spire_lobby",
+    "entry": "from_street",
+    "when": "flag:commuter_woken",
+    "blocked": "street.commuter_blocks"
+   }
+  },
+  {
+   "id": "commuter",
+   "rect": [
+    632,
+    212,
+    32,
+    70
+   ],
+   "look": "look.street.commuter",
+   "name": "name.commuter",
+   "person": true,
+   "when": "!flag:commuter_woken",
+   "sprite": {
+    "image": "commuter",
+    "x": 648,
+    "y": 284,
+    "lit": true,
+    "frameWhen": [
+     [
+      0,
+      "true"
+     ]
+    ]
+   },
+   "drafts": {
+    "waking": "script:prologue.wake_commuter",
+    "waking_rev": "say:street.lull_commuter",
+    "opening": "say:street.open_commuter",
+    "healing": "say:street.heal_commuter"
+   }
+  },
+  {
+   "id": "arena",
+   "rect": [
+    850,
+    120,
+    110,
+    140
+   ],
+   "look": "look.exit",
+   "name": "name.megadome",
+   "exit": {
+    "to": "arena_outside",
+    "entry": "from_street",
+    "when": "flag:show_tonight",
+    "blocked": "street.arena_closed"
+   }
+  }
+ ],
+ "ambient": "#a4a0b0",
+ "lights": [
+  {
+   "x": 145,
+   "y": 120,
+   "radius": 180,
+   "color": "#ffe0b0",
+   "intensity": 1.0
+  },
+  {
+   "x": 410,
+   "y": 90,
+   "radius": 220,
+   "color": "#ff6ad5",
+   "intensity": 0.8
+  }
+ ]
+}

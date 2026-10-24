@@ -1,0 +1,157 @@
+{
+ "id": "arena_outside",
+ "act": "act2",
+ "location": "arena",
+ "width": 640,
+ "layers": [
+  {
+   "image": "bg_arena_outside_far",
+   "scroll": 1
+  },
+  {
+   "image": "bg_arena_outside",
+   "scroll": 1,
+   "lit": true
+  }
+ ],
+ "walk": [
+  [
+   20,
+   252
+  ],
+  [
+   620,
+   252
+  ],
+  [
+   632,
+   298
+  ],
+  [
+   8,
+   298
+  ]
+ ],
+ "entries": {
+  "from_street": [
+   44,
+   284
+  ],
+  "from_studio": [
+   116,
+   280
+  ],
+  "from_basement": [
+   432,
+   280
+  ],
+  "from_dome": [
+   570,
+   284
+  ]
+ },
+ "song": "marcus",
+ "hotspots": [
+  {
+   "id": "poster",
+   "rect": [
+    296,
+    70,
+    100,
+    120
+   ],
+   "look": "look.arena_outside.poster",
+   "name": "name.poster"
+  },
+  {
+   "id": "marcus",
+   "rect": [
+    236,
+    210,
+    56,
+    72
+   ],
+   "look": "look.arena_outside.marcus",
+   "name": "name.marcus",
+   "person": true,
+   "talk": "marcus_arena",
+   "songSource": "marcus",
+   "sprite": {
+    "image": "marcus",
+    "x": 264,
+    "y": 284,
+    "lit": true
+   }
+  },
+  {
+   "id": "street",
+   "rect": [
+    0,
+    150,
+    36,
+    146
+   ],
+   "look": "look.exit",
+   "name": "name.street",
+   "exit": {
+    "to": "street",
+    "entry": "from_arena"
+   }
+  },
+  {
+   "id": "studio_door",
+   "rect": [
+    88,
+    156,
+    54,
+    104
+   ],
+   "look": "look.exit",
+   "name": "name.stage_door",
+   "exit": {
+    "to": "dominic_studio",
+    "entry": "from_stage"
+   }
+  },
+  {
+   "id": "basement",
+   "rect": [
+    404,
+    196,
+    56,
+    64
+   ],
+   "look": "look.exit",
+   "name": "name.basement",
+   "exit": {
+    "to": "arena_basement",
+    "entry": "from_outside"
+   }
+  },
+  {
+   "id": "dome_doors",
+   "rect": [
+    516,
+    130,
+    110,
+    134
+   ],
+   "look": "look.exit",
+   "name": "name.dome_doors",
+   "exit": {
+    "to": "mega_dome",
+    "entry": "from_outside"
+   }
+  }
+ ],
+ "ambient": "#8890b0",
+ "lights": [
+  {
+   "x": 570,
+   "y": 120,
+   "radius": 220,
+   "color": "#c080ff",
+   "intensity": 1.2
+  }
+ ]
+}

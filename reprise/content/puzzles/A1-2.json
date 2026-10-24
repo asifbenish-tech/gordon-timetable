@@ -1,0 +1,23 @@
+{
+ "id": "A1-2",
+ "title": "puzzle.A1-2",
+ "room": "mixing_room",
+ "focus": "desk",
+ "needs": [
+  "puzzle:A1-1"
+ ],
+ "gives": [
+  "tool:combing"
+ ],
+ "solvedWhen": "watched_engineer",
+ "hints": [
+  "hint.A1-2.look",
+  "hint.A1-2.nudge",
+  "hint.A1-2.answer"
+ ],
+ "bot": [
+  "walk:mixing_room",
+  "listen:desk",
+  "flag:watched_engineer"
+ ]
+}

@@ -1,0 +1,45 @@
+{
+ "id": "marcus",
+ "bpm": 92,
+ "bars": 2,
+ "caption": "caption.song.marcus",
+ "stems": [
+  {
+   "id": "groove",
+   "file": "audio/stems/marcus/groove",
+   "hitsFile": "audio/stems/marcus/groove.hits.json",
+   "color": "#d49a5a",
+   "label": "thread.marcus.groove",
+   "instrument": "bucket",
+   "role": "rhythm"
+  },
+  {
+   "id": "rims",
+   "file": "audio/stems/marcus/rims",
+   "hitsFile": "audio/stems/marcus/rims.hits.json",
+   "color": "#c08050",
+   "label": "thread.marcus.rims",
+   "instrument": "snare",
+   "role": "rhythm"
+  },
+  {
+   "id": "traffic",
+   "file": "audio/stems/marcus/traffic",
+   "hitsFile": "audio/stems/marcus/traffic.hits.json",
+   "color": "#808898",
+   "label": "thread.marcus.traffic",
+   "instrument": "crowd",
+   "level": 0.5
+  },
+  {
+   "id": "billboard",
+   "file": "audio/stems/marcus/billboard",
+   "hitsFile": "audio/stems/marcus/billboard.hits.json",
+   "color": "#ff4fd8",
+   "label": "thread.marcus.billboard",
+   "instrument": "saw",
+   "level": 0.35,
+   "role": "harmony"
+  }
+ ]
+}

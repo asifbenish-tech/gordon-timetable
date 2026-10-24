@@ -1,0 +1,26 @@
+{
+ "id": "lyra",
+ "bpm": 84,
+ "bars": 4,
+ "caption": "caption.song.lyra",
+ "stems": [
+  {
+   "id": "hum",
+   "file": "audio/stems/lyra/hum",
+   "hitsFile": "audio/stems/lyra/hum.hits.json",
+   "color": "#ffd8a8",
+   "label": "thread.lyra.hum",
+   "instrument": "hum",
+   "role": "melody"
+  },
+  {
+   "id": "piano",
+   "file": "audio/stems/lyra/piano",
+   "hitsFile": "audio/stems/lyra/piano.hits.json",
+   "color": "#e8c890",
+   "label": "thread.lyra.piano",
+   "instrument": "piano",
+   "role": "harmony"
+  }
+ ]
+}

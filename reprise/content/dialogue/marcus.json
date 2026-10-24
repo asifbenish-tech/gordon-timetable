@@ -1,0 +1,20 @@
+{
+ "id": "marcus",
+ "start": "n0",
+ "nodes": {
+  "n0": {
+   "speaker": "marcus",
+   "text": "dlg.marcus.n0",
+   "next": "n1"
+  },
+  "n1": {
+   "speaker": "bobbin",
+   "text": "dlg.marcus.n1",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "marcus",
+   "text": "dlg.marcus.n2"
+  }
+ }
+}

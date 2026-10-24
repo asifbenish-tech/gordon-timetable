@@ -1,0 +1,21 @@
+{
+ "id": "A1-7",
+ "title": "puzzle.A1-7",
+ "room": "talent_elevator",
+ "focus": "scanner",
+ "needs": [
+  "puzzle:A1-6"
+ ],
+ "gives": [],
+ "solvedWhen": "masked",
+ "hints": [
+  "hint.A1-7.look",
+  "hint.A1-7.nudge",
+  "hint.A1-7.answer"
+ ],
+ "bot": [
+  "walk:talent_elevator",
+  "cast:unmasking_rev>self",
+  "flag:masked"
+ ]
+}

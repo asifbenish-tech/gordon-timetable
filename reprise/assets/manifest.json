@@ -1,0 +1,1132 @@
+{
+ "images": [
+  {
+   "id": "bg_arena_basement_far",
+   "path": "art/rooms/bg_arena_basement_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_arena_basement_far"
+  },
+  {
+   "id": "bg_arena_basement",
+   "path": "art/rooms/bg_arena_basement.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_arena_basement_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_arena_basement"
+  },
+  {
+   "id": "bg_arena_outside_far",
+   "path": "art/rooms/bg_arena_outside_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_arena_outside_far"
+  },
+  {
+   "id": "bg_arena_outside",
+   "path": "art/rooms/bg_arena_outside.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_arena_outside_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_arena_outside"
+  },
+  {
+   "id": "bg_crossing_far",
+   "path": "art/rooms/bg_crossing_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_crossing_far"
+  },
+  {
+   "id": "bg_crossing",
+   "path": "art/rooms/bg_crossing.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_crossing"
+  },
+  {
+   "id": "bg_dominic_studio_far",
+   "path": "art/rooms/bg_dominic_studio_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_dominic_studio_far"
+  },
+  {
+   "id": "bg_dominic_studio",
+   "path": "art/rooms/bg_dominic_studio.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_dominic_studio_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_dominic_studio"
+  },
+  {
+   "id": "bg_factory_night_far",
+   "path": "art/rooms/bg_factory_night_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_factory_night_far"
+  },
+  {
+   "id": "bg_factory_night",
+   "path": "art/rooms/bg_factory_night.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_factory_night_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_factory_night"
+  },
+  {
+   "id": "bg_fitting_room_far",
+   "path": "art/rooms/bg_fitting_room_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_fitting_room_far"
+  },
+  {
+   "id": "bg_fitting_room",
+   "path": "art/rooms/bg_fitting_room.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_fitting_room_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_fitting_room"
+  },
+  {
+   "id": "bg_floor3_far",
+   "path": "art/rooms/bg_floor3_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_floor3_far"
+  },
+  {
+   "id": "bg_floor3",
+   "path": "art/rooms/bg_floor3.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_floor3_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_floor3"
+  },
+  {
+   "id": "bg_floor40_far",
+   "path": "art/rooms/bg_floor40_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_floor40_far"
+  },
+  {
+   "id": "bg_floor40",
+   "path": "art/rooms/bg_floor40.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_floor40_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_floor40"
+  },
+  {
+   "id": "bg_focus_lounge_far",
+   "path": "art/rooms/bg_focus_lounge_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_focus_lounge_far"
+  },
+  {
+   "id": "bg_focus_lounge",
+   "path": "art/rooms/bg_focus_lounge.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_focus_lounge_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_focus_lounge"
+  },
+  {
+   "id": "bg_mega_dome_far",
+   "path": "art/rooms/bg_mega_dome_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_mega_dome_far"
+  },
+  {
+   "id": "bg_mega_dome",
+   "path": "art/rooms/bg_mega_dome.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_mega_dome_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_mega_dome"
+  },
+  {
+   "id": "bg_mirror_corridor_far",
+   "path": "art/rooms/bg_mirror_corridor_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_mirror_corridor_far"
+  },
+  {
+   "id": "bg_mirror_corridor",
+   "path": "art/rooms/bg_mirror_corridor.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_mirror_corridor_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_mirror_corridor"
+  },
+  {
+   "id": "bg_mixing_room_far",
+   "path": "art/rooms/bg_mixing_room_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_mixing_room_far"
+  },
+  {
+   "id": "bg_mixing_room",
+   "path": "art/rooms/bg_mixing_room.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_mixing_room_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_mixing_room"
+  },
+  {
+   "id": "bg_park_gate_far",
+   "path": "art/rooms/bg_park_gate_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_park_gate_far"
+  },
+  {
+   "id": "bg_park_gate",
+   "path": "art/rooms/bg_park_gate.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_park_gate_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_park_gate"
+  },
+  {
+   "id": "bg_pond_far",
+   "path": "art/rooms/bg_pond_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_pond_far"
+  },
+  {
+   "id": "bg_pond",
+   "path": "art/rooms/bg_pond.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_pond_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_pond"
+  },
+  {
+   "id": "bg_press_floor_far",
+   "path": "art/rooms/bg_press_floor_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_press_floor_far"
+  },
+  {
+   "id": "bg_press_floor",
+   "path": "art/rooms/bg_press_floor.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_press_floor_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_press_floor"
+  },
+  {
+   "id": "bg_rehearsal_hall_far",
+   "path": "art/rooms/bg_rehearsal_hall_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_rehearsal_hall_far"
+  },
+  {
+   "id": "bg_rehearsal_hall",
+   "path": "art/rooms/bg_rehearsal_hall.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_rehearsal_hall_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_rehearsal_hall"
+  },
+  {
+   "id": "bg_spire_lobby_far",
+   "path": "art/rooms/bg_spire_lobby_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_spire_lobby_far"
+  },
+  {
+   "id": "bg_spire_lobby",
+   "path": "art/rooms/bg_spire_lobby.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_spire_lobby_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_spire_lobby"
+  },
+  {
+   "id": "bg_street_sky",
+   "path": "art/rooms/bg_street_sky.png",
+   "w": 704,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_street_sky"
+  },
+  {
+   "id": "bg_street_mid",
+   "path": "art/rooms/bg_street_mid.png",
+   "w": 800,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_street_mid"
+  },
+  {
+   "id": "bg_street",
+   "path": "art/rooms/bg_street.png",
+   "w": 960,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_street_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_street"
+  },
+  {
+   "id": "bg_talent_elevator_far",
+   "path": "art/rooms/bg_talent_elevator_far.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_talent_elevator_far"
+  },
+  {
+   "id": "bg_talent_elevator",
+   "path": "art/rooms/bg_talent_elevator.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "normal": "art/rooms/bg_talent_elevator_n.png",
+   "status": "placeholder",
+   "recipe": "room:bg_talent_elevator"
+  },
+  {
+   "id": "bobbin",
+   "path": "art/chars/bobbin.png",
+   "w": 288,
+   "h": 64,
+   "frames": 9,
+   "frameW": 32,
+   "normal": "art/chars/bobbin_n.png",
+   "status": "placeholder",
+   "recipe": "char:bobbin"
+  },
+  {
+   "id": "bobbin_swan",
+   "path": "art/chars/bobbin_swan.png",
+   "w": 192,
+   "h": 32,
+   "frames": 4,
+   "frameW": 48,
+   "status": "placeholder",
+   "recipe": "char:bobbin_swan"
+  },
+  {
+   "id": "skein",
+   "path": "art/chars/skein.png",
+   "w": 64,
+   "h": 16,
+   "frames": 4,
+   "frameW": 16,
+   "status": "placeholder",
+   "recipe": "char:skein"
+  },
+  {
+   "id": "skein_sit",
+   "path": "art/chars/skein_sit.png",
+   "w": 48,
+   "h": 20,
+   "frames": 2,
+   "frameW": 24,
+   "status": "placeholder",
+   "recipe": "char:skein_sit"
+  },
+  {
+   "id": "flock_flight",
+   "path": "art/chars/flock_flight.png",
+   "w": 640,
+   "h": 64,
+   "frames": 4,
+   "frameW": 160,
+   "status": "placeholder",
+   "recipe": "char:flock_flight"
+  },
+  {
+   "id": "lead_swan",
+   "path": "art/chars/lead_swan.png",
+   "w": 192,
+   "h": 32,
+   "frames": 4,
+   "frameW": 48,
+   "status": "placeholder",
+   "recipe": "char:lead_swan"
+  },
+  {
+   "id": "flock_rest",
+   "path": "art/chars/flock_rest.png",
+   "w": 420,
+   "h": 40,
+   "frames": 2,
+   "frameW": 210,
+   "status": "placeholder",
+   "recipe": "char:flock_rest"
+  },
+  {
+   "id": "jogger",
+   "path": "art/chars/jogger.png",
+   "w": 128,
+   "h": 64,
+   "frames": 4,
+   "frameW": 32,
+   "status": "placeholder",
+   "recipe": "char:jogger"
+  },
+  {
+   "id": "marcus",
+   "path": "art/chars/marcus.png",
+   "w": 224,
+   "h": 72,
+   "frames": 4,
+   "frameW": 56,
+   "normal": "art/chars/marcus_n.png",
+   "status": "placeholder",
+   "recipe": "char:marcus"
+  },
+  {
+   "id": "commuter",
+   "path": "art/chars/commuter.png",
+   "w": 64,
+   "h": 70,
+   "frames": 2,
+   "frameW": 32,
+   "normal": "art/chars/commuter_n.png",
+   "status": "placeholder",
+   "recipe": "char:commuter"
+  },
+  {
+   "id": "receptionist",
+   "path": "art/chars/receptionist.png",
+   "w": 80,
+   "h": 56,
+   "frames": 2,
+   "frameW": 40,
+   "normal": "art/chars/receptionist_n.png",
+   "status": "placeholder",
+   "recipe": "char:receptionist"
+  },
+  {
+   "id": "lyrix_holo",
+   "path": "art/chars/lyrix_holo.png",
+   "w": 192,
+   "h": 88,
+   "frames": 4,
+   "frameW": 48,
+   "status": "placeholder",
+   "recipe": "char:lyrix_holo"
+  },
+  {
+   "id": "lyra",
+   "path": "art/chars/lyra.png",
+   "w": 64,
+   "h": 64,
+   "frames": 2,
+   "frameW": 32,
+   "normal": "art/chars/lyra_n.png",
+   "status": "placeholder",
+   "recipe": "char:lyra"
+  },
+  {
+   "id": "engineer",
+   "path": "art/chars/engineer.png",
+   "w": 72,
+   "h": 56,
+   "frames": 2,
+   "frameW": 36,
+   "normal": "art/chars/engineer_n.png",
+   "status": "placeholder",
+   "recipe": "char:engineer"
+  },
+  {
+   "id": "coach",
+   "path": "art/chars/coach.png",
+   "w": 64,
+   "h": 68,
+   "frames": 2,
+   "frameW": 32,
+   "normal": "art/chars/coach_n.png",
+   "status": "placeholder",
+   "recipe": "char:coach"
+  },
+  {
+   "id": "dancers",
+   "path": "art/chars/dancers.png",
+   "w": 472,
+   "h": 64,
+   "frames": 4,
+   "frameW": 118,
+   "normal": "art/chars/dancers_n.png",
+   "status": "placeholder",
+   "recipe": "char:dancers"
+  },
+  {
+   "id": "choreographer",
+   "path": "art/chars/choreographer.png",
+   "w": 64,
+   "h": 66,
+   "frames": 2,
+   "frameW": 32,
+   "normal": "art/chars/choreographer_n.png",
+   "status": "placeholder",
+   "recipe": "char:choreographer"
+  },
+  {
+   "id": "scanner",
+   "path": "art/chars/scanner.png",
+   "w": 48,
+   "h": 32,
+   "frames": 2,
+   "frameW": 24,
+   "status": "placeholder",
+   "recipe": "char:scanner"
+  },
+  {
+   "id": "juno",
+   "path": "art/chars/juno.png",
+   "w": 64,
+   "h": 64,
+   "frames": 2,
+   "frameW": 32,
+   "normal": "art/chars/juno_n.png",
+   "status": "placeholder",
+   "recipe": "char:juno"
+  },
+  {
+   "id": "beat_press",
+   "path": "art/chars/beat_press.png",
+   "w": 392,
+   "h": 152,
+   "frames": 4,
+   "frameW": 98,
+   "normal": "art/chars/beat_press_n.png",
+   "status": "placeholder",
+   "recipe": "char:beat_press"
+  },
+  {
+   "id": "conveyor",
+   "path": "art/chars/conveyor.png",
+   "w": 800,
+   "h": 24,
+   "frames": 4,
+   "frameW": 200,
+   "status": "placeholder",
+   "recipe": "char:conveyor"
+  },
+  {
+   "id": "panelists",
+   "path": "art/chars/panelists.png",
+   "w": 292,
+   "h": 70,
+   "frames": 2,
+   "frameW": 146,
+   "normal": "art/chars/panelists_n.png",
+   "status": "placeholder",
+   "recipe": "char:panelists"
+  },
+  {
+   "id": "dial",
+   "path": "art/chars/dial.png",
+   "w": 32,
+   "h": 24,
+   "frames": 2,
+   "frameW": 16,
+   "status": "placeholder",
+   "recipe": "char:dial"
+  },
+  {
+   "id": "host",
+   "path": "art/chars/host.png",
+   "w": 64,
+   "h": 66,
+   "frames": 2,
+   "frameW": 32,
+   "normal": "art/chars/host_n.png",
+   "status": "placeholder",
+   "recipe": "char:host"
+  },
+  {
+   "id": "foreman",
+   "path": "art/chars/foreman.png",
+   "w": 80,
+   "h": 64,
+   "frames": 2,
+   "frameW": 40,
+   "status": "placeholder",
+   "recipe": "char:foreman"
+  },
+  {
+   "id": "gate_park",
+   "path": "art/chars/gate_park.png",
+   "w": 200,
+   "h": 122,
+   "frames": 2,
+   "frameW": 100,
+   "status": "placeholder",
+   "recipe": "char:gate_park"
+  },
+  {
+   "id": "gate_factory",
+   "path": "art/chars/gate_factory.png",
+   "w": 168,
+   "h": 128,
+   "frames": 2,
+   "frameW": 84,
+   "status": "placeholder",
+   "recipe": "char:gate_factory"
+  },
+  {
+   "id": "dominic",
+   "path": "art/chars/dominic.png",
+   "w": 80,
+   "h": 66,
+   "frames": 2,
+   "frameW": 40,
+   "normal": "art/chars/dominic_n.png",
+   "status": "placeholder",
+   "recipe": "char:dominic"
+  },
+  {
+   "id": "mic",
+   "path": "art/chars/mic.png",
+   "w": 20,
+   "h": 48,
+   "frames": 2,
+   "frameW": 10,
+   "status": "placeholder",
+   "recipe": "char:mic"
+  },
+  {
+   "id": "por_bobbin",
+   "path": "art/portraits/bobbin.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:bobbin"
+  },
+  {
+   "id": "por_skein",
+   "path": "art/portraits/skein.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:skein"
+  },
+  {
+   "id": "por_receptionist",
+   "path": "art/portraits/receptionist.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:receptionist"
+  },
+  {
+   "id": "por_lyrix",
+   "path": "art/portraits/lyrix.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:lyrix"
+  },
+  {
+   "id": "por_lyra",
+   "path": "art/portraits/lyra.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:lyra"
+  },
+  {
+   "id": "por_engineer",
+   "path": "art/portraits/engineer.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:engineer"
+  },
+  {
+   "id": "por_coach",
+   "path": "art/portraits/coach.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:coach"
+  },
+  {
+   "id": "por_marcus",
+   "path": "art/portraits/marcus.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:marcus"
+  },
+  {
+   "id": "por_commuter",
+   "path": "art/portraits/commuter.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:commuter"
+  },
+  {
+   "id": "por_choreographer",
+   "path": "art/portraits/choreographer.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:choreographer"
+  },
+  {
+   "id": "por_juno",
+   "path": "art/portraits/juno.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:juno"
+  },
+  {
+   "id": "por_host",
+   "path": "art/portraits/host.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:host"
+  },
+  {
+   "id": "por_dominic",
+   "path": "art/portraits/dominic.png",
+   "w": 160,
+   "h": 160,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "portrait:dominic"
+  }
+ ],
+ "audio": [
+  {
+   "id": "again_again/bass",
+   "path": "audio/stems/again_again/bass",
+   "notes": "audio/stems/again_again/bass.notes.json",
+   "hits": "audio/stems/again_again/bass.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "again_again/golden",
+   "path": "audio/stems/again_again/golden",
+   "notes": "audio/stems/again_again/golden.notes.json",
+   "hits": "audio/stems/again_again/golden.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "again_again/kick",
+   "path": "audio/stems/again_again/kick",
+   "notes": "audio/stems/again_again/kick.notes.json",
+   "hits": "audio/stems/again_again/kick.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "again_again/riser",
+   "path": "audio/stems/again_again/riser",
+   "notes": "audio/stems/again_again/riser.notes.json",
+   "hits": "audio/stems/again_again/riser.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "again_again/supersaw",
+   "path": "audio/stems/again_again/supersaw",
+   "notes": "audio/stems/again_again/supersaw.notes.json",
+   "hits": "audio/stems/again_again/supersaw.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "again_again/vocal",
+   "path": "audio/stems/again_again/vocal",
+   "notes": "audio/stems/again_again/vocal.notes.json",
+   "hits": "audio/stems/again_again/vocal.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "arena/chant",
+   "path": "audio/stems/arena/chant",
+   "notes": "audio/stems/arena/chant.notes.json",
+   "hits": "audio/stems/arena/chant.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "arena/click",
+   "path": "audio/stems/arena/click",
+   "notes": "audio/stems/arena/click.notes.json",
+   "hits": "audio/stems/arena/click.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "arena/drums",
+   "path": "audio/stems/arena/drums",
+   "notes": "audio/stems/arena/drums.notes.json",
+   "hits": "audio/stems/arena/drums.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "arena/live",
+   "path": "audio/stems/arena/live",
+   "notes": "audio/stems/arena/live.notes.json",
+   "hits": "audio/stems/arena/live.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "arena/prerecorded",
+   "path": "audio/stems/arena/prerecorded",
+   "notes": "audio/stems/arena/prerecorded.notes.json",
+   "hits": "audio/stems/arena/prerecorded.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "arena/supersaw",
+   "path": "audio/stems/arena/supersaw",
+   "notes": "audio/stems/arena/supersaw.notes.json",
+   "hits": "audio/stems/arena/supersaw.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "crossing/choir",
+   "path": "audio/stems/crossing/choir",
+   "notes": "audio/stems/crossing/choir.notes.json",
+   "hits": "audio/stems/crossing/choir.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "crossing/shimmer",
+   "path": "audio/stems/crossing/shimmer",
+   "notes": "audio/stems/crossing/shimmer.notes.json",
+   "hits": "audio/stems/crossing/shimmer.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "crossing/wind",
+   "path": "audio/stems/crossing/wind",
+   "notes": "audio/stems/crossing/wind.notes.json",
+   "hits": "audio/stems/crossing/wind.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "factory/arp",
+   "path": "audio/stems/factory/arp",
+   "notes": "audio/stems/factory/arp.notes.json",
+   "hits": "audio/stems/factory/arp.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "factory/bass",
+   "path": "audio/stems/factory/bass",
+   "notes": "audio/stems/factory/bass.notes.json",
+   "hits": "audio/stems/factory/bass.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "factory/clap",
+   "path": "audio/stems/factory/clap",
+   "notes": "audio/stems/factory/clap.notes.json",
+   "hits": "audio/stems/factory/clap.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "factory/kick",
+   "path": "audio/stems/factory/kick",
+   "notes": "audio/stems/factory/kick.notes.json",
+   "hits": "audio/stems/factory/kick.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "juno/bass",
+   "path": "audio/stems/juno/bass",
+   "notes": "audio/stems/juno/bass.notes.json",
+   "hits": "audio/stems/juno/bass.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "juno/drums",
+   "path": "audio/stems/juno/drums",
+   "notes": "audio/stems/juno/drums.notes.json",
+   "hits": "audio/stems/juno/drums.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "juno/hook",
+   "path": "audio/stems/juno/hook",
+   "notes": "audio/stems/juno/hook.notes.json",
+   "hits": "audio/stems/juno/hook.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "juno/riff",
+   "path": "audio/stems/juno/riff",
+   "notes": "audio/stems/juno/riff.notes.json",
+   "hits": "audio/stems/juno/riff.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "lyra/hum",
+   "path": "audio/stems/lyra/hum",
+   "notes": "audio/stems/lyra/hum.notes.json",
+   "hits": "audio/stems/lyra/hum.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "lyra/piano",
+   "path": "audio/stems/lyra/piano",
+   "notes": "audio/stems/lyra/piano.notes.json",
+   "hits": "audio/stems/lyra/piano.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "marcus/billboard",
+   "path": "audio/stems/marcus/billboard",
+   "notes": "audio/stems/marcus/billboard.notes.json",
+   "hits": "audio/stems/marcus/billboard.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "marcus/groove",
+   "path": "audio/stems/marcus/groove",
+   "notes": "audio/stems/marcus/groove.notes.json",
+   "hits": "audio/stems/marcus/groove.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "marcus/rims",
+   "path": "audio/stems/marcus/rims",
+   "notes": "audio/stems/marcus/rims.notes.json",
+   "hits": "audio/stems/marcus/rims.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "marcus/traffic",
+   "path": "audio/stems/marcus/traffic",
+   "notes": "audio/stems/marcus/traffic.notes.json",
+   "hits": "audio/stems/marcus/traffic.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "mirror/beat",
+   "path": "audio/stems/mirror/beat",
+   "notes": "audio/stems/mirror/beat.notes.json",
+   "hits": "audio/stems/mirror/beat.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "mirror/click",
+   "path": "audio/stems/mirror/click",
+   "notes": "audio/stems/mirror/click.notes.json",
+   "hits": "audio/stems/mirror/click.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "mirror/stab",
+   "path": "audio/stems/mirror/stab",
+   "notes": "audio/stems/mirror/stab.notes.json",
+   "hits": "audio/stems/mirror/stab.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "panel/bassline",
+   "path": "audio/stems/panel/bassline",
+   "notes": "audio/stems/panel/bassline.notes.json",
+   "hits": "audio/stems/panel/bassline.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "panel/drums",
+   "path": "audio/stems/panel/drums",
+   "notes": "audio/stems/panel/drums.notes.json",
+   "hits": "audio/stems/panel/drums.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "panel/jingle",
+   "path": "audio/stems/panel/jingle",
+   "notes": "audio/stems/panel/jingle.notes.json",
+   "hits": "audio/stems/panel/jingle.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "panel/topline",
+   "path": "audio/stems/panel/topline",
+   "notes": "audio/stems/panel/topline.notes.json",
+   "hits": "audio/stems/panel/topline.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "park/harp",
+   "path": "audio/stems/park/harp",
+   "notes": "audio/stems/park/harp.notes.json",
+   "hits": "audio/stems/park/harp.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "park/pad",
+   "path": "audio/stems/park/pad",
+   "notes": "audio/stems/park/pad.notes.json",
+   "hits": "audio/stems/park/pad.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "park/theme",
+   "path": "audio/stems/park/theme",
+   "notes": "audio/stems/park/theme.notes.json",
+   "hits": "audio/stems/park/theme.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "piano_room/piano",
+   "path": "audio/stems/piano_room/piano",
+   "notes": "audio/stems/piano_room/piano.notes.json",
+   "hits": "audio/stems/piano_room/piano.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "piano_room/piano_old",
+   "path": "audio/stems/piano_room/piano_old",
+   "notes": "audio/stems/piano_room/piano_old.notes.json",
+   "hits": "audio/stems/piano_room/piano_old.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "piano_room/radiator",
+   "path": "audio/stems/piano_room/radiator",
+   "notes": "audio/stems/piano_room/radiator.notes.json",
+   "hits": "audio/stems/piano_room/radiator.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "title/clarinet",
+   "path": "audio/stems/title/clarinet",
+   "notes": "audio/stems/title/clarinet.notes.json",
+   "hits": "audio/stems/title/clarinet.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "title/piano",
+   "path": "audio/stems/title/piano",
+   "notes": "audio/stems/title/piano.notes.json",
+   "hits": "audio/stems/title/piano.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "title/strings",
+   "path": "audio/stems/title/strings",
+   "notes": "audio/stems/title/strings.notes.json",
+   "hits": "audio/stems/title/strings.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "warmup/metronome",
+   "path": "audio/stems/warmup/metronome",
+   "notes": "audio/stems/warmup/metronome.notes.json",
+   "hits": "audio/stems/warmup/metronome.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "warmup/piano",
+   "path": "audio/stems/warmup/piano",
+   "notes": "audio/stems/warmup/piano.notes.json",
+   "hits": "audio/stems/warmup/piano.hits.json",
+   "status": "placeholder"
+  },
+  {
+   "id": "warmup/voice",
+   "path": "audio/stems/warmup/voice",
+   "notes": "audio/stems/warmup/voice.notes.json",
+   "hits": "audio/stems/warmup/voice.hits.json",
+   "status": "placeholder"
+  }
+ ]
+}

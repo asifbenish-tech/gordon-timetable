@@ -1,0 +1,35 @@
+{
+ "id": "juno_riff",
+ "start": "n0",
+ "nodes": {
+  "n0": {
+   "speaker": "juno",
+   "text": "dlg.juno_riff.n0",
+   "next": "n1"
+  },
+  "n1": {
+   "speaker": "juno",
+   "text": "dlg.juno_riff.n1",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "bobbin",
+   "text": "dlg.juno_riff.n2",
+   "next": "n3"
+  },
+  "n3": {
+   "speaker": "juno",
+   "text": "dlg.juno_riff.n3",
+   "next": "n4"
+  },
+  "n4": {
+   "speaker": "juno",
+   "text": "dlg.juno_riff.n4",
+   "next": "n5"
+  },
+  "n5": {
+   "speaker": "juno",
+   "text": "dlg.juno_riff.n5"
+  }
+ }
+}

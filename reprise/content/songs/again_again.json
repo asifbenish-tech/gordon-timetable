@@ -1,0 +1,69 @@
+{
+ "id": "again_again",
+ "bpm": 120,
+ "bars": 4,
+ "caption": "caption.song.again_again",
+ "stems": [
+  {
+   "id": "kick",
+   "file": "audio/stems/again_again/kick",
+   "hitsFile": "audio/stems/again_again/kick.hits.json",
+   "color": "#e0403a",
+   "label": "thread.again_again.kick",
+   "instrument": "kick",
+   "masksGolden": 0.05,
+   "tether": "dancers",
+   "role": "rhythm"
+  },
+  {
+   "id": "bass",
+   "file": "audio/stems/again_again/bass",
+   "hitsFile": "audio/stems/again_again/bass.hits.json",
+   "color": "#f08c3a",
+   "label": "thread.again_again.bass",
+   "instrument": "bass",
+   "masksGolden": 0.2,
+   "role": "harmony"
+  },
+  {
+   "id": "supersaw",
+   "file": "audio/stems/again_again/supersaw",
+   "hitsFile": "audio/stems/again_again/supersaw.hits.json",
+   "color": "#ff4fd8",
+   "label": "thread.again_again.supersaw",
+   "instrument": "saw",
+   "masksGolden": 0.4,
+   "role": "harmony"
+  },
+  {
+   "id": "vocal",
+   "file": "audio/stems/again_again/vocal",
+   "hitsFile": "audio/stems/again_again/vocal.hits.json",
+   "color": "#c8ccd8",
+   "label": "thread.again_again.vocal",
+   "instrument": "vocal",
+   "masksGolden": 0.35,
+   "knot": "tuning",
+   "role": "melody"
+  },
+  {
+   "id": "golden",
+   "file": "audio/stems/again_again/golden",
+   "hitsFile": "audio/stems/again_again/golden.hits.json",
+   "color": "#f3c64b",
+   "label": "thread.again_again.golden",
+   "instrument": "hum",
+   "golden": true,
+   "role": "melody"
+  },
+  {
+   "id": "riser",
+   "file": "audio/stems/again_again/riser",
+   "hitsFile": "audio/stems/again_again/riser.hits.json",
+   "color": "#f4f4f4",
+   "label": "thread.again_again.riser",
+   "instrument": "riser",
+   "level": 0.6
+  }
+ ]
+}

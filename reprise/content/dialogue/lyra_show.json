@@ -1,0 +1,15 @@
+{
+ "id": "lyra_show",
+ "start": "n0",
+ "nodes": {
+  "n0": {
+   "speaker": "lyra",
+   "text": "dlg.lyra_show.n0",
+   "next": "n1"
+  },
+  "n1": {
+   "speaker": "lyra",
+   "text": "dlg.lyra_show.n1"
+  }
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "id": "park",
+ "bpm": 84,
+ "bars": 8,
+ "tracks": {
+  "theme": {
+   "instrument": "clarinet",
+   "notes": "e4:3 a3:.25 b3:.25 c4:.25 d4:.25 | e4:1.5 c4:.5 e4:1.5 c4:.5 | e4:1.5 a3:.5 c4:.5 a3:.5 f3:.5 c4:.5 | a3:4 | r:4 | r:4 | r:4 | r:4"
+  },
+  "harp": {
+   "instrument": "harp",
+   "notes": "a2:.5 e3:.5 a3:.5 c4:.5 e4:.5 c4:.5 a3:.5 e3:.5 | f2:.5 c3:.5 f3:.5 a3:.5 c4:.5 a3:.5 f3:.5 c3:.5"
+  },
+  "pad": {
+   "instrument": "pad",
+   "notes": "[a2,e3,a3]:4 | [f2,c3,a3]:4 | [d3,f3,a3]:4 | [e2,b2,e3]:4"
+  }
+ }
+}

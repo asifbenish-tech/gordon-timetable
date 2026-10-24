@@ -1,0 +1,21 @@
+{
+ "id": "warmup",
+ "bpm": 90,
+ "bars": 2,
+ "tracks": {
+  "piano": {
+   "instrument": "piano",
+   "notes": "[c3,e3,g3,c4]:1 [c3,e3,g3,c4]:1 [c3,e3,g3,c4]:1 [c3,e3,g3,c4]:1 | [g2,d3,g3,b3]:1 [g2,d3,g3,b3]:1 [c3,e3,g3,c4]:2"
+  },
+  "voice": {
+   "instrument": "coach",
+   "draft": "tuning",
+   "notes": "@0:1 @1:1 @2:1 @3:1 | r:4"
+  },
+  "metronome": {
+   "instrument": "click",
+   "pitch": "c6",
+   "steps": "X...x...x...x..."
+  }
+ }
+}

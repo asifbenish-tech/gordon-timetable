@@ -1,0 +1,23 @@
+{
+ "id": "A2-7",
+ "title": "puzzle.A2-7",
+ "room": "dominic_studio",
+ "focus": "dominic",
+ "needs": [
+  "puzzle:A2-6"
+ ],
+ "gives": [
+  "spools:4"
+ ],
+ "solvedWhen": "show_tonight",
+ "hints": [
+  "hint.A2-7.look",
+  "hint.A2-7.nudge",
+  "hint.A2-7.answer"
+ ],
+ "bot": [
+  "walk:dominic_studio",
+  "talk:dominic",
+  "flag:show_tonight"
+ ]
+}

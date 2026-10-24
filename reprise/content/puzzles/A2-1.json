@@ -1,0 +1,25 @@
+{
+ "id": "A2-1",
+ "title": "puzzle.A2-1",
+ "room": "factory_night",
+ "focus": "pedal",
+ "needs": [
+  "puzzle:A1-7"
+ ],
+ "gives": [
+  "spools:2"
+ ],
+ "solvedWhen": "juno_ally",
+ "hints": [
+  "hint.A2-1.look",
+  "hint.A2-1.nudge",
+  "hint.A2-1.answer"
+ ],
+ "bot": [
+  "walk:factory_night",
+  "comb:pedal",
+  "pull:hook",
+  "pull:bass",
+  "flag:juno_ally"
+ ]
+}

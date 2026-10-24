@@ -1,0 +1,23 @@
+{
+ "id": "factory",
+ "bpm": 128,
+ "bars": 2,
+ "tracks": {
+  "kick": {
+   "instrument": "kick",
+   "steps": "X...X...X...X..."
+  },
+  "clap": {
+   "instrument": "clap",
+   "steps": "....x.......x..."
+  },
+  "bass": {
+   "instrument": "bass",
+   "notes": "r:.5 a1:.5 r:.5 a1:.5 r:.5 a1:.5 r:.5 a1:.5 | r:.5 g1:.5 r:.5 g1:.5 r:.5 g1:.5 r:.5 e1:.5"
+  },
+  "arp": {
+   "instrument": "arp",
+   "notes": "a3:.25 c4:.25 e4:.25 a4:.25 a3:.25 c4:.25 e4:.25 a4:.25 a3:.25 c4:.25 e4:.25 a4:.25 a3:.25 c4:.25 e4:.25 a4:.25 | g3:.25 b3:.25 d4:.25 g4:.25 g3:.25 b3:.25 d4:.25 g4:.25 g3:.25 b3:.25 d4:.25 g4:.25 g3:.25 b3:.25 d4:.25 g4:.25"
+  }
+ }
+}
