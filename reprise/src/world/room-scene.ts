@@ -106,7 +106,7 @@ export class RoomScene extends Phaser.Scene implements View {
     } else this.lights.disable();
 
     room.layers.forEach((l, i) => {
-      const img = this.add.image(0, 0, l.image).setOrigin(0, 0).setScrollFactor(l.scroll).setDepth(-100 + i);
+      const img = this.add.image(0, 0, l.image).setOrigin(0, 0).setScrollFactor(l.scroll).setDepth(l.front ? 5000 + i : -100 + i);
       if (l.lit && lighting) img.setLighting(true);
       this.layers.push(img);
     });
@@ -350,7 +350,8 @@ export class RoomScene extends Phaser.Scene implements View {
         const frames = s.texture.frameTotal - 1;
         s.setFrame(Math.floor(beat * 2 + (def.x % 3)) % Math.max(1, frames));
       } else if (!s.anims.isPlaying) {
-        s.play({ key: def.image, frameRate: (def.fps ?? 8) * (0.9 + ((def.x * 7) % 20) / 100), startFrame: def.x % 4 });
+        const frames = Math.max(1, s.texture.frameTotal - 1);
+        s.play({ key: def.image, frameRate: (def.fps ?? 8) * (0.9 + ((def.x * 7) % 20) / 100), startFrame: Math.floor(def.x) % frames });
       }
     }
 

@@ -22,7 +22,7 @@ const schemas: Record<string, object> = {
     additionalProperties: false,
     properties: {
       id: { type: "string" }, act: { enum: ["prologue", "act1", "act2"] }, location: { type: "string" }, width: { type: "number", minimum: 640, maximum: 1280 },
-      layers: { type: "array", minItems: 1, items: { type: "object", required: ["image", "scroll"], additionalProperties: false, properties: { image: { type: "string" }, scroll: { type: "number" }, lit: { type: "boolean" } } } },
+      layers: { type: "array", minItems: 1, items: { type: "object", required: ["image", "scroll"], additionalProperties: false, properties: { image: { type: "string" }, scroll: { type: "number" }, lit: { type: "boolean" }, front: { type: "boolean" } } } },
       walk: { type: "array", minItems: 3, items: pt }, entries: { type: "object", additionalProperties: pt }, song: { type: "string" },
       ambient: { type: "string" }, logic: { type: "string" }, onEnter: { type: "string" }, swan: { type: "boolean" },
       lights: { type: "array", items: { type: "object", required: ["x", "y", "radius", "color", "intensity"] } },
@@ -68,7 +68,7 @@ const schemas: Record<string, object> = {
       stems: { type: "array", items: { type: "object", required: ["id", "file", "color", "label", "instrument"], additionalProperties: false, properties: {
         id: { type: "string" }, file: { type: "string" }, color: { type: "string", pattern: "^#[0-9a-f]{6}$" }, masksGolden: { type: "number", minimum: 0, maximum: 1 },
         sealed: { type: "boolean" }, knot: { type: "string" }, tether: { type: "string" }, role: { enum: ["melody", "rhythm", "harmony"] }, hitsFile: { type: "string" },
-        golden: { type: "boolean" }, label: { type: "string" }, instrument: { type: "string" }, when: { type: "string" }, level: { type: "number" } } } },
+        golden: { type: "boolean" }, braid: { type: "string" }, label: { type: "string" }, instrument: { type: "string" }, when: { type: "string" }, level: { type: "number" } } } },
     },
   },
 };

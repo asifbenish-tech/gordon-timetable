@@ -98,10 +98,10 @@ function window_(img: Img, [x, y, w, h]: Rect, sky: string, city: string): void 
   img.rect(x + w / 2 - 1, y, 2, h, "#2a2a34");
 }
 
+/** A soft dithered darkening along the floor's front edge: grounds the room without framing it. */
 function vignette(img: Img, amount = 0.5): void {
-  img.shade(0, 0, img.w, 20, "#000000", amount * 0.6);
-  img.shade(0, 0, 14, img.h, "#000000", amount * 0.4);
-  img.shade(img.w - 14, 0, 14, img.h, "#000000", amount * 0.4);
+  img.shade(0, img.h - 70, img.w, 16, "#000000", amount * 0.25);
+  img.shade(0, img.h - 54, img.w, 54, "#000000", amount * 0.45);
 }
 
 // ---- rooms -----------------------------------------------------------------------------------
@@ -230,10 +230,6 @@ const ROOMS: Record<string, (img: Img) => void> = {
     floor(img, 248, "#e8e8f4", "#8a7a9a");
     for (let x = 0; x < img.w; x += 40) img.line(x, 248, x - 60, 300, "#c8c0d8");
     mirrorPanel(img, rectOf("spire_lobby", "mirrors"), "#e8e8f4", "#8a6aa8");
-    const d = rectOf("spire_lobby", "desk");
-    img.ellipse(d[0] + d[2] / 2, d[1] + 6, d[2] / 2, 16, "#e8e8f4");
-    img.rect(d[0], d[1] + 6, d[2], d[3] - 6, "#e8e8f4");
-    img.rect(d[0] + 10, d[1] + 18, d[2] - 20, 3, "#ff7ae0");
     const s = rectOf("spire_lobby", "sign");
     img.text(s[0] + 2, s[1] + 4, "WHERE EVERY STAR", "#ffffff");
     img.text(s[0] + 2, s[1] + 14, "IS BORN READY", "#66e0ff");
@@ -242,6 +238,14 @@ const ROOMS: Record<string, (img: Img) => void> = {
     img.ellipse(h[0] + h[2] / 2, h[1] + h[3] - 2, 24, 6, "#66e0ff", 160);
     img.rect(0, 150, 36, 146, "#2a0f3a");
     vignette(img, 0.25);
+  },
+  bg_spire_lobby_front(img) {
+    // the desk stands in front of the receptionist
+    const d = rectOf("spire_lobby", "desk");
+    img.ellipse(d[0] + d[2] / 2, d[1] + 6, d[2] / 2, 16, "#e8e8f4");
+    img.rect(d[0], d[1] + 6, d[2], d[3] - 6, "#e8e8f4");
+    img.rect(d[0] + 10, d[1] + 18, d[2] - 20, 3, "#ff7ae0");
+    img.shade(d[0], d[1] + d[3] - 8, d[2], 8, "#8a7a9a", 0.5);
   },
   bg_floor40_far(img) {
     img.gradient(0, 0, img.w, 250, "#3a1550", "#a03090", 5);

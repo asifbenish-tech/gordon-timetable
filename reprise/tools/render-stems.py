@@ -11,7 +11,7 @@ For every music/src/<song>.json this script:
      and marks the stem "generated" in assets/manifest.json. Otherwise stems stay
      "placeholder" and the browser synthesises them.
 
-Notation (DECISIONS.md D-010):
+Notation (DECISIONS.md D-017):
   "steps": "x...x...|x.x.x..." one char per 16th, bars split by |, X accent, x normal, o soft
   "notes": "c4:1 e4:.5 [c4,e4,g4]:2 r:1 | ..."  pitch:beats, r = rest, ! accent, ? soft
   "@0:1"  = note 0 of this save's draft named in "draft" (per-save melodies, GDD 8.9 step 6)

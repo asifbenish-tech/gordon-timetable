@@ -69,7 +69,10 @@ export class LoomModel {
   }
 
   goldenLevel(at: number): number {
-    if (!this.def.stems.some((s) => s.golden && this.exists(s))) return 0;
+    const golden = this.def.stems.find((s) => s.golden && this.exists(s));
+    if (!golden) return 0;
+    // Braided into a knotted thread, it goes wherever that thread goes until Tuning splits them (GDD 6, puzzle 1).
+    if (golden.braid && this.isTied(golden.braid) && !this.audible(golden.braid, at)) return 0;
     return goldenLevel(
       this.def,
       (id) => this.audible(id, at),

@@ -12,6 +12,11 @@
    "image": "bg_spire_lobby",
    "scroll": 1,
    "lit": true
+  },
+  {
+   "image": "bg_spire_lobby_front",
+   "scroll": 1,
+   "front": true
   }
  ],
  "walk": [

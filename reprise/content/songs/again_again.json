@@ -54,7 +54,8 @@
    "label": "thread.again_again.golden",
    "instrument": "hum",
    "golden": true,
-   "role": "melody"
+   "role": "melody",
+   "braid": "vocal"
   },
   {
    "id": "riser",

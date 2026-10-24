@@ -12,6 +12,11 @@ export default tseslint.config(
     },
   },
   {
+    // the bot drives the page through window.__reprise, which has no static type on that side
+    files: ["tests/e2e/**"],
+    rules: { "@typescript-eslint/no-explicit-any": "off" },
+  },
+  {
     files: ["src/audio/**", "src/core/**"],
     rules: {
       "no-restricted-globals": ["error",

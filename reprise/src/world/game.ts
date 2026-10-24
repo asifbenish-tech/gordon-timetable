@@ -129,11 +129,13 @@ export class Game {
   }
 
   cond(expr: string | undefined): boolean {
+    if (!expr) return true;
     return check(this.condState(), expr);
   }
 
   condState(): CondState {
     const s = this.save;
+    if (!s) return { flags: {}, learned: [], solved: [], ownedNotes: 8, tools: [], capacity: 0 }; // the title screen
     return { flags: s.flags, learned: this.library.learned, solved: s.solved, ownedNotes: this.library.ownedNotes, tools: s.tools, capacity: this.spindle.capacity };
   }
 
@@ -220,7 +222,9 @@ export class Game {
   refreshLook(): void {
     const restoredBy: Record<string, string> = { park: "note:f", spire: "note:f", factory: "note:g", arena: "note:g", crossing: "true", street: "note:g" };
     this.view?.setRestored(this.cond(restoredBy[this.room.location] ?? "false") ? 1 : 0);
-    const white = this.save.flags.flock_grey ? Math.max(0, this.library.ownedNotes - 3) / 5 : 1;
+    // The flock's whiteness is the progress bar: each note won back after the crack whitens it.
+    const restored = this.save.flags.human ? Math.max(0, this.library.ownedNotes - 3) : 0;
+    const white = this.save.flags.flock_grey ? restored / 5 : 1;
     this.view?.setFlockWhite(white);
   }
 
@@ -229,8 +233,8 @@ export class Game {
     if (!m) {
       const def = songs.get(songId);
       if (!def) throw new Error(`Unknown song ${songId}`);
-      this.save.mods[songId] ??= { untied: [], replaced: {} };
-      m = new LoomModel(def, this.effects, this.save.mods[songId], (s) => this.cond(s.when));
+      const mods = this.save ? (this.save.mods[songId] ??= { untied: [], replaced: {} }) : { untied: [], replaced: {} };
+      m = new LoomModel(def, this.effects, mods, (s) => this.cond(s.when));
       this.models.set(songId, m);
     }
     return m;
@@ -252,9 +256,9 @@ export class Game {
     this.song = null;
     if (!this.mixer) return;
     this.song = new Song(this.model(id), this.stemData, this.conductor, this.mixer, this.bus);
-    if (this.save.difficulty === "expert") this.song.goldenCurve = (l) => l * l * l;
+    if (this.save?.difficulty === "expert") this.song.goldenCurve = (l) => l * l * l;
     this.song.start();
-    for (const { slot, thread } of this.spindle.threadSlots()) this.song.addGuest(slot, thread);
+    for (const { slot, thread } of this.spindle?.threadSlots() ?? []) this.song.addGuest(slot, thread);
     if (def.caption) this.caption(def.caption);
   }
 
@@ -413,6 +417,8 @@ export class Game {
   async say(speaker: string, key: string, vars: Record<string, string> = {}): Promise<void> {
     const text = t(key, vars);
     this.bus.emit("say", { speaker, text });
+    const sp = speakers.get(speaker);
+    if (sp && speaker !== "bobbin") this.speakerSignature(sp);
     if (!this.hud) return;
     await this.hud.say(speaker, text);
   }
@@ -502,6 +508,7 @@ export class Game {
     this.distaff.clear();
     this.bus.emit("notesOwned", { count: 3 });
     this.hud?.refresh();
+    this.refreshLook();
     this.persist(true);
   }
 

@@ -23,6 +23,9 @@ export class Conductor {
     if (this.started) return;
     this.started = true;
     this.bpm = bpm;
+    // Game state follows the music through Tone.getDraw() (GDD 9.3 rule 4). Draw drops callbacks that run
+    // more than 0.25 s late; a busy frame must delay a bar's logic, never lose it.
+    Tone.getDraw().expiration = 10;
     const transport = Tone.getTransport();
     transport.bpm.value = bpm * this.tempoScale;
     transport.timeSignature = this.beatsPerBar;

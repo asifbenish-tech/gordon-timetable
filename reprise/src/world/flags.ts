@@ -60,8 +60,9 @@ export function check(state: CondState, cond: string | undefined): boolean {
 
 /** Static check used by content validation: does every term parse? */
 export function validCondition(cond: string): boolean {
+  const state: CondState = { flags: {}, learned: [], solved: [], ownedNotes: 8, tools: [], capacity: 4 };
   try {
-    check({ flags: {}, learned: [], solved: [], ownedNotes: 8, tools: [], capacity: 4 }, cond);
+    for (const raw of cond.split("&")) term(state, raw.trim().replace(/^!/, ""));
     return true;
   } catch {
     return false;

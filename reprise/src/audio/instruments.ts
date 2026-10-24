@@ -1,5 +1,5 @@
 // src/audio/instruments.ts: placeholder synths. Every stem and teaching voice plays
-// through one of these until a rendered stem exists (GDD 8.9, DECISIONS.md D-010).
+// through one of these until a rendered stem exists (GDD 8.9, DECISIONS.md D-017).
 import * as Tone from "tone";
 
 export interface Instrument {
@@ -13,8 +13,15 @@ const hz = (m: number): number => 440 * Math.pow(2, (m - 69) / 12);
 type Node = Tone.ToneAudioNode & { dispose(): unknown };
 
 function build(nodes: Node[], output: Tone.ToneAudioNode, play: Instrument["play"]): Instrument {
+  // Tone's monophonic voices and envelopes need start times in order; two callers scheduling the same
+  // instrument a few milliseconds apart (a loop and a stinger, say) must never throw.
+  let last = -1;
   return {
-    play,
+    play(m, d, t, v) {
+      if (t <= last) t = last + 0.0005;
+      last = t;
+      play(m, d, t, v);
+    },
     output,
     dispose: () => {
       for (const n of nodes) n.dispose();

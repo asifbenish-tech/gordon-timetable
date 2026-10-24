@@ -15,7 +15,8 @@
     "validate": "tsx tools/validate-content.ts",
     "placeholders": "tsx tools/make-placeholders.ts && tsx tools/make-normals.ts",
     "bot": "playwright test",
-    "check": "npm run typecheck && npm run lint && npm run validate && npm run test"
+    "check": "npm run typecheck && npm run lint && npm run validate && npm run test",
+    "build:artifact": "vite build && tsx tools/make-artifact-page.ts"
   },
   "dependencies": {
     "phaser": "4.2.1",

@@ -146,11 +146,12 @@ export class DistaffBar {
     if (!label) return;
     const icon = h("div", { class: "closeup-icon" });
     if (sprite) {
-      icon.style.backgroundImage = `url(${sprite.url})`;
-      const scale = Math.min(1, 40 / Math.max(sprite.frameW, sprite.h));
-      icon.style.backgroundSize = `${sprite.w * scale}px ${sprite.h * scale}px`;
-      icon.style.width = `${sprite.frameW * scale}px`;
-      icon.style.height = `${sprite.h * scale}px`;
+      // the object's first frame, drawn pixel for pixel: its close-up icon (GDD 4.1)
+      const c = h("canvas", { width: sprite.frameW, height: sprite.h });
+      const img = new Image();
+      img.onload = () => c.getContext("2d")?.drawImage(img, 0, 0, sprite.frameW, sprite.h, 0, 0, sprite.frameW, sprite.h);
+      img.src = sprite.url;
+      icon.append(c);
     } else icon.textContent = label.slice(0, 1).toUpperCase();
     this.closeup.append(icon, h("span", { class: "closeup-label" }, label));
   }

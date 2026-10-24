@@ -30,6 +30,7 @@ export interface StemDef {
   role?: StemRole; // for weaving recipes
   hitsFile?: string; // note-on beats from render-stems.py
   golden?: boolean; // this stem is the golden thread
+  braid?: string; // ext: the knotted stem the golden thread is braided into, until the knot is untied
   label: string; // ext: string key for the thread's name
   instrument: string; // ext: placeholder synth used until a rendered stem exists
   when?: string; // ext: condition; the thread only exists while it holds
@@ -93,6 +94,7 @@ export interface LayerDef {
   image: string; // manifest id
   scroll: number; // parallax factor, 1 = moves with the room
   lit?: boolean;
+  front?: boolean; // ext: drawn in front of characters (a desk, a railing)
 }
 
 export interface RoomDef {

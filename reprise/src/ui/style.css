@@ -140,14 +140,16 @@ button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px s
 .contour.bad .contour-line { stroke: #776b8a; stroke-dasharray: 2 3; }
 .closeup { width: calc(var(--s) * 92px); flex: none; display: flex; align-items: center; gap: 0.3em; font-size: 0.8em; }
 .closeup-icon {
-  flex: none; display: grid; place-items: center; min-width: calc(var(--s) * 22px); min-height: calc(var(--s) * 22px);
-  background-color: #1d1830; background-repeat: no-repeat; image-rendering: pixelated; border: 2px solid #c08a5a; border-radius: 3px; font-weight: 700;
+  flex: none; display: grid; place-items: center; width: calc(var(--s) * 26px); height: calc(var(--s) * 26px);
+  background-color: #1d1830; border: 2px solid #c08a5a; border-radius: 3px; font-weight: 700; overflow: hidden;
 }
+.closeup-icon canvas { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
 .closeup-label { line-height: 1.1; text-shadow: 0 1px 1px #000; overflow: hidden; }
 .icon-btn { flex: none; width: calc(var(--s) * 24px); height: calc(var(--s) * 24px); border-radius: 50%; background: #2b1a10; border: 2px solid #c08a5a; padding: 0; line-height: 1; }
 
 /* ---- the Loom View's controls ---- */
 #hud.loom-open #speech { top: auto; bottom: calc(var(--s) * 60px); }
+#hud.loom-open #caption { top: auto; bottom: calc(var(--s) * 62px); left: auto; right: calc(var(--s) * 8px); text-align: right; }
 #loom-panel { position: absolute; inset: 0 0 calc(var(--s) * 56px) 0; pointer-events: none; }
 #loom-panel > * { pointer-events: auto; }
 .loom-actions { position: absolute; left: calc(var(--s) * 6px); right: calc(var(--s) * 6px); top: calc(var(--s) * 6px); display: flex; flex-wrap: wrap; gap: 0.35em; }
@@ -229,3 +231,5 @@ body.portrait #app::after {
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+.save-text { width: 100%; margin: 0.4em 0; font: 0.8em ui-monospace, monospace; background: #0d0b14; color: var(--ink); border: 1px solid var(--line); border-radius: 4px; user-select: text; }

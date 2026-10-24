@@ -13,6 +13,7 @@ export function noteMidi(n: NoteIndex): number {
 
 export class NoteVoice {
   private distaff: Instrument | null = null;
+  private looper: Instrument | null = null; // the Spindle's own voice: loops are scheduled ahead, live notes are not
   private teachers = new Map<string, Instrument>();
   private crack: Tone.NoiseSynth | null = null;
   private stinger: Tone.PolySynth | null = null;
@@ -34,7 +35,12 @@ export class NoteVoice {
   }
 
   playAt(n: NoteIndex, time: number, vel = 0.7): void {
-    this.ensure()?.play(noteMidi(n), 0.35, time, vel);
+    if (!this.mixer) return;
+    if (!this.looper) {
+      this.looper = makeInstrument("distaff");
+      this.looper.output.connect(this.mixer.distaff);
+    }
+    this.looper.play(noteMidi(n), 0.35, time, vel);
   }
 
   /** A dead click: that note is still lost. */

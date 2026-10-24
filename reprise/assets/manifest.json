@@ -323,6 +323,15 @@
    "recipe": "room:bg_spire_lobby"
   },
   {
+   "id": "bg_spire_lobby_front",
+   "path": "art/rooms/bg_spire_lobby_front.png",
+   "w": 640,
+   "h": 360,
+   "frames": 1,
+   "status": "placeholder",
+   "recipe": "room:bg_spire_lobby_front"
+  },
+  {
    "id": "bg_street_sky",
    "path": "art/rooms/bg_street_sky.png",
    "w": 704,

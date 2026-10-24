@@ -11,6 +11,7 @@ declare const __DEBUG__: boolean;
 export class SettingsPanel {
   readonly el: HTMLElement;
   private body: HTMLElement;
+  private status = h("p", { class: "fine", role: "status" });
   onQuit: () => void = () => {};
   onBook: () => void = () => {};
   onApply: () => void = () => {};
@@ -92,36 +93,70 @@ export class SettingsPanel {
         inGame ? h("button", { onclick: () => this.exportSave() }, t("save.export")) : null,
         h("button", { onclick: () => this.importSave() }, t("save.import")),
         inGame ? h("button", { onclick: () => this.onQuit() }, t("save.title")) : null,
-        h("button", { class: "danger", onclick: () => { if (confirm(t("save.erase.confirm"))) { clearSave(); location.reload(); } } }, t("save.erase")),
+        h("button", {
+          class: "danger",
+          // two clicks instead of confirm(), which some hosts never show
+          onclick: (e: Event) => {
+            const b = e.currentTarget as HTMLButtonElement;
+            if (b.dataset.armed) {
+              clearSave();
+              location.reload();
+            } else {
+              b.dataset.armed = "1";
+              b.textContent = t("save.erase.confirm");
+            }
+          },
+        }, t("save.erase")),
       ),
+      this.status,
       h("p", { class: "fine" }, t("set.privacy")),
     );
   }
 
+  /** A file where downloads work, and always the text itself to copy (some hosts block downloads). */
   private exportSave(): void {
     this.g.persist(true);
-    const blob = new Blob([JSON.stringify(this.g.save, null, 1)], { type: "application/json" });
-    const a = h("a", { href: URL.createObjectURL(blob), download: "reprise-save.json" });
-    document.body.append(a);
-    a.click();
-    a.remove();
+    const json = JSON.stringify(this.g.save);
+    try {
+      const blob = new Blob([json], { type: "application/json" });
+      const a = h("a", { href: URL.createObjectURL(blob), download: "reprise-save.json" });
+      document.body.append(a);
+      a.click();
+      a.remove();
+    } catch {
+      // the text below is enough
+    }
+    const area = h("textarea", { id: "save-text", class: "save-text", readonly: true, rows: 3, "aria-label": t("save.text") });
+    area.value = json;
+    const copy = h("button", {
+      onclick: () => {
+        navigator.clipboard?.writeText(json).then(
+          () => (this.status.textContent = t("save.copied")),
+          () => area.select(),
+        );
+      },
+    }, t("save.copy"));
+    this.status.replaceChildren(h("span", {}, t("save.export.help")), area, copy);
   }
 
   private importSave(): void {
-    const input = h("input", { type: "file", accept: "application/json,.json" });
-    input.onchange = async () => {
-      const f = input.files?.[0];
-      if (!f) return;
+    const load = (text: string) => {
       try {
-        const data = JSON.parse(await f.text()) as unknown;
+        const data = JSON.parse(text) as unknown;
         if (!isSave(data)) throw new Error("not a save");
         this.close();
         this.g.load(data);
       } catch {
-        alert(t("save.import.bad"));
+        this.status.textContent = t("save.import.bad");
       }
     };
-    input.click();
+    const input = h("input", { id: "save-file", type: "file", accept: "application/json,.json" });
+    input.onchange = async () => {
+      const f = input.files?.[0];
+      if (f) load(await f.text());
+    };
+    const area = h("textarea", { id: "save-paste", class: "save-text", rows: 3, placeholder: t("save.paste"), "aria-label": t("save.paste") });
+    this.status.replaceChildren(input, area, h("button", { onclick: () => load(area.value) }, t("save.load")));
   }
 }
 

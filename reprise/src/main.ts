@@ -49,7 +49,7 @@ function layout(): void {
   const w = window.innerWidth;
   const hgt = window.innerHeight;
   const fit = Math.min(w / WORLD_W, hgt / WORLD_H);
-  // Whole numbers only; below 1x there is no whole number, so the stage shrinks (DECISIONS.md D-012).
+  // Whole numbers only; below 1x there is no whole number, so the stage shrinks (DECISIONS.md D-023).
   const s = fit >= 1 ? Math.floor(fit) : fit;
   stage.style.setProperty("--s", String(s));
   stage.style.width = `${WORLD_W * s}px`;
@@ -285,7 +285,14 @@ window.addEventListener("beforeunload", () => {
   writeSettings(settings);
 });
 
-if ("serviceWorker" in navigator && location.protocol === "https:" && !(typeof __DEBUG__ !== "undefined" && __DEBUG__)) {
+const framed = (() => {
+  try {
+    return window.top !== window;
+  } catch {
+    return true;
+  }
+})();
+if ("serviceWorker" in navigator && location.protocol === "https:" && !framed && !(typeof __DEBUG__ !== "undefined" && __DEBUG__)) {
   navigator.serviceWorker.register("./sw.js").catch(() => {});
 }
 
@@ -293,4 +300,6 @@ if (typeof __DEBUG__ !== "undefined" && __DEBUG__) {
   void import("./debug/api").then((m) => m.install(g, hud, { begin, start, showMenu }));
 }
 
+document.title = t("title.name");
+document.getElementById("app")!.dataset.rotate = t("ui.rotate");
 showTitle();
