@@ -823,10 +823,16 @@ function saveToday(cid, patch, writeHist){
 function todaysPlan(cid){ const p = S.today[cid] && S.today[cid].plan; return p && p.date === todayStr() ? p : null; }
 function updateClass(cid, fn){
   const c = getCls(cid); if (!c) return;
-  fn(c); normalizeClass(c); saveCls(c);
+  const res = fn(c); normalizeClass(c); saveCls(c);
   const plan = todaysPlan(cid);
   if (plan){
-    const fixed = repair(plan, c, absentSet(cid));
+    // After a change to the room layout, today's tables follow their physical spot to the new numbers.
+    let base = plan;
+    if (res && res.renumber && plan.tables){
+      base = clone(plan); base.tables = {};
+      for (const [n, ids] of Object.entries(plan.tables)) if (res.renumber[n]) base.tables[res.renumber[n]] = ids;
+    }
+    const fixed = repair(base, c, absentSet(cid));
     if (stable(fixed) !== stable(plan)) saveToday(cid, { plan: fixed }, true);
   }
 }
@@ -979,14 +985,18 @@ function ensureCid(){
 function setColumns(c, cols){
   const oldPos = {}; let n = 1;
   c.columns.forEach((k, ci) => { for (let r = 0; r < k; r++) oldPos[ci + ':' + r] = n++; });
-  const tables = {}; n = 1;
+  const tables = {}, renumber = {}; n = 1;
   cols.forEach((k, ci) => { for (let r = 0; r < k; r++){
     const old = oldPos[ci + ':' + r];
     const above = r > 0 ? tables[n - 1] : null;
     tables[n] = old ? Object.assign({}, c.tables[old]) : { team: above ? above.team : null, active: true };
+    if (old) renumber[old] = n;
     n++;
   } });
   c.columns = cols; c.tables = tables;
+  // Same physical table, new number: keep role tables (cups -> table 1) on the same spot.
+  for (const r of c.roles) r.tables = (r.tables || []).map(x => renumber[x]).filter(Boolean);
+  return { renumber };
 }
 function planText(c){
   const t = S.today[c.id]; const plan = t && t.plan; if (!plan) return '';
@@ -1526,9 +1536,9 @@ function onClick(e){
       updateClass(c.id, x => { x.teams = x.teams.filter(t => t.id !== tid); for (const n of tableNums(x)) if (x.tables[n].team === tid) x.tables[n].team = null; });
       break;
     }
-    case 'col-inc': case 'col-dec': if (W && c) updateClass(c.id, x => { const cols = x.columns.slice(); const i = +el.dataset.i; cols[i] = Math.max(1, Math.min(14, cols[i] + (act === 'col-inc' ? 1 : -1))); setColumns(x, cols); }); break;
-    case 'col-add': if (W && c) updateClass(c.id, x => { setColumns(x, x.columns.concat([5])); }); break;
-    case 'col-del': if (W && c) updateClass(c.id, x => { const cols = x.columns.slice(); cols.splice(+el.dataset.i, 1); setColumns(x, cols); }); break;
+    case 'col-inc': case 'col-dec': if (W && c) updateClass(c.id, x => { const cols = x.columns.slice(); const i = +el.dataset.i; cols[i] = Math.max(1, Math.min(14, cols[i] + (act === 'col-inc' ? 1 : -1))); return setColumns(x, cols); }); break;
+    case 'col-add': if (W && c) updateClass(c.id, x => setColumns(x, x.columns.concat([5]))); break;
+    case 'col-del': if (W && c) updateClass(c.id, x => { const cols = x.columns.slice(); cols.splice(+el.dataset.i, 1); return setColumns(x, cols); }); break;
     case 'add-role': if (W && c) updateClass(c.id, x => { x.roles.push({ id: uid('r_'), name: 'תפקיד חדש', icon: 'star', count: 1, fixed: null }); }); break;
     case 'role-inc': case 'role-dec': if (W && c) updateClass(c.id, x => { const r = x.roles.find(r => r.id === el.dataset.rid); if (r) r.count = Math.max(1, Math.min(10, (r.count || 1) + (act === 'role-inc' ? 1 : -1))); }); break;
     case 'del-role': {
