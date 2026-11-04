@@ -143,6 +143,19 @@ button.tbl:hover{filter:brightness(1.03);box-shadow:0 0 0 3px color-mix(in srgb,
 .tbl.off .tnum{background:var(--off-ink);color:var(--surface)}
 .tbl.off::before{opacity:.45}
 .tbl.none{border-style:dashed}
+.tbl.open{border-style:dashed;border-color:var(--amber);background:var(--amber-soft)}
+.tbl.open .tnum{background:var(--amber);color:var(--surface)}
+.tbl.open .tbody{color:var(--amber)}
+.tbl.pick{box-shadow:0 0 0 3px var(--accent-soft)}
+.modebar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.modebar .lbl-in{font-size:.85rem;font-weight:700;color:var(--muted)}
+.seg.inline{display:inline-grid;grid-template-columns:auto auto}
+.seg.inline button{padding:7px 14px}
+.duty{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;padding:12px}
+.duty .kid{justify-content:space-between;border-radius:8px;width:100%}
+.duty-free{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0 12px 12px}
+.duty-free .lbl{margin:0}
+.card-h .sub{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .hall-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:.82rem;color:var(--muted)}
 .hall-legend span{display:inline-flex;align-items:center;gap:6px}
 .dot{width:12px;height:12px;border-radius:4px;background:var(--team,var(--t-none))}
@@ -375,6 +388,7 @@ function normalizeClass(c){
   c.roles = Array.isArray(c.roles) ? c.roles : [];
   c.tables = c.tables && typeof c.tables === 'object' ? c.tables : {};
   c.opts = Object.assign({ mode: 'team', stage: 'במה' }, c.opts || {});
+  c.opts.mode = c.opts.mode === 'personal' ? 'personal' : 'team';
   for (const n of tableNums(c)) if (!c.tables[n]) c.tables[n] = { team: null, active: true };
   return c;
 }
@@ -384,6 +398,26 @@ const teamById = (c, id) => c.teams.find(t => t.id === id) || null;
 const studentName = (c, sid) => (c.students.find(s => s.id === sid) || {}).name || '—';
 function activeTablesOf(c, tid){ return tableNums(c).filter(n => { const t = tableInfo(c, n); return t.active !== false && t.team === tid; }); }
 function allTablesOf(c, tid){ return tableNums(c).filter(n => tableInfo(c, n).team === tid); }
+const isPersonal = plan => !!plan && plan.kind === 'personal';
+function activeAll(c){ return tableNums(c).filter(n => tableInfo(c, n).active !== false); }
+function tablePos(c){ const pos = {}; let n = 1; c.columns.forEach((k, col) => { for (let row = 0; row < k; row++) pos[n++] = { col, row }; }); return pos; }
+// Active tables walked like a snake (down one column, up the next), so a run of tables
+// that wraps into the next column stays at the same end of the aisle.
+function snakeActive(c){
+  const out = []; let n = 1;
+  c.columns.forEach((k, col) => {
+    const nums = []; for (let r = 0; r < k; r++) nums.push(n++);
+    if (col % 2) nums.reverse();
+    nums.forEach(x => { if (tableInfo(c, x).active !== false) out.push(x); });
+  });
+  return out;
+}
+function ownedMap(plan){
+  const own = {};
+  for (const [n, ids] of Object.entries((plan && plan.tables) || {})) for (const id of ids || []) (own[id] || (own[id] = [])).push(Number(n));
+  for (const k in own) own[k].sort((a, b) => a - b);
+  return own;
+}
 function byName(c){ return c.students.slice().sort((a, b) => a.name.localeCompare(b.name, 'he', { numeric: true })); }
 function defaultLayout(){
   const columns = [7, 8, 7];
@@ -412,7 +446,137 @@ function roleStats(cid, excludeDate){
   }
   return st;
 }
-function prevPlan(cid, date){ const hs = histFor(cid).filter(h => h.date < date); return hs[hs.length - 1] || null; }
+function prevPlan(cid, date, kind){
+  const hs = histFor(cid).filter(h => h.date < date && (!kind || (h.kind === 'personal' ? 'personal' : 'team') === kind));
+  return hs[hs.length - 1] || null;
+}
+// How many past days each student had more than one table (personal mode), so the doubles rotate.
+function doubleCounts(cid, excludeDate){
+  const d = {};
+  for (const h of histFor(cid)){
+    if (h.date === excludeDate || h.kind !== 'personal') continue;
+    const own = ownedMap(h);
+    for (const [id, ns] of Object.entries(own)) if (ns.length > 1) d[id] = (d[id] || 0) + 1;
+  }
+  return d;
+}
+// Personal mode, fresh: every student on duty gets a run of neighbouring tables (one or two),
+// or, with more students than tables, tables are shared by one or two students.
+function assignPersonal(c, duty, prevP, dbl){
+  const order = snakeActive(c);
+  const T = order.length, K = duty.length;
+  const empty = {}; order.forEach(n => empty[n] = []);
+  if (!T) return { tables: empty, unassigned: duty.slice() };
+  if (!K) return { tables: empty, unassigned: [] };
+  let groups = [];
+  if (T >= K){
+    // Try several orders of group sizes and keep one where the fewest runs cross into another column.
+    const pos = tablePos(c), q = Math.floor(T / K), extra = T % K;
+    const base = Array.from({ length: K }, (_, i) => i < extra ? q + 1 : q);
+    let bestSizes = base, bestCross = Infinity;
+    for (let t = 0; t < 80; t++){
+      const sizes = shuffle(base); let k = 0, cross = 0;
+      for (const sz of sizes){ if (new Set(order.slice(k, k + sz).map(n => pos[n].col)).size > 1) cross++; k += sz; }
+      if (cross < bestCross){ bestCross = cross; bestSizes = sizes; if (!cross) break; }
+    }
+    let k = 0; for (const sz of bestSizes){ groups.push(order.slice(k, k + sz)); k += sz; }
+  } else groups = shuffle(order.map(n => [n]));
+  const prevTables = ownedMap(prevP);
+  let best = null, bestScore = Infinity;
+  for (let it = 0; it < 300; it++){
+    const kids = shuffle(duty), out = {}; let score = 0;
+    order.forEach(n => out[n] = []);
+    kids.forEach((id, i) => {
+      const g = groups[i % groups.length];
+      g.forEach(n => { out[n].push(id); if ((prevTables[id] || []).includes(n)) score += 1; });
+      if (g.length > 1) score += 0.6 * ((dbl && dbl[id]) || 0);
+    });
+    if (score < bestScore){ best = out; bestScore = score; if (!score) break; }
+  }
+  return { tables: best, unassigned: [] };
+}
+// Personal mode, keeping what is already there: only uncovered tables and students without
+// a table change hands, then loads are evened out so nobody has two more tables than another.
+function fixPersonal(c, tablesIn, duty){
+  const order = snakeActive(c), pos = tablePos(c);
+  const T = order.length, K = duty.length, dutySet = new Set(duty);
+  const tables = {}; order.forEach(n => tables[n] = []);
+  for (const n of order) for (const id of (tablesIn[n] || [])) if (dutySet.has(id) && !tables[n].includes(id)) tables[n].push(id);
+  if (!T) return { tables, unassigned: duty.slice() };
+  if (!K) return { tables, unassigned: [] };
+  const owned = id => order.filter(n => tables[n].includes(id));
+  const dist = (a, b) => Math.abs(pos[a].col - pos[b].col) * 3 + Math.abs(pos[a].row - pos[b].row);
+  const near = (id, n) => { const ns = owned(id); return ns.length ? Math.min(...ns.map(m => dist(m, n))) : 99; };
+  const spread = id => { const ns = owned(id).sort((x, y) => pos[x].col - pos[y].col || pos[x].row - pos[y].row); let sp = 0; for (let i = 1; i < ns.length; i++) sp += dist(ns[i - 1], ns[i]) - 1; return sp; };
+  const loads = () => { const L = {}; duty.forEach(id => L[id] = 0); order.forEach(n => tables[n].forEach(id => L[id]++)); return L; };
+  const touched = new Set();
+  const give = (n, id) => { tables[n] = [id]; touched.add(id); };
+  if (T >= K){
+    for (const n of order) if (tables[n].length > 1) tables[n] = tables[n].slice(0, 1);
+    for (const id of shuffle(duty)){
+      const L = loads(); if (L[id] > 0) continue;
+      const open = order.filter(n => !tables[n].length);
+      if (open.length){ give(open[0], id); continue; }
+      const max = duty.reduce((m, x) => L[x] > L[m] ? x : m, duty[0]);
+      if (L[max] < 2) break;
+      const theirs = owned(max); give(theirs[theirs.length - 1], id);
+    }
+    for (const n of order){
+      if (tables[n].length) continue;
+      const L = loads(); const min = Math.min(...duty.map(id => L[id]));
+      const cands = duty.filter(id => L[id] === min).sort((a, b) => near(a, n) - near(b, n));
+      give(n, cands[0]);
+    }
+    for (let g = 0; g < 200; g++){
+      const L = loads();
+      const max = duty.reduce((m, x) => L[x] > L[m] ? x : m, duty[0]);
+      const min = duty.reduce((m, x) => L[x] < L[m] ? x : m, duty[0]);
+      if (L[max] - L[min] < 2) break;
+      give(owned(max).sort((a, b) => near(min, a) - near(min, b))[0], min);
+    }
+    // A student who just got a second table far from the first may trade with someone nearby.
+    for (let round = 0; round < 3; round++){
+      let improved = false;
+      for (const a of [...touched]){
+        if (!spread(a)) continue;
+        for (const ta of owned(a)){
+          for (const n of order){
+            const b = tables[n][0];
+            if (!b || b === a || !tables[ta].includes(a)) continue;
+            const before = spread(a) + spread(b);
+            tables[ta] = [b]; tables[n] = [a];
+            if (spread(a) + spread(b) < before){ improved = true; break; }
+            tables[ta] = [a]; tables[n] = [b];
+          }
+        }
+      }
+      if (!improved) break;
+    }
+  } else {
+    const seen = new Set();
+    for (const n of order) tables[n] = tables[n].filter(id => { if (seen.has(id)) return false; seen.add(id); return true; });
+    const free = shuffle(duty.filter(id => !seen.has(id)));
+    for (const n of order){
+      if (tables[n].length) continue;
+      if (free.length){ tables[n].push(free.pop()); continue; }
+      const crowded = order.reduce((m, x) => tables[x].length > tables[m].length ? x : m, order[0]);
+      if (tables[crowded].length < 2) break;
+      tables[n].push(tables[crowded].pop());
+    }
+    for (const id of free){ const n = order.reduce((m, x) => tables[x].length < tables[m].length ? x : m, order[0]); tables[n].push(id); }
+    for (let g = 0; g < 200; g++){
+      const mx = order.reduce((m, x) => tables[x].length > tables[m].length ? x : m, order[0]);
+      const mn = order.reduce((m, x) => tables[x].length < tables[m].length ? x : m, order[0]);
+      if (tables[mx].length - tables[mn].length < 2) break;
+      tables[mn].push(tables[mx].pop());
+    }
+  }
+  return { tables, unassigned: [] };
+}
+function personalDuty(c, plan, ab){
+  const busy = new Set(Object.values((plan && plan.roles) || {}).flat());
+  return c.students.map(s => s.id).filter(id => !ab.has(id) && !busy.has(id));
+}
 function pickForRole(cands, rid, st, prev, busy){
   if (!cands.length) return null;
   const prevHolders = new Set([...Object.values((prev && prev.roles) || {}).flat(), ...Object.values((prev && prev.extras) || {}).flat()]);
@@ -491,10 +655,16 @@ function makePlan(c, absent, date){
     plan.roles[role.id] = holders;
   }
   const rest = pool.filter(id => !used.has(id));
-  const { W } = teamTargets(c, rest.length);
-  c.teams.forEach(t => plan.teams[t.id] = []);
-  if (!W) plan.unassigned = rest;
-  else Object.assign(plan.teams, distribute(c, rest, prev));
+  if (c.opts.mode === 'personal'){
+    const res = assignPersonal(c, rest, prevPlan(c.id, date, 'personal'), doubleCounts(c.id, date));
+    Object.assign(plan, { kind: 'personal', teams: {}, tables: res.tables, unassigned: res.unassigned });
+  } else {
+    plan.kind = 'team';
+    const { W } = teamTargets(c, rest.length);
+    c.teams.forEach(t => plan.teams[t.id] = []);
+    if (!W) plan.unassigned = rest;
+    else Object.assign(plan.teams, distribute(c, rest, prevPlan(c.id, date, 'team')));
+  }
   const presentSet = new Set(present);
   plan.extras = fillExtras(c, plan, id => presentSet.has(id), st, prev);
   return plan;
@@ -524,12 +694,30 @@ function repair(plan0, c, absent){
   const st = roleStats(c.id, plan.date), prev = prevPlan(c.id, plan.date);
   const placed = new Set(), roles = {}, teams = {}, homeless = [];
   const mainRoles = c.roles.filter(r => !r.extra);
+  const was = isPersonal(plan) ? 'personal' : 'team';
   for (const role of mainRoles){
     roles[role.id] = ((plan.roles || {})[role.id] || []).filter(id => ok(id) && !placed.has(id)).slice(0, role.count || 1);
     roles[role.id].forEach(id => placed.add(id));
   }
+  if (c.opts.mode === 'personal'){
+    const isHolder = id => Object.values(roles).some(a => a.includes(id));
+    for (const role of mainRoles){
+      while (roles[role.id].length < (role.count || 1)){
+        const pick = role.fixed && ok(role.fixed) && !isHolder(role.fixed) ? role.fixed
+          : pickForRole(shuffle(c.students.map(s => s.id).filter(id => ok(id) && !isHolder(id))), role.id, st, prev);
+        if (!pick) break;
+        roles[role.id].push(pick);
+      }
+    }
+    const duty = c.students.map(s => s.id).filter(id => ok(id) && !isHolder(id));
+    const res = was === 'personal' ? fixPersonal(c, plan.tables || {}, duty)
+      : assignPersonal(c, duty, prevPlan(c.id, plan.date, 'personal'), doubleCounts(c.id, plan.date));
+    Object.assign(plan, { kind: 'personal', roles, teams: {}, tables: res.tables, unassigned: res.unassigned });
+    plan.extras = fillExtras(c, plan, ok, st, prev);
+    return plan;
+  }
   for (const t of c.teams) teams[t.id] = [];
-  for (const [tid, arr] of Object.entries(plan.teams || {})) for (const id of arr || []){
+  for (const [tid, arr] of Object.entries(was === 'team' ? (plan.teams || {}) : {})) for (const id of arr || []){
     if (!ok(id) || placed.has(id)) continue;
     placed.add(id); (teams[tid] || homeless).push(id);
   }
@@ -552,6 +740,10 @@ function repair(plan0, c, absent){
     for (const k in teams) teams[k] = [];
   } else {
     plan.unassigned = [];
+    if (was === 'personal'){
+      const d = distribute(c, homeless.splice(0), prevPlan(c.id, plan.date, 'team'));
+      for (const t of c.teams) teams[t.id] = d[t.id] || [];
+    }
     for (const t of c.teams) if (!activeTablesOf(c, t.id).length) homeless.push(...teams[t.id].splice(0));
     const total = homeless.length + Object.values(teams).reduce((s, a) => s + a.length, 0);
     const sizes = {}; for (const t of c.teams) sizes[t.id] = teams[t.id].length;
@@ -563,7 +755,8 @@ function repair(plan0, c, absent){
     }
     rebalance(c, teams, 3);
   }
-  plan.roles = roles; plan.teams = teams;
+  plan.roles = roles; plan.teams = teams; plan.kind = 'team';
+  delete plan.tables;
   plan.extras = fillExtras(c, plan, ok, st, prev);
   return plan;
 }
@@ -571,30 +764,31 @@ function locate(plan, sid){
   if (!plan) return null;
   for (const [rid, a] of Object.entries(plan.roles || {})) if ((a || []).includes(sid)) return { kind: 'role', id: rid, arr: a };
   for (const [tid, a] of Object.entries(plan.teams || {})) if ((a || []).includes(sid)) return { kind: 'team', id: tid, arr: a };
+  const mine = ownedMap(plan)[sid];
+  if (mine) return { kind: 'tables', tables: mine };
   if ((plan.unassigned || []).includes(sid)) return { kind: 'none', id: null, arr: plan.unassigned };
   return null;
 }
-function tableAssignees(c, plan){
-  const out = {};
-  if (!plan) return out;
-  for (const t of c.teams){
-    const tables = activeTablesOf(c, t.id), members = (plan.teams || {})[t.id] || [];
-    tables.forEach(n => out[n] = []);
-    if (!tables.length || !members.length) continue;
-    if (members.length >= tables.length) members.forEach((sid, i) => out[tables[i % tables.length]].push(sid));
-    else tables.forEach((n, i) => out[n].push(members[i % members.length]));
-  }
-  return out;
-}
-function tablesOfStudent(c, plan, sid){
-  const a = tableAssignees(c, plan);
-  return Object.keys(a).map(Number).filter(n => a[n].includes(sid)).sort((x, y) => x - y);
-}
-function isImbalanced(c, plan){
+function tableAssignees(c, plan){ return isPersonal(plan) ? (plan.tables || {}) : {}; }
+function isImbalanced(c, plan, ab){
   if (!plan) return false;
+  if (isPersonal(plan)){
+    const cur = {}; for (const n of snakeActive(c)) cur[n] = ((plan.tables || {})[n] || []).slice();
+    return stable(cur) !== stable(fixPersonal(c, plan.tables || {}, personalDuty(c, plan, ab)).tables);
+  }
   const teams = {}; for (const t of c.teams) teams[t.id] = ((plan.teams || {})[t.id] || []).slice();
   const before = stable(teams);
   return before !== stable(rebalance(c, teams, 2));
+}
+// Swap two students wherever they sit (role, team, tables). Carts stay with the student.
+function swapIds(plan, a, b){
+  const sw = arr => { if (arr) arr.forEach((x, i) => { if (x === a) arr[i] = b; else if (x === b) arr[i] = a; }); };
+  for (const src of [plan.roles, plan.teams, plan.tables]) for (const arr of Object.values(src || {})) sw(arr);
+  sw(plan.unassigned);
+}
+function removeId(plan, sid){
+  for (const src of [plan.roles, plan.teams, plan.tables]) for (const k of Object.keys(src || {})) src[k] = (src[k] || []).filter(x => x !== sid);
+  if (plan.unassigned) plan.unassigned = plan.unassigned.filter(x => x !== sid);
 }
 
 /* ---------- actions ---------- */
@@ -608,7 +802,11 @@ function saveToday(cid, patch, writeHist){
   };
   put('today', cid, data);
   const p = data.plan;
-  if (writeHist && p && p.date === todayStr()) put('history', `${cid}__${p.date}`, { cid, date: p.date, roles: p.roles, teams: p.teams, extras: p.extras || {}, savedAt: Date.now() });
+  if (writeHist && p && p.date === todayStr()){
+    const h = { cid, date: p.date, kind: p.kind || 'team', roles: p.roles, teams: p.teams || {}, extras: p.extras || {}, savedAt: Date.now() };
+    if (isPersonal(p)) h.tables = p.tables || {};
+    put('history', `${cid}__${p.date}`, h);
+  }
 }
 function todaysPlan(cid){ const p = S.today[cid] && S.today[cid].plan; return p && p.date === todayStr() ? p : null; }
 function updateClass(cid, fn){
@@ -626,7 +824,7 @@ function generate(){
   const plan = makePlan(c, absentSet(c.id), todayStr());
   S.sel = null;
   saveToday(c.id, { plan }, true);
-  toast(plan.unassigned.length ? 'אין שולחנות פעילים עם צוות, אז התלמידים לא חולקו לצוותים.' : 'חולק סידור חדש להיום');
+  toast(plan.unassigned.length ? (isPersonal(plan) ? 'אין שולחנות פעילים, אז התלמידים לא קיבלו שולחנות.' : 'אין שולחנות פעילים עם צוות, אז התלמידים לא חולקו לצוותים.') : 'חולק סידור חדש להיום');
 }
 function reuse(){
   const c = getCls(S.cid); const old = S.today[c.id] && S.today[c.id].plan; if (!old) return;
@@ -652,8 +850,15 @@ function toggleAttendance(sid){
       const nw = ((next.extras || {})[r.id] || [])[i];
       if (nw) msg = (msg ? msg + '. ' : '') + `${studentName(c, nw)} מחליפ/ה את ${studentName(c, sid)} ב${slotLabel(r, i)}`;
     }
+    if (goingAway && before && before.kind === 'tables' && isPersonal(next)){
+      const to = {};
+      for (const n of before.tables) for (const x of ((next.tables || {})[n] || [])) (to[x] || (to[x] = [])).push(n);
+      const parts = Object.entries(to).map(([x, ns]) => `${ns.length > 1 ? 'שולחנות' : 'שולחן'} ${ns.join(', ')} ${ns.length > 1 ? 'עברו' : 'עבר'} ל${studentName(c, x)}`);
+      if (parts.length) msg = (msg ? msg + '. ' : '') + parts.join('. ');
+    }
     if (!goingAway){
       const after = locate(next, sid);
+      if (after && after.kind === 'tables') msg = `${studentName(c, sid)} קיבל/ה את ${after.tables.length > 1 ? 'שולחנות' : 'שולחן'} ${after.tables.join(', ')}`;
       if (after && after.kind === 'team'){ const tm = teamById(c, after.id); if (tm) msg = `${studentName(c, sid)} צורפ/ה ל${tm.name}`; }
       if (after && after.kind === 'role'){ const r = c.roles.find(x => x.id === after.id); if (r) msg = `${studentName(c, sid)} קיבל/ה את ${r.name}`; }
     }
@@ -671,11 +876,24 @@ function allPresent(){
 }
 function swapKids(a, b){
   const c = getCls(S.cid); const plan = clone(todaysPlan(c.id)); if (!plan) return;
-  const la = locate(plan, a), lb = locate(plan, b); if (!la || !lb) return;
-  const ia = la.arr.indexOf(a), ib = lb.arr.indexOf(b);
-  la.arr[ia] = b; lb.arr[ib] = a;
+  if (!locate(plan, a) || !locate(plan, b)) return;
+  swapIds(plan, a, b);
   saveToday(c.id, { plan }, true);
   toast(`${studentName(c, a)} ו${studentName(c, b)} התחלפו`);
+}
+function assignTable(sid, n){
+  const c = getCls(S.cid); const plan = clone(todaysPlan(c.id)); if (!isPersonal(plan)) return;
+  const active = activeAll(c);
+  if (!active.includes(n)){ toast(`שולחן ${n} סגור`); return; }
+  const tables = plan.tables || (plan.tables = {});
+  if ((tables[n] || []).includes(sid)) return;
+  for (const rid of Object.keys(plan.roles || {})) plan.roles[rid] = plan.roles[rid].filter(x => x !== sid);
+  const duty = new Set([...Object.values(tables).flat(), ...(plan.unassigned || []), sid]);
+  plan.unassigned = (plan.unassigned || []).filter(x => x !== sid);
+  if (active.length >= duty.size) tables[n] = [sid];
+  else { for (const k of Object.keys(tables)) tables[k] = tables[k].filter(x => x !== sid); tables[n] = (tables[n] || []).concat(sid); }
+  saveToday(c.id, { plan }, true);
+  toast(`שולחן ${n} אצל ${studentName(c, sid)}`);
 }
 function moveToTeam(sid, tid){
   const c = getCls(S.cid); const plan = clone(todaysPlan(c.id)); if (!plan) return;
@@ -688,12 +906,10 @@ function moveToTeam(sid, tid){
 function moveToRole(sid, rid){
   const c = getCls(S.cid); const plan = clone(todaysPlan(c.id)); if (!plan) return;
   const role = c.roles.find(r => r.id === rid); if (!role) return;
-  const holders = plan.roles[rid] || (plan.roles[rid] = []);
-  if (holders.includes(sid)) return;
-  const l = locate(plan, sid); if (!l) return;
-  const idx = l.arr.indexOf(sid);
-  if (holders.length < (role.count || 1)){ l.arr.splice(idx, 1); holders.push(sid); }
-  else { const out = holders[holders.length - 1]; holders[holders.length - 1] = sid; l.arr[idx] = out; }
+  const holders = (plan.roles || {})[rid] || [];
+  if (holders.includes(sid) || !locate(plan, sid)) return;
+  if (holders.length < (role.count || 1)){ removeId(plan, sid); plan.roles[rid] = ((plan.roles || {})[rid] || []).concat(sid); }
+  else swapIds(plan, sid, holders[holders.length - 1]);
   saveToday(c.id, { plan }, true);
   toast(`${studentName(c, sid)} ב${role.name}`);
 }
@@ -714,6 +930,13 @@ function fillRole(){
 }
 function balance(){
   const c = getCls(S.cid); const plan = clone(todaysPlan(c.id)); if (!plan) return;
+  if (isPersonal(plan)){
+    const res = fixPersonal(c, plan.tables || {}, personalDuty(c, plan, absentSet(c.id)));
+    plan.tables = res.tables; plan.unassigned = res.unassigned;
+    saveToday(c.id, { plan }, true);
+    toast('כל שולחן פעיל קיבל אחראי, והשולחנות מחולקים שווה');
+    return;
+  }
   for (const t of c.teams) plan.teams[t.id] = plan.teams[t.id] || [];
   rebalance(c, plan.teams, 2);
   saveToday(c.id, { plan }, true);
@@ -763,11 +986,15 @@ function planText(c){
     } else L.push(`${r.name}: ${((plan.roles || {})[r.id] || []).map(s => studentName(c, s)).join(', ') || '—'}`);
   }
   L.push('');
-  for (const tm of c.teams){
+  if (isPersonal(plan)){
+    const own = ownedMap(plan);
+    for (const s of byName(c)) if (own[s.id]) L.push(`${s.name}: ${own[s.id].length > 1 ? 'שולחנות' : 'שולחן'} ${own[s.id].join(', ')}`);
+    const unc = activeAll(c).filter(n => !((plan.tables || {})[n] || []).length);
+    if (unc.length) L.push('', `שולחנות בלי אחראי: ${rangeText(unc)}`);
+  } else for (const tm of c.teams){
     const tabs = activeTablesOf(c, tm.id); const mem = (plan.teams || {})[tm.id] || [];
     if (!tabs.length && !mem.length) continue;
-    if (c.opts.mode === 'table') L.push(`${tm.name}: ${mem.map(s => `${studentName(c, s)} (${tablesOfStudent(c, plan, s).join(', ') || '—'})`).join(', ') || '—'}`);
-    else L.push(`${tm.name} · שולחנות ${rangeText(tabs)}: ${mem.map(s => studentName(c, s)).join(', ') || '—'}`);
+    L.push(`${tm.name} · שולחנות ${rangeText(tabs)}: ${mem.map(s => studentName(c, s)).join(', ') || '—'}`);
   }
   const closed = tableNums(c).filter(n => tableInfo(c, n).active === false);
   if (closed.length) L.push('', `שולחנות סגורים: ${rangeText(closed)}`);
@@ -781,29 +1008,43 @@ function arm(key){ S.confirm = key; clearTimeout(confirmTimer); confirmTimer = s
 
 /* ---------- views ---------- */
 function icon(name){ return ICONS[name] || ICONS.star; }
-function tile(c, n, plan, assignees, interactive){
-  const t = tableInfo(c, n), tm = teamById(c, t.team), off = t.active === false;
-  let body = '';
+function tile(c, n, plan, assignees, interactive, look){
+  const t = tableInfo(c, n), off = t.active === false, personal = look === 'personal';
+  const tm = personal ? null : teamById(c, t.team);
+  let body = '', extra = '';
   if (off) body = 'סגור';
+  else if (personal){
+    const who = assignees[n] || [];
+    if (plan && !who.length){ body = 'אין אחראי'; extra = ' open'; }
+    else body = who.map(s => `<span class="who">${esc(studentName(c, s))}</span>`).join('');
+  }
   else if (!tm) body = 'ללא צוות';
-  else if (c.opts.mode === 'table' && plan) body = (assignees[n] || []).map(s => `<span class="who">${esc(studentName(c, s))}</span>`).join('');
-  const cls = `tbl${off ? ' off' : ''}${!tm ? ' none' : ''}`;
-  const style = `--team:var(--t-${tm ? tm.color : 'none'})`;
-  const label = `שולחן ${n}${off ? ', סגור' : ''}${tm ? ', ' + tm.name : ''}`;
+  const pick = interactive && personal && !off && S.sel && S.view === 'plan' && plan && plan.date === todayStr();
+  const cls = `tbl${off ? ' off' : ''}${!personal && !tm ? ' none' : ''}${extra}${pick ? ' pick' : ''}`;
+  const style = `--team:${personal ? 'var(--accent)' : `var(--t-${tm ? tm.color : 'none'})`}`;
+  const label = `שולחן ${n}${off ? ', סגור' : ''}${tm ? ', ' + tm.name : ''}${personal && (assignees[n] || []).length ? ', ' + assignees[n].map(s => studentName(c, s)).join(' ו') : ''}`;
   const inner = `<span class="tnum">${n}</span><span class="tbody">${body}</span>`;
   return interactive
     ? `<button type="button" class="${cls}" style="${style}" data-act="table" data-n="${n}" aria-label="${esc(label)}">${inner}</button>`
     : `<div class="${cls}" style="${style}" aria-label="${esc(label)}">${inner}</div>`;
 }
-function hall(c, plan, interactive){
+function lookOf(c, plan){ return plan ? (isPersonal(plan) ? 'personal' : 'team') : c.opts.mode; }
+function hall(c, plan, interactive, look){
+  look = look || lookOf(c, plan);
   const assignees = tableAssignees(c, plan);
   let n = 1;
-  const cols = c.columns.map(k => { const tiles = []; for (let i = 0; i < k; i++) tiles.push(tile(c, n++, plan, assignees, interactive)); return `<div class="col">${tiles.join('')}</div>`; }).join('');
+  const cols = c.columns.map(k => { const tiles = []; for (let i = 0; i < k; i++) tiles.push(tile(c, n++, plan, assignees, interactive, look)); return `<div class="col">${tiles.join('')}</div>`; }).join('');
   return `<div class="hall"><div class="stage">${esc(c.opts.stage || 'במה')}</div><div class="cols" style="--cols:${c.columns.length}">${cols}</div></div>`;
 }
-function legend(c){
-  const items = c.teams.map(t => `<span style="--team:var(--t-${t.color})"><i class="dot"></i>${esc(t.name)} · ${activeTablesOf(c, t.id).length}</span>`);
+function legend(c, look, plan){
   const closed = tableNums(c).filter(n => tableInfo(c, n).active === false).length;
+  let items;
+  if (look === 'personal'){
+    const act = activeAll(c);
+    items = [`<span style="--team:var(--accent)"><i class="dot"></i>פעילים · ${act.length}</span>`];
+    const unc = plan ? act.filter(n => !((plan.tables || {})[n] || []).length).length : 0;
+    if (unc) items.push(`<span style="--team:var(--amber)"><i class="dot"></i>בלי אחראי · ${unc}</span>`);
+  } else items = c.teams.map(t => `<span style="--team:var(--t-${t.color})"><i class="dot"></i>${esc(t.name)} · ${activeTablesOf(c, t.id).length}</span>`);
   if (closed) items.push(`<span><i class="dot off"></i>סגורים · ${closed}</span>`);
   return `<div class="hall-legend">${items.join('')}</div>`;
 }
@@ -852,7 +1093,7 @@ function teamsGrid(c, plan, edit, ab){
     const mem = plan ? ((plan.teams || {})[t.id] || []) : [];
     const sub = all.length ? `שולחנות ${rangeText(act)}${act.length < all.length ? ` · ${all.length - act.length} סגורים` : ''} · ${mem.length} תלמידים` : 'אין שולחנות לצוות';
     const canMove = edit && S.sel && act.length && !(selLoc && selLoc.kind === 'team' && selLoc.id === t.id);
-    const chips = mem.map(s => kid(c, s, { edit, gone: ab.has(s), tables: c.opts.mode === 'table' ? tablesOfStudent(c, plan, s).join(', ') : '' })).join('');
+    const chips = mem.map(s => kid(c, s, { edit, gone: ab.has(s) })).join('');
     return `<div class="team${act.length ? '' : ' dim'}" style="--team:var(--t-${t.color})">
       <div class="team-h"><span class="swatch"></span><div class="grow"><h3>${esc(t.name)}</h3><div class="sub">${sub}</div></div>${canMove ? `<button type="button" class="btn sm" data-act="move-team" data-tid="${esc(t.id)}">העברה לכאן</button>` : ''}</div>
       <div class="team-b">${chips || `<span class="muted">${plan ? (act.length ? 'אין תלמידים בצוות' : 'כל השולחנות של הצוות סגורים') : 'יתמלא בחלוקה'}</span>`}</div>
@@ -862,6 +1103,20 @@ function teamsGrid(c, plan, edit, ab){
     cards.push(`<div class="team"><div class="team-h"><span class="swatch"></span><div class="grow"><h3>בלי צוות</h3><div class="sub">אין שולחן פעיל עם צוות</div></div></div><div class="team-b">${plan.unassigned.map(s => kid(c, s, { edit, gone: ab.has(s) })).join('')}</div></div>`);
   }
   return `<div class="teams">${cards.join('')}</div>`;
+}
+function dutyGrid(c, plan, edit, ab){
+  const act = activeAll(c);
+  if (!plan) return `<div class="card"><div class="card-h"><h3>מי אחראי על איזה שולחן</h3><span class="sub">${act.length} שולחנות פעילים</span></div><p class="sec muted" style="margin:0">אחרי החלוקה יופיע כאן מי אחראי על איזה שולחן.</p></div>`;
+  const own = ownedMap(plan);
+  const busy = new Set(Object.values(plan.roles || {}).flat());
+  const onDuty = byName(c).filter(s => own[s.id]);
+  const free = plan.date === todayStr() ? byName(c).filter(s => !own[s.id] && !busy.has(s.id) && !ab.has(s.id)) : [];
+  const chips = onDuty.map(s => kid(c, s.id, { edit, gone: ab.has(s.id), tables: own[s.id].join(', ') })).join('');
+  return `<div class="card">
+    <div class="card-h"><h3>מי אחראי על איזה שולחן</h3><span class="sub">${onDuty.length} תלמידים · ${act.length} שולחנות</span></div>
+    ${chips ? `<div class="duty">${chips}</div>` : `<p class="sec muted" style="margin:0">אין שולחנות פעילים.</p>`}
+    ${free.length ? `<div class="duty-free"><span class="lbl">בלי שולחן</span>${free.map(s => kid(c, s.id, { edit })).join('')}</div>` : ''}
+  </div>`;
 }
 function attendanceCard(c, plan, ab){
   const list = byName(c);
@@ -883,27 +1138,35 @@ function planView(c){
   const today = todayStr(); const isToday = !!plan && plan.date === today;
   const ab = absentSet(c.id);
   const edit = isToday && S.canWrite;
+  const look = lookOf(c, plan);
+  const personal = look === 'personal';
   const nums = tableNums(c);
-  const activeN = nums.filter(n => { const x = tableInfo(c, n); return x.active !== false && teamById(c, x.team); }).length;
+  const activeN = personal ? activeAll(c).length : nums.filter(n => { const x = tableInfo(c, n); return x.active !== false && teamById(c, x.team); }).length;
   const present = c.students.filter(s => !ab.has(s.id)).length;
   let banner = '';
   if (!plan) banner = `<div class="note"><p>עוד לא חולק סידור להיום. סמנו מי נוכח, בדקו אילו שולחנות פתוחים, ולחצו על "חלוקה חדשה".</p></div>`;
   else if (!isToday) banner = `<div class="note warn"><p>מוצג הסידור של ${esc(fmtDate(plan.date))}. אפשר לחלק סידור חדש להיום, או להמשיך עם אותו סידור.</p>${S.canWrite ? `<button type="button" class="btn sm" data-act="reuse">להמשיך עם הסידור הזה היום</button>` : ''}</div>`;
-  else if (!activeN) banner = `<div class="note warn"><p>כל השולחנות סגורים או בלי צוות. פתחו שולחנות כדי לחלק את התלמידים.</p></div>`;
+  else if (!activeN) banner = `<div class="note warn"><p>${personal ? 'כל השולחנות סגורים.' : 'כל השולחנות סגורים או בלי צוות.'} פתחו שולחנות כדי לחלק את התלמידים.</p></div>`;
+  const imbalanced = edit && isImbalanced(c, plan, ab);
+  const modebar = S.canWrite ? `<div class="modebar"><span class="lbl-in">איך מחלקים</span>
+    <div class="seg inline" role="group" aria-label="איך מחלקים">
+      <button type="button" data-act="mode" data-v="team" aria-pressed="${c.opts.mode === 'team'}">בצוותים</button>
+      <button type="button" data-act="mode" data-v="personal" aria-pressed="${c.opts.mode === 'personal'}">כל ילד שולחן או שניים</button>
+    </div></div>` : '';
   const toolbar = `<div class="toolbar">
     ${S.canWrite ? `<button type="button" class="btn primary" data-act="gen">${ICONS.shuffle}${isToday ? 'חלוקה מחדש' : 'חלוקה חדשה'}</button>` : ''}
     ${plan ? `<button type="button" class="btn" data-act="display-open">${ICONS.screen}תצוגה לכיתה</button><button type="button" class="btn" data-act="copy">${ICONS.copy}העתקת הסידור</button>` : ''}
-    ${edit && isImbalanced(c, plan) ? `<button type="button" class="btn ghost" data-act="balance">איזון הצוותים</button>` : ''}
+    ${imbalanced ? `<button type="button" class="btn ghost" data-act="balance">${personal ? 'איזון השולחנות' : 'איזון הצוותים'}</button>` : ''}
     <span class="spacer"></span>
     <span class="stat"><b>${present}</b>/${c.students.length} נוכחים · <b>${activeN}</b>/${nums.length} שולחנות פעילים</span>
   </div>`;
   return `<div class="plan-grid">
     <aside class="aside">${attendanceCard(c, plan, ab)}</aside>
     <section class="main" aria-label="הסידור">
-      ${toolbar}${banner}
+      ${modebar}${toolbar}${banner}
       ${c.roles.length ? rolesRow(c, plan, edit, ab) : ''}
-      <div>${hall(c, plan, S.canWrite)}${legend(c)}</div>
-      ${teamsGrid(c, plan, edit, ab)}
+      <div>${hall(c, plan, S.canWrite, look)}${legend(c, look, plan)}</div>
+      ${personal ? dutyGrid(c, plan, edit, ab) : teamsGrid(c, plan, edit, ab)}
     </section>
   </div>`;
 }
@@ -955,23 +1218,23 @@ function tablesView(c){
   return `<div class="set-grid">
     <div class="card sec" style="grid-column:1/-1">
       <h2>מפת חדר האוכל</h2>
-      <p class="help">לחיצה על שולחן פותחת אותו לעריכה: פעיל או סגור, ולאיזה צוות הוא שייך. שולחן סגור לא נכנס לחלוקה, והתלמידים מתחלקים לפי מספר השולחנות הפעילים של כל צוות.</p>
+      <p class="help">לחיצה על שולחן פותחת אותו לעריכה: פעיל או סגור, ולאיזה צוות הוא שייך. שולחן סגור לא נכנס לחלוקה. בחלוקה בצוותים התלמידים מתחלקים לפי מספר השולחנות הפעילים של כל צוות. בחלוקה האישית הצבעים לא משנים.</p>
       ${S.canWrite ? `<div class="row" style="margin-bottom:12px"><button type="button" class="btn sm" data-act="all-on">פתיחת כל השולחנות</button><button type="button" class="btn sm" data-act="all-off">סגירת כל השולחנות</button></div>` : ''}
-      ${hall(c, todaysPlan(c.id), S.canWrite)}${legend(c)}
+      ${hall(c, null, S.canWrite, 'team')}${legend(c, 'team', null)}
     </div>
     <div class="card sec">
       <h2>איך מחלקים</h2>
-      <p class="help">אפשר לשנות בכל רגע. החלוקה לצוותים נשארת, רק התצוגה משתנה.</p>
+      <p class="help">אפשר לעבור בכל רגע, גם מהמסך "סידור היום". במעבר התפקידים והעגלות נשארים, ורק החלוקה לשולחנות נעשית מחדש.</p>
       <div class="modes">
-        <button type="button" class="mode" data-act="mode" data-v="team" aria-pressed="${mode !== 'table'}" ${dis}><span class="radio"></span><span><b>הצוות אחראי יחד על השולחנות שלו</b><small>כל תלמידי הצוות הירוק מטפלים בכל השולחנות הירוקים.</small></span></button>
-        <button type="button" class="mode" data-act="mode" data-v="table" aria-pressed="${mode === 'table'}" ${dis}><span class="radio"></span><span><b>כל תלמיד/ה מקבל/ת שולחנות משלו</b><small>בתוך הצוות השולחנות מתחלקים בין התלמידים, והשם מופיע על השולחן במפה.</small></span></button>
+        <button type="button" class="mode" data-act="mode" data-v="team" aria-pressed="${mode === 'team'}" ${dis}><span class="radio"></span><span><b>בצוותים</b><small>כל תלמידי הצוות הירוק מטפלים יחד בכל השולחנות הירוקים.</small></span></button>
+        <button type="button" class="mode" data-act="mode" data-v="personal" aria-pressed="${mode === 'personal'}" ${dis}><span class="radio"></span><span><b>כל ילד אחראי על שולחן או שניים</b><small>בלי צוותים. כל תלמיד/ה מקבל/ת שולחן משלו, ואם יש יותר שולחנות מתלמידים חלק מקבלים שני שולחנות צמודים. מי שקיבל שניים מקבל פחות פעמים שניים בימים הבאים.</small></span></button>
       </div>
       <h2 style="margin-top:20px">הכיתוב בראש המפה</h2>
       <div class="row"><input class="inp grow" id="stage-name" data-ch="stage" value="${esc(c.opts.stage)}" aria-label="הכיתוב בראש המפה" ${dis}></div>
     </div>
     <div class="card sec">
       <h2>צוותים</h2>
-      <p class="help">כל צוות מסומן בצבע. משייכים שולחנות לצוות דרך המפה.</p>
+      <p class="help">כל צוות מסומן בצבע. משייכים שולחנות לצוות דרך המפה. הצוותים משמשים רק בחלוקה בצוותים.</p>
       <ul class="list">${teamsEd}</ul>
       ${S.canWrite ? `<div class="row" style="margin-top:10px"><button type="button" class="btn" data-act="add-team">+ צוות חדש</button></div>` : ''}
     </div>
@@ -1004,7 +1267,9 @@ function rolesView(c){
     </li>`;
   }).join('');
   const st = roleStats(c.id, null);
-  const fair = byName(c).map(s => `<tr><td>${esc(s.name)}</td>${c.roles.map(r => { const x = st[s.id] && st[s.id][r.id]; return `<td class="n">${x ? x.n : 0}</td><td class="d">${x ? esc(fmtDate(x.last)) : '—'}</td>`; }).join('')}</tr>`).join('');
+  const dbl = doubleCounts(c.id, null);
+  const showDbl = c.opts.mode === 'personal' || Object.keys(dbl).length > 0;
+  const fair = byName(c).map(s => `<tr><td>${esc(s.name)}</td>${c.roles.map(r => { const x = st[s.id] && st[s.id][r.id]; return `<td class="n">${x ? x.n : 0}</td><td class="d">${x ? esc(fmtDate(x.last)) : '—'}</td>`; }).join('')}${showDbl ? `<td class="n">${dbl[s.id] || 0}</td>` : ''}</tr>`).join('');
   return `<div class="set-grid">
     <div class="card sec">
       <h2>תפקידים</h2>
@@ -1015,7 +1280,7 @@ function rolesView(c){
     <div class="card sec">
       <h2>מי כבר עשה מה</h2>
       <p class="help">ספירה מכל הימים השמורים בהיסטוריה, כולל היום.</p>
-      ${c.students.length && c.roles.length ? `<div class="tbl-wrap"><table class="fair"><thead><tr><th>תלמיד/ה</th>${c.roles.map(r => `<th>${esc(r.name)}</th><th>פעם אחרונה</th>`).join('')}</tr></thead><tbody>${fair}</tbody></table></div>` : '<p class="muted">אין עדיין נתונים.</p>'}
+      ${c.students.length && c.roles.length ? `<div class="tbl-wrap"><table class="fair"><thead><tr><th>תלמיד/ה</th>${c.roles.map(r => `<th>${esc(r.name)}</th><th>פעם אחרונה</th>`).join('')}${showDbl ? '<th>שני שולחנות</th>' : ''}</tr></thead><tbody>${fair}</tbody></table></div>` : '<p class="muted">אין עדיין נתונים.</p>'}
     </div>
   </div>`;
 }
@@ -1027,7 +1292,8 @@ function historyView(c){
     ${hs.map(h => {
       const id = `${c.id}__${h.date}`, armed = S.confirm === 'hist:' + id;
       const roles = c.roles.map(r => `<div class="line"><span class="lab">${esc(r.name)}</span><span>${((h.roles || {})[r.id] || (h.extras || {})[r.id] || []).filter(Boolean).map(s => esc(studentName(c, s))).join(', ') || '—'}</span></div>`).join('');
-      const teams = c.teams.filter(t => ((h.teams || {})[t.id] || []).length).map(t => `<div class="line" style="--team:var(--t-${t.color})"><span class="lab"><i class="dot" style="display:inline-block;vertical-align:-1px"></i> ${esc(t.name)}</span><span>${h.teams[t.id].map(s => esc(studentName(c, s))).join(', ')}</span></div>`).join('');
+      const own = h.kind === 'personal' ? ownedMap(h) : null;
+      const teams = own ? `<div class="line"><span class="lab">שולחנות</span><span>${byName(c).filter(s => own[s.id]).map(s => `${esc(s.name)} (${own[s.id].join(', ')})`).join(', ') || '—'}</span></div>` : c.teams.filter(t => ((h.teams || {})[t.id] || []).length).map(t => `<div class="line" style="--team:var(--t-${t.color})"><span class="lab"><i class="dot" style="display:inline-block;vertical-align:-1px"></i> ${esc(t.name)}</span><span>${h.teams[t.id].map(s => esc(studentName(c, s))).join(', ')}</span></div>`).join('');
       return `<div class="card"><div class="card-h hist-h"><h3>${esc(fmtDate(h.date))}${h.date === todayStr() ? ' · היום' : ''}</h3>${S.canWrite ? `<button type="button" class="btn sm danger${armed ? ' armed' : ''}" data-act="del-hist" data-id="${esc(id)}">${armed ? 'ללחוץ שוב למחיקה' : 'מחיקה'}</button>` : ''}</div><div class="hist-b">${roles}${teams}</div></div>`;
     }).join('')}
   </div>`;
@@ -1040,7 +1306,7 @@ function emptyView(){
       ${S.mode === 'loading' ? '<p>עוד רגע יופיעו הכיתות, הנוכחות והסידור של היום.</p>' : `<p>יוצרים כיתה, מוסיפים את שמות התלמידים, ומסמנים במפה אילו שולחנות פתוחים. כל יום מסמנים מי נוכח ולוחצים על "חלוקה חדשה".</p>
       ${S.canWrite ? `<div class="row"><input class="inp grow" id="new-class-name" placeholder="שם הכיתה, למשל ו׳2" aria-label="שם הכיתה"><button type="button" class="btn primary" data-act="create-class">יצירת כיתה</button></div>` : '<p class="muted">עוד לא נוצרו כיתות.</p>'}`}
     </div>
-    <div class="ghost-hall" aria-hidden="true">${hall(demo, null, false)}</div>
+    <div class="ghost-hall" aria-hidden="true">${hall(demo, null, false, 'team')}</div>
   </div>`;
 }
 function sheetView(){
@@ -1065,14 +1331,15 @@ function displayView(){
     <div class="display-h"><div><div class="eyebrow">${esc(fmtDate(plan.date))}</div><h2>חדר האוכל · ${esc(c.name)}</h2></div><button type="button" class="btn" data-act="display-close">סגירת התצוגה</button></div>
     <div class="display-g">
       <div>${hall(c, plan, false)}</div>
-      <div class="display-side">${c.roles.length ? rolesRow(c, plan, false, ab) : ''}${teamsGrid(c, plan, false, ab)}</div>
+      <div class="display-side">${c.roles.length ? rolesRow(c, plan, false, ab) : ''}${isPersonal(plan) ? dutyGrid(c, plan, false, ab) : teamsGrid(c, plan, false, ab)}</div>
     </div>
   </div>`;
 }
 function selBar(){
   if (!S.sel || S.view !== 'plan') return '';
   const c = getCls(S.cid); if (!c) return '';
-  return `<div class="selbar" role="status"><p>נבחר/ה: <b>${esc(studentName(c, S.sel))}</b>. הקישו על תלמיד/ה אחר/ת כדי להחליף ביניהם, על "העברה לכאן" בצוות אחר, על כרטיס של תפקיד, או על עגלה.</p><button type="button" class="btn" data-act="sel-cancel">ביטול</button></div>`;
+  const how = isPersonal(todaysPlan(c.id)) ? 'הקישו על שולחן במפה כדי לתת אותו לו/לה, על תלמיד/ה אחר/ת כדי להחליף ביניהם, על כרטיס של תפקיד, או על עגלה.' : 'הקישו על תלמיד/ה אחר/ת כדי להחליף ביניהם, על "העברה לכאן" בצוות אחר, על כרטיס של תפקיד, או על עגלה.';
+  return `<div class="selbar" role="status"><p>נבחר/ה: <b>${esc(studentName(c, S.sel))}</b>. ${how}</p><button type="button" class="btn" data-act="sel-cancel">ביטול</button></div>`;
 }
 function copyModal(){
   if (S.copyText == null) return '';
@@ -1161,13 +1428,25 @@ function onClick(e){
     case 'move-team': if (S.sel){ const a = S.sel; S.sel = null; moveToTeam(a, el.dataset.tid); } break;
     case 'role-slot': if (S.sel){ const a = S.sel; S.sel = null; moveToRole(a, el.dataset.rid); } break;
     case 'extra-slot': if (S.sel){ const a = S.sel; S.sel = null; setExtra(a, el.dataset.rid, +el.dataset.i); } break;
-    case 'table': if (W){ S.sheet = Number(el.dataset.n); scheduleRender(); } break;
+    case 'table': {
+      const n = Number(el.dataset.n);
+      if (S.sel && S.view === 'plan' && isPersonal(todaysPlan(S.cid))){ const a = S.sel; S.sel = null; if (W) assignTable(a, n); scheduleRender(); break; }
+      if (W){ S.sheet = n; scheduleRender(); } break;
+    }
     case 'sheet-close': S.sheet = null; scheduleRender(); break;
     case 'sheet-active': { if (!W || !c) break; const n = S.sheet, on = el.dataset.v === '1'; updateClass(c.id, x => { x.tables[n] = Object.assign({}, x.tables[n], { active: on }); }); toast(`שולחן ${n} ${on ? 'פעיל' : 'סגור'}`); break; }
     case 'sheet-team': { if (!W || !c) break; const n = S.sheet, tid = el.dataset.tid || null; updateClass(c.id, x => { x.tables[n] = Object.assign({}, x.tables[n], { team: tid }); }); break; }
     case 'all-on': if (W && c) updateClass(c.id, x => { for (const n of tableNums(x)) x.tables[n].active = true; }); break;
     case 'all-off': if (W && c) updateClass(c.id, x => { for (const n of tableNums(x)) x.tables[n].active = false; }); break;
-    case 'mode': if (W && c) updateClass(c.id, x => { x.opts.mode = el.dataset.v; }); break;
+    case 'mode': {
+      if (!W || !c || c.opts.mode === el.dataset.v) break;
+      const had = !!todaysPlan(c.id), v = el.dataset.v;
+      S.sel = null;
+      updateClass(c.id, x => { x.opts.mode = v; });
+      toast(v === 'personal' ? (had ? 'הסידור של היום חולק מחדש: כל ילד/ה קיבל/ה שולחן או שניים. התפקידים והעגלות נשארו.' : 'מעכשיו כל ילד/ה מקבל/ת שולחן או שניים')
+                             : (had ? 'הסידור של היום חולק מחדש לצוותים. התפקידים והעגלות נשארו.' : 'מעכשיו מחלקים בצוותים'));
+      break;
+    }
     case 'add-student': {
       if (!W || !c) break; const inp = document.getElementById('new-student'); const name = cleanName(inp && inp.value);
       if (!name) break;
