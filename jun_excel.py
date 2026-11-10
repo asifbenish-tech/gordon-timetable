@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""jun_excel.py - אקסל חטיבה בלבד להצעה: גיליון שינויים + כיתות החטיבה + מערכות מורי החטיבה.
+"""jun_excel.py - אקסל חטיבה להצעה: גיליון שינויים + כיתות החטיבה + מערכות מורי החטיבה.
+   אם ההצעה נוגעת גם ביסודי - נוספים גיליונות של כיתות היסודי שהשתנו והמורים שהשתנו.
    נבנה מנתוני הלוח (viewer.html) של ההצעה ושל המפורסם - אותו מקור שהלוח מציג, ולכן
    תמיד תואם אותו. השינויים מחושבים ישירות מול הלוח המפורסם.
    שימוש: python jun_excel.py <viewer הצעה> <viewer מפורסם> <פלט.xlsx> <כותרת>"""
@@ -33,6 +34,12 @@ def ctext(v):
     return f"{t} – {s}" if t and s else (t or s)
 
 
+def etext(v):   # תא יסודי: מורה (+ מה מלמדים / הערה)
+    if not v: return ""
+    t, s = v.get("t") or "", v.get("s") or ""
+    return (f"{t} · {s}" if t and s else (t or s)) + (f"\n{v['co']}" if v.get("co") else "")
+
+
 def setc(ws, r, c, val, font=None, f=None, al=CEN):
     cell = ws.cell(row=r, column=c, value=val)
     cell.font = font or F(size=10); cell.alignment = al; cell.border = BO
@@ -60,8 +67,12 @@ for t in sorted(set(D["teachers"]) | set(B["teachers"])):
         for h in range(1, 9):
             a, b = tl(B, t, d, h), tl(D, t, d, h)
             if a != b: TDIFF.setdefault(t, {})[f"{d},{h}"] = {"was": a or "—"}
-ELEM_CHG = sum(1 for c in D["elem"] for k in set(D["elem"][c]["cells"]) | set(B["elem"][c]["cells"])
-               if (D["elem"][c]["cells"].get(k) or {}).get("t") != (B["elem"][c]["cells"].get(k) or {}).get("t"))
+EDIFF = {}
+for c in D["elem"]:
+    for k in sorted(set(D["elem"][c]["cells"]) | set(B["elem"][c]["cells"]), key=skey):
+        a, b = etext(B["elem"][c]["cells"].get(k)), etext(D["elem"][c]["cells"].get(k))
+        if a != b: EDIFF.setdefault(c, {})[k] = {"was": a.replace("\n", " ") or "—"}
+ELEM_CHG = sum(len(v) for v in EDIFF.values())
 DUTY = {c: (D["jun"][c].get("duty"), B["jun"][c].get("duty")) for c in D["jun"]}
 tch = sorted(TDIFF)
 
@@ -70,7 +81,8 @@ wb = Workbook(); wb.remove(wb.active)
 # ---------- גיליון שינויים ----------
 ws = wb.create_sheet("שינויים"); ws.sheet_view.rightToLeft = True
 ws["A1"] = TITLE; ws["A1"].font = F(bold=True, size=14)
-ws["A2"] = ("הצעה - לא מפורסם. השינוי נוגע לחטיבה בלבד" + ("; ביסודי אין שינוי" if not ELEM_CHG else f"; ביסודי {ELEM_CHG} תאים") +
+ws["A2"] = ("הצעה - לא מפורסם. " + ("השינוי נוגע לחטיבה בלבד; ביסודי אין שינוי" if not ELEM_CHG else
+             f"השינוי נוגע לחטיבה ולכיתות יסודי: {', '.join(EDIFF)} ({ELEM_CHG} תאים) - גם הן בקובץ") +
             ". תאים שהשתנו מסומנים בצהוב בכל הגיליונות, עם מה שהיה קודם. סידור חדר האוכל מסומן ★ ובמסגרת כתומה.")
 ws["A2"].font = F(size=10, italic=True)
 r = 4
@@ -84,6 +96,12 @@ for c in D["jun"]:
         now = ctext(D["jun"][c]["cells"].get(k)) or "—"
         for i, v in enumerate([c, DN[d], h, dv["was"], now]): setc(ws, r, 1 + i, v, al=RIGHT if i > 2 else CEN)
         ws.cell(row=r, column=5).fill = CHG; r += 1; nch += 1
+for c in D["elem"]:
+    for k, dv in EDIFF.get(c, {}).items():
+        d, h = skey(k)
+        now = etext(D["elem"][c]["cells"].get(k)).replace("\n", " ") or "—"
+        for i, v in enumerate([c, DN[d], h, dv["was"], now]): setc(ws, r, 1 + i, v, al=RIGHT if i > 2 else CEN)
+        ws.cell(row=r, column=5).fill = CHG; r += 1
 r += 1
 ws.cell(row=r, column=1, value="שינויים במערכות המורים").font = F(bold=True, size=12); r += 1
 for i, h in enumerate(["מורה", "יום", "שעה", "היה", "נהיה"]): setc(ws, r, 1 + i, h, F(bold=True), HDR)
@@ -163,11 +181,40 @@ for c, info in D["jun"].items():
     for h in range(3, 11): ws.row_dimensions[h].height = 42
     ws.cell(row=12, column=1, value="מקרא: ירוק = מחנך/ת · סגול = מגמות · צהוב בהיר = חנ\"ג שכבתי · צהוב חזק = שינוי בהצעה · אפור = אין לימודים · ★ במסגרת כתומה = סידור חדר אוכל").font = F(size=9, italic=True)
 
+# ---------- כיתות יסודי שהשתנו ----------
+for c in EDIFF:
+    info = D["elem"][c]
+    ws = wb.create_sheet(c); ws.sheet_view.rightToLeft = True
+    home = info.get("home") or ""
+    ws["A1"] = f"{c}   (מחנך/ת: {home})   ·   יסודי"
+    ws["A1"].font = F(bold=True, size=13); ws.merge_cells("A1:G1"); ws["A1"].alignment = CEN
+    grid_header(ws, 2)
+    dif = EDIFF[c]
+    maxh = max(skey(k)[1] for k in info["cells"])
+    for h in range(1, maxh + 1):
+        setc(ws, 2 + h, 1, h, F(bold=True), HDR)
+        for d in range(6):
+            k = f"{d},{h}"; v = info["cells"].get(k)
+            txt = etext(v)
+            if v is None: f = OFF
+            elif v.get("k") == "hole" or (v.get("t") or "") == "חסר מורה": f = HOLE
+            elif v.get("k") == "home": f = HOME
+            elif d == 5: f = FRI
+            else: f = None
+            if k in dif:
+                txt = (txt or "—") + f"\n(היה: {dif[k]['was']})"; f = CHG
+            setc(ws, 2 + h, 2 + d, txt, F(size=10, bold=k in dif), f)
+    ws.column_dimensions["A"].width = 7
+    for col in "BCDEFG": ws.column_dimensions[col].width = 24
+    for h in range(3, 3 + maxh): ws.row_dimensions[h].height = 42
+    ws.cell(row=4 + maxh, column=1, value="מקרא: ירוק = מחנך/ת · צהוב חזק = שינוי בהצעה · אפור = אין לימודים").font = F(size=9, italic=True)
+
 # ---------- מורי החטיבה ----------
 ws = wb.create_sheet("מורי החטיבה"); ws.sheet_view.rightToLeft = True
-ws["A1"] = "מערכות מורי החטיבה (כל מי שמלמד/ת בחטיבה; המערכת המלאה, כולל יסודי)"; ws["A1"].font = F(bold=True, size=13)
+ws["A1"] = ("מערכות מורי החטיבה (כל מי שמלמד/ת בחטיבה; המערכת המלאה, כולל יסודי)" +
+            (" + מורי יסודי שהשתנו בהצעה" if ELEM_CHG else "")); ws["A1"].font = F(bold=True, size=13)
 teachers = sorted(t for t, ev in D["teachers"].items() if any(e[0] == "חטיבה" for e in ev))
-teachers = [t for t in tch if t in teachers] + [t for t in teachers if t not in tch]   # מי שהשתנה - ראשון
+teachers = [t for t in tch if t in D["teachers"]] + [t for t in teachers if t not in tch]   # מי שהשתנה - ראשון (גם מורי יסודי)
 util = {u["t"]: u for u in D["util"]}
 order = list(D["elem"]) + list(D["jun"])
 r = 3
