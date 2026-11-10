@@ -564,7 +564,7 @@ for t in NIHUL:
 # אלי: קבוצת שלישי קבוע - בלי תלות ב-sed הישן
 hebusy["אלי"].discard((HCM["שני"],3)); hebusy["אלי"].discard((HCM["שני"],4))
 hebusy["אלי"].add((HCM["שלישי"],6))
-hebusy["אלי"].discard((HCM["שלישי"],5))   # ש5 שוחררה זמנית: אלי נכנס לכיתתו עד תחילת המפגשות
+for _h in ELI_TUE_CLASS: hebusy["אלי"].discard((HCM["שלישי"],_h))   # hdata.ELI_TUE_CLASS: שעות המפגשה שבהן אלי בכיתתו
 def htblk(t):
     b=set(hebusy.get(t,()))
     for dn in HOFF.get(t,[]):
@@ -735,7 +735,8 @@ _eli_nmi=[hx[("ז נעמי",s2,sj,"אלי")] for s2 in HSLOTS for (sj,t) in pair
 for _k7 in [k for k in hx if k[0]=="ח גלית" and k[3]=="אלי" and k[1][1]==7]:
     m.Add(hx[_k7]==0)
 _REL=set(os.environ.get("REL","").split(","))
-if "ELI" not in _REL: m.Add(sum(_eli_own)==8); m.Add(sum(_eli_nmi)==6)
+if "ELI" not in _REL:   # המספרים ב-hdata.TEACHER_CLASS_HOURS (מקור אחד)
+    m.Add(sum(_eli_own)==TEACHER_CLASS_HOURS[("אלי","ז אלי")]); m.Add(sum(_eli_nmi)==TEACHER_CLASS_HOURS[("אלי","ז נעמי")])
 _ch=[hx[("ז אלי",s2,"חינוך","אלי")] for s2 in HSLOTS if ("ז אלי",s2,"חינוך","אלי") in hx]
 
 _tn=[hx[("ז אלי",s2,'תנ"ך',"אלי")] for s2 in HSLOTS if ("ז אלי",s2,'תנ"ך',"אלי") in hx]
