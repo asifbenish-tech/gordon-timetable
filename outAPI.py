@@ -27,7 +27,7 @@ from data2 import DAY_NAMES, DAY_HOURS, HOMEROOM, CLASSES, SLOTS
 from hdata import HHOME, HDAY, HCLASSES
 
 S = json.load(io.open("sol_J.json", encoding="utf-8"))
-SED = json.load(io.open("sed_J.json", encoding="utf-8"))
+SED = __import__('data2').load_sed()
 # הכיסוי נלקח מהתא עצמו: כשהמחנך/ת תפוס/ה במקום אחר אין לה כיסוי,
 # וסימון "המחנך/ת נכנס/ת" היה משבץ אותה לשתי כיתות באותה שעה.
 holes = []

@@ -4,7 +4,7 @@ from data2 import *
 from hdata import HCLASSES,HSLOTS,HDAY,HOFF,HEV,PE_BLOCKS   # PE_BLOCKS: מקור אחד (pe_blocks.json)
 S=json.load(io.open('sol_J.json',encoding='utf-8'))
 H=json.load(io.open('sol_hat.json',encoding='utf-8'))
-SED=json.load(io.open('sed_J.json',encoding='utf-8'))
+SED=__import__('data2').load_sed()
 F=json.load(io.open('fills.json',encoding='utf-8'))
 def tof(v): return v.split(' – ')[1].split(' + ') if ' – ' in v else []   # 'שרית + חסן' = שניהם עסוקים
 CM={'שני':1,'שלישי':2}

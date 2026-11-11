@@ -18,7 +18,7 @@ S   = json.load(io.open("sol_J.json",  encoding="utf-8"))
 H   = json.load(io.open("sol_hat.json",encoding="utf-8"))
 TLN = json.load(io.open("tln_map.json",encoding="utf-8"))
 FIL = json.load(io.open("fills.json",  encoding="utf-8"))
-SED = json.load(io.open("sed_J.json",  encoding="utf-8"))
+SED = __import__('data2').load_sed()
 try: DUTY = json.load(io.open("duty.json",encoding="utf-8"))
 except Exception: DUTY = {}
 try: CO = json.load(io.open("co_zofia3.json",encoding="utf-8"))

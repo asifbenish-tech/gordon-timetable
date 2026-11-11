@@ -18,7 +18,7 @@ from hdata import CAP as HCAP, HEV, POOLS, FRIDAY_COVER, FRIDAY_H1
 JUN_EXTRA = {v["teacher"] for v in FRIDAY_COVER.values()} | {v["teacher"] for v in FRIDAY_H1.values()}   # מלווים בשישי
 GRADES = ["ז", "ח", "ט"]
 def lists(): return {"classes": list(ECLASSES), "subjects": list(POOLS), "grades": GRADES}
-SED = json.load(io.open("sed_J.json", encoding="utf-8"))   # מעגלי שיח (מפגשה) + ישיבת ניהול
+SED = __import__('data2').load_sed()   # מעגלי שיח (מפגשה) + ישיבת ניהול
 from data2 import NIHUL
 
 SKIP = {'תל"ן', "מגמות", "חסר מורה", "שרית + חסן", "מדעים חיצוני", "אבי קרן צבי"}

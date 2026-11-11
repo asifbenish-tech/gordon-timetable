@@ -510,7 +510,7 @@ keepg=[gm[t] for t in CIR_MON]+[gm[t].Not() for t in CIR_TUE]
 OBJ_E=(-300*sum(orna)+10000*sum(empty.values())+sum(pen)+200*(len(farm)-sum(farm))+400*(len(keepg)-sum(keepg)))
 
 # ---- נעילת סדירויות לפי sed_J.json (החלטות מאושרות) ----
-_SEDF=json.load(io.open("sed_J.json",encoding="utf-8"))
+_SEDF=__import__('data2').load_sed()
 for _t in ALLC:
     if False: pass
     elif _t=="אלי":                  m.Add(gm[_t]==0)   # קבוצת שלישי (קבוע)
@@ -551,7 +551,7 @@ from hdata import *
 from data2 import CLASSES as ECL, SLOTS as ESL
 
 E=None
-HSED=json.load(io.open("sed_J.json",encoding="utf-8"))
+HSED=__import__('data2').load_sed()
 hebusy=collections.defaultdict(set)                       # מורה -> משבצות תפוסות ביסודי
 pass  # הקישור ליסודי נעשה במודל המאוחד
 HCM={"שני":1,"שלישי":2}
@@ -570,6 +570,8 @@ def htblk(t):
     for dn in HOFF.get(t,[]):
         for h in range(1,MAXH+1): b.add((DIDX[dn],h))
     for s in HEV.get(t,[]): b.add(s)
+    for (_fc,_fs),_ft in fixed.items():        # שישי ביסודי (שיבוץ קבוע): המורה תפוס/ה גם לחטיבה
+        if _ft==t and _fs[0]==5: b.add(_fs)
     return b
 
 # מודל משותף (מוגדר בצד היסודי)
@@ -1277,7 +1279,7 @@ if st in (cp_model.OPTIMAL,cp_model.FEASIBLE):
     nbh=[h for h in range(1,7) if h in nb and sol.Value(nb[h])]
     io.open("sed_J.json","w",encoding="utf-8").write(json.dumps(
       {"מעגלי שיח שני":mb,"מעגלי שיח שלישי":ub,"ישיבת ניהול שלישי":nbh,
-       "קבוצת שני":sorted(t for t in ALLC if sol.Value(gm[t])),"קבוצת שלישי":sorted(t for t in ALLC if not sol.Value(gm[t]))},ensure_ascii=False,indent=1))
+       "קבוצת שני":sorted(t for t in ALLC if sol.Value(gm[t]) and t not in SED_EXEMPT),"קבוצת שלישי":sorted(t for t in ALLC if not sol.Value(gm[t]) and t not in SED_EXEMPT)},ensure_ascii=False,indent=1))
     out={c:{f"{s[0]},{s[1]}":(fixed[(c,s)] if s[0]==5 else
         next((t for t in allowed[c] if (c,s,t) in x and sol.Value(x[(c,s,t)])),"")) for s in SLOTS} for c in CLASSES}
     tlnmap={}

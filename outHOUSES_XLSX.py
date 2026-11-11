@@ -16,7 +16,7 @@ mv = importlib.util.module_from_spec(spec); spec.loader.exec_module(mv)
 
 E = json.load(io.open("sol_J.json", encoding="utf-8"))
 H = json.load(io.open("sol_hat.json", encoding="utf-8"))
-D = json.load(io.open("sed_J.json", encoding="utf-8"))
+D = __import__('data2').load_sed()
 DUTY = json.load(io.open("duty.json", encoding="utf-8"))
 FILLS = json.load(io.open("fills.json", encoding="utf-8"))
 FILLMAP = {}

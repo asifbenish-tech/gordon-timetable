@@ -6,7 +6,7 @@ from data2 import *
 from hdata import HCLASSES, GRADE, HHOME, HDAY, HSLOTS, NEED
 E=json.load(io.open("sol_J.json",encoding="utf-8"))
 H=json.load(io.open("sol_hat.json",encoding="utf-8"))
-D=json.load(io.open("sed_J.json",encoding="utf-8"))
+D=__import__('data2').load_sed()
 wb=openpyxl.Workbook(); wb.remove(wb.active)
 th=Side(style="thin",color="B0B0B0"); BO=Border(left=th,right=th,top=th,bottom=th)
 HDRF=PatternFill("solid",fgColor="2F5597"); HF=Font(bold=True,color="FFFFFF")
