@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>לוח שמירות · גורדון</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&family=Frank+Ruhl+Libre:wght@700&display=swap">
+<style>
+:root{
+  --bg:#FAF9F6; --surface:#FFFFFF; --ink:#22303D; --muted:#6B7A88; --line:#E3E0D8;
+  --accent:#0E6E66; --accent-ink:#FFFFFF; --chip:#EFECE4;
+  --mine:#FFF1C2; --mine-b:#E0B400; --today:#E6F3F1; --warn:#B3261E; --band:#F1EEE6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141B22; --surface:#1C2530; --ink:#E8EDF2; --muted:#93A1AE; --line:#2C3742;
+    --accent:#3FB8AC; --accent-ink:#0E1A18; --chip:#242E39;
+    --mine:#5A4A00; --mine-b:#E0B400; --today:#17302E; --warn:#FF8A80; --band:#222C37;
+  }
+}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 Heebo,"Segoe UI",Arial,sans-serif;direction:rtl}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:.9rem 1.2rem .7rem}
+.top{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}
+h1{font:700 1.5rem "Frank Ruhl Libre",Heebo,serif}
+#who{color:var(--muted);font-size:.85rem;margin-inline-start:auto}
+#who a,#who button{color:var(--accent);background:none;border:none;font:inherit;cursor:pointer;text-decoration:underline;padding:0;margin-inline-start:.6rem}
+nav{display:flex;gap:.4rem;margin-top:.7rem;flex-wrap:wrap;align-items:center}
+nav button,.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  padding:.35rem .9rem;border-radius:999px;font:500 .9rem Heebo;cursor:pointer}
+nav button[aria-pressed="true"],.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.55;cursor:default}
+select,input[type=text]{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:.3rem .6rem;border-radius:.5rem;font:500 .9rem Heebo}
+main{padding:1rem 1.2rem 4rem;max-width:1080px;margin:0 auto}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:.75rem;padding:1rem 1.1rem;margin-top:1rem}
+.card h2{font:700 1.15rem "Frank Ruhl Libre",Heebo,serif}
+.sub{color:var(--muted);font-size:.85rem;margin-top:.15rem}
+.time{direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums}
+/* השמירות שלי */
+.next{border-color:var(--accent);border-width:2px}
+.next .big{font:700 1.25rem Heebo;margin-top:.25rem}
+.dayrow{display:grid;grid-template-columns:5.5rem 1fr;gap:.2rem .8rem;padding:.65rem 0;border-top:1px solid var(--line)}
+.dayrow:first-of-type{border-top:none}
+.dayrow.today .dname{color:var(--accent)}
+.dname{font-weight:700}
+.duty{display:flex;gap:.6rem;flex-wrap:wrap;align-items:baseline;padding:.1rem 0}
+.duty .time{font-weight:700;min-width:6.2rem}
+.duty .with{color:var(--muted);font-size:.85rem}
+.none{color:var(--muted)}
+/* הלוח המלא */
+.tblwrap{overflow-x:auto;margin-top:.7rem}
+table{border-collapse:collapse;width:100%;min-width:680px}
+th,td{border:1px solid var(--line);padding:.42rem .5rem;text-align:center;font-size:.88rem;vertical-align:middle}
+thead th{background:var(--band);font-weight:700}
+th.spot{text-align:start;font-weight:500;min-width:9.5rem;background:var(--surface)}
+th.today,td.today{background:var(--today)}
+td.mine{background:var(--mine);box-shadow:inset 0 0 0 2px var(--mine-b);font-weight:700}
+td .p{display:block;white-space:nowrap}
+td .p.me{font-weight:700}
+td .p.unl{text-decoration:underline dotted var(--warn);text-underline-offset:3px}
+td.ed{cursor:pointer}
+td.ed:hover{box-shadow:inset 0 0 0 2px var(--accent)}
+td.ed:empty::after,td.ed .plus{content:"+";color:var(--muted)}
+.bhead{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.bhead h2 .time{font-family:Heebo;font-size:1.1rem}
+.rowtools{display:flex;gap:.2rem;margin-top:.25rem}
+.ic{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:.4rem;padding:.05rem .4rem;font-size:.8rem;cursor:pointer}
+.ic.del{color:var(--warn)}
+th.spot input{width:100%;min-width:8rem}
+#bar{position:sticky;bottom:0;z-index:6;background:var(--surface);border-top:2px solid var(--accent);padding:.6rem 1.2rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+#bar .msg{flex:1;min-width:10rem;font-size:.9rem}
+.note{background:var(--band);border-radius:.5rem;padding:.5rem .8rem;font-size:.85rem;margin-top:.8rem}
+.err{color:var(--warn)}
+dialog{border:1px solid var(--line);border-radius:.9rem;background:var(--surface);color:var(--ink);padding:1.2rem 1.3rem;width:min(26rem,92vw);margin:auto}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.8rem 0;min-height:2rem}
+.chipx{background:var(--chip);border-radius:999px;padding:.2rem .3rem .2rem .7rem;display:inline-flex;align-items:center;gap:.3rem}
+.chipx button{border:none;background:none;color:var(--warn);font-size:1rem;cursor:pointer;line-height:1;padding:0 .3rem}
+.addrow{display:flex;gap:.4rem}.addrow input{flex:1;min-width:0}
+.dfoot{display:flex;gap:.5rem;justify-content:flex-start;margin-top:1rem}
+.cnt{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem}
+.cnt span{background:var(--chip);border-radius:.5rem;padding:.15rem .55rem;font-size:.85rem}
+@media (max-width:600px){ header{padding:.7rem .8rem .6rem} main{padding:.6rem .8rem 4rem} h1{font-size:1.25rem}
+  .dayrow{grid-template-columns:4.2rem 1fr} }
+@media print{ header nav,#who,#bar,.noprint{display:none!important} header{position:static} .card{break-inside:avoid;border:none;padding:0}
+  table{min-width:0} body{background:#fff} }
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><h1>🛡️ לוח שמירות</h1><span class="sub" id="ttl"></span><span id="who"></span></div>
+  <nav id="nav"></nav>
+</header>
+<main id="main"><p class="sub" style="margin-top:2rem;text-align:center">טוען…</p></main>
+<div id="bar" hidden></div>
+<dialog id="dlg"></dialog>
+
+<script>
+"use strict";
+// ================= הגדרות =================
+// USERS_API: אותו שרת משתמשים של לוח המערכות (שינויים חיים ברשימת הנכנסים).
+// DUTY_API: כתובת ה-Web App של shmira_admin/Code.gs. ריק = הלוח מוצג מהנתונים המוטבעים,
+//           ועריכה נשמרת רק במכשיר של העורך (מצב ניסיון).
+const USERS_API="https://script.google.com/macros/s/AKfycbwJyZr8roh7yF0P32iXu2MgMoz95K62urGr_BAVOeAsWhMjqP-J3JQP87XKZanTpxNI/exec";
+const DUTY_API="";
+const EDITORS=["אסיף","חסן"];           // מי רשאי לערוך (לפי שם המשתמש ברשימת הנכנסים)
+const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
+// שם כפי שנכתב בלוח -> שם המשתמש ברשימת הנכנסים (כדי שכל אחד/ת יראו את השמירות שלהם)
+const ALIAS={"אורנה לוי":"אורנה","אלי מור":"אלי","עדי אבן טוב":"עדי שם טוב","גלית ז":"גלית זינגר","גלית ב":"גלית",
+  "גלית בצלאל":"גלית","נועה חמו":"נועה","הילית שטרן":"הילית","סימה דוד":"סימה","הדר קורצויל":"הדר","חגית אבידן":"חגית",
+  "שחר ש":"שחר","שחר שלייסר":"שחר","ליאור שפירא":"לי-אור","ליאור":"לי-אור","נעמי קציר":"נעמי","טלי ברינברג":"טלי",
+  "מירי קריימר":"מירי","מירי קרימר":"מירי","דניאל צאל":"דניאל","חסאן":"חסן"};
+// איך להציג שם משתמש כשבוחרים אותו מהרשימה (להבדיל בין שמות פרטיים זהים)
+const LABEL={"אורנה":"אורנה לוי","גלית":"גלית ב","גלית זינגר":"גלית ז","לי-אור":"ליאור שפירא"};
+
+// הלוח המקורי (תורנות שמירה תשפ"ז 26/27). עמודות: ראשון|שני|...|שישי, "/" = שניים באותה עמדה.
+const DEFAULT=(function(){
+  const src=[
+   ["7:45-8:10",[
+    ["חצר מתקנים","|||||"],
+    ["מגרשים/רחבה בניין החדש","יפעת|יפעת|אורנה לוי|אלי מור|יעל|צבי"]]],
+   ["9:40-10:00",[
+    ["חצר שומר ומסדרונות קומת כניסה","עדי אבן טוב|גלית ז|אסיף|דני|נועה חמו|לייה"],
+    ["רחבה בניין חדש","הילית שטרן|תדהר|סימה דוד|פנינה|הדר קורצויל|פנינה"],
+    ["חצר מתקנים","יערה|חגית אבידן|אנה|פאני|מאמי|צופיה"],
+    ["מגרש כדורסל","חסן/תמיר|שחר ש/פאני|מרים/תדהר|ארז|ליאור שפירא|שיר אופיר"],
+    ["מגרש כדורגל","חסן/תמיר|שחר ש/פאני|מרים/תדהר|ארז|ליאור שפירא|שיר אופיר"],
+    ["קומת יסודי","|||||"]]],
+   ["11:30-11:50",[
+    ["חצר שומר ומסדרונות קומת כניסה","גלית ז|אלי מור|לילך|תמיר|אסיף|"],
+    ["רחבה בניין חדש","נעמי קציר|הילית שטרן|עינת|שרית|חגית אבידן|"],
+    ["חצר מתקנים","גלית ב|תניה|טלי ברינברג|תניה|מרים|"],
+    ["מגרש כדורסל","אורנה לוי|אורנה מאיר|שרית|גלית ב|חסן|"],
+    ["מגרש כדורגל","אורנה לוי|אורנה מאיר|שרית|גלית ב|חסן|"],
+    ["קומת יסודי","|||||"]]],
+   ["12:35-12:55",[
+    ["חצר שומר ומסדרונות קומת כניסה","אינס|דני|צבי|צופיה|נעמי קציר|"],
+    ["רחבה בניין חדש","אורנה מאיר|דליה|הילה|מירי קריימר|דניאל צאל|"],
+    ["חצר מתקנים","עינת|מירי קריימר|דליה|אינס|לייה|"],
+    ["מגרש כדורסל","לילך/נועה חמו|דניאל צאל|ליאור שפירא|סימה דוד|יערה|"],
+    ["מגרש כדורגל","לילך/נועה חמו|דניאל צאל|ליאור שפירא|סימה דוד|יערה|"],
+    ["קומת יסודי","|||||"]]]];
+  return {title:"תורנות שמירה תשפ״ז", breaks:src.map(([time,spots])=>({time,spots:spots.map(([name,row])=>
+    ({name,a:row.split("|").map(c=>c?c.split("/"):[])}))}))};
+})();
+
+// ================= עזרים =================
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LS=(k,v)=>{try{return v===undefined?localStorage.getItem(k):(v===null?localStorage.removeItem(k):localStorage.setItem(k,v));}catch(e){return null;}};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const clean=s=>String(s||"").replace(/[<>"`\\]/g,"").replace(/\s+/g," ").trim().slice(0,40);
+const canon=p=>ALIAS[p]||p;
+const today=()=>new Date().getDay();   // 0=ראשון … 5=שישי, 6=שבת
+function jsonp(api,params,ms){
+  return new Promise((res,rej)=>{
+    const cb="__gs"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), sc=document.createElement("script");
+    const done=()=>{try{delete window[cb];}catch(e){window[cb]=undefined;} sc.remove(); clearTimeout(t);};
+    const t=setTimeout(()=>{done();rej(new Error("השרת לא ענה"));},ms||10000);
+    window[cb]=d=>{done();res(d);};
+    const q=Object.entries(Object.assign({},params,{callback:cb})).map(([k,v])=>encodeURIComponent(k)+"="+encodeURIComponent(v)).join("&");
+    sc.src=api+(api.includes("?")?"&":"?")+q; sc.onerror=()=>{done();rej(new Error("אין חיבור לשרת"));};
+    document.head.appendChild(sc);
+  });
+}
+
+// ================= הזדהות - אותה רשימה ואותו גיבוב כמו לוח המערכות =================
+let ACCESS_BASE={}, ACCESS={}, USER=null, USER_H=null;
+(function(){   // קישור העריכה מהמייל: ?skey=... נשמר במכשיר ונמחק מהכתובת
+  try{const u=new URL(location.href),k=u.searchParams.get("skey");
+    if(k){LS("gordon_skey",k);u.searchParams.delete("skey");history.replaceState(null,"",u.pathname+u.search+u.hash);}}catch(e){}
+})();
+async function loadAccess(){
+  try{ ACCESS_BASE=await (await fetch("access_map.json?v="+Date.now(),{cache:"no-store"})).json(); }catch(e){ ACCESS_BASE={}; }
+  ACCESS=Object.assign({},ACCESS_BASE);
+}
+const usersReady=(async()=>{
+  if(!USERS_API) return;
+  try{ const d=await jsonp(USERS_API,{});
+    if(d&&d.ok){ const a=Object.assign({},ACCESS_BASE); Object.keys(d.removed||{}).forEach(h=>{delete a[h];}); Object.assign(a,d.users||{}); USERS_LIVE=a; }
+  }catch(e){}
+})();
+let USERS_LIVE=null;
+const waitUsers=()=>Promise.race([usersReady,new Promise(r=>setTimeout(r,6000))]).then(()=>{ if(USERS_LIVE) ACCESS=USERS_LIVE; });
+async function idHash(raw){
+  const id=(raw||"").replace(/\D/g,"").padStart(9,"0"), enc=new TextEncoder();
+  const key=await crypto.subtle.importKey("raw",enc.encode(id),"PBKDF2",false,["deriveBits"]);
+  const bits=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:enc.encode("gordon-lohot-2026"),iterations:100000},key,256);
+  return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+function setUser(h){ USER_H=h||null; USER=h?ACCESS[h]:null; LS("gordon_auth",h||null); }
+function showLogin(msg){
+  let ov=$("loginov");
+  if(!ov){
+    ov=document.createElement("div"); ov.id="loginov";
+    ov.style.cssText="position:fixed;inset:0;z-index:99;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1rem";
+    ov.innerHTML='<div style="background:var(--surface);border:1px solid var(--line);border-radius:1rem;padding:2rem 2.2rem;max-width:22rem;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.12)">'
+      +'<div style="font-size:2rem">🛡️</div><h2 style="margin:.4rem 0">לוח שמירות · גורדון</h2>'
+      +'<div style="color:var(--muted);font-size:.9rem;margin-bottom:1rem">הזינו תעודת זהות כדי לראות איפה ומתי אתם שומרים</div>'
+      +'<input id="loginid" inputmode="numeric" autocomplete="off" placeholder="תעודת זהות" style="width:100%;padding:.55rem .8rem;font-size:1.05rem;text-align:center;letter-spacing:.1em">'
+      +'<button id="loginbtn" class="btn pri" style="width:100%;margin-top:.8rem;padding:.55rem;border-radius:.5rem;font-weight:700;font-size:1rem">כניסה</button>'
+      +'<div id="loginerr" class="err" style="font-size:.85rem;margin-top:.6rem;min-height:1.2em"></div></div>';
+    document.body.appendChild(ov);
+    const go=async()=>{
+      const btn=$("loginbtn"); btn.textContent="בודק…"; btn.disabled=true;
+      try{
+        const hsh=await idHash($("loginid").value); await waitUsers();
+        if(ACCESS[hsh]){ setUser(hsh); ov.remove(); start(); }
+        else $("loginerr").textContent="תעודת זהות לא מוכרת - פנו למנהל/ת";
+      }catch(err){ $("loginerr").textContent="שגיאה בהזדהות: "+err; }
+      btn.textContent="כניסה"; btn.disabled=false;
+    };
+    $("loginbtn").onclick=go; $("loginid").onkeydown=e=>{if(e.key==="Enter")go();};
+  }
+  if(msg) $("loginerr").textContent=msg;
+  $("loginid").focus();
+}
+
+// ================= נתוני הלוח =================
+let BOARD=clone(DEFAULT), REV=0, SRC="embedded", LOADERR="";
+let VIEW="mine", VIEWAS=null, EDIT=false, DRAFT=null, DIRTY=false, SAVING=false, BARMSG="";
+const canEdit=()=>!!(USER&&EDITORS.includes(USER.n));
+const hasKey=()=>!!LS("gordon_skey");
+function valid(b){ return b&&Array.isArray(b.breaks)&&b.breaks.every(k=>k&&Array.isArray(k.spots)&&k.spots.every(s=>s&&Array.isArray(s.a)&&s.a.length===6)); }
+async function loadBoard(){
+  if(DUTY_API){
+    try{ const d=await jsonp(DUTY_API,{});
+      if(d&&d.ok){ LOADERR=""; REV=d.rev||0; if(valid(d.board)){BOARD=d.board;SRC="server";} else {BOARD=clone(DEFAULT);SRC="embedded";} }
+      else LOADERR=(d&&d.error)||"תשובה לא צפויה מהשרת";
+    }catch(e){ LOADERR=e.message; }
+  } else {
+    try{ const l=JSON.parse(LS("gordon_shmira_local")||"null"); if(valid(l)){BOARD=l;SRC="local";} }catch(e){}
+  }
+}
+// כל השמירות של אדם: [{d,b,time,spots:[..],with:[..]}]
+function dutiesOf(name){
+  const out=[];
+  BOARD.breaks.forEach((bk,bi)=>{ for(let d=0;d<6;d++){
+    const spots=[], w=new Set();
+    bk.spots.forEach(s=>{ if(s.a[d].some(p=>canon(p)===name)){ spots.push(s.name); s.a[d].forEach(p=>{ if(canon(p)!==name) w.add(p); }); } });
+    if(spots.length) out.push({d,b:bi,time:bk.time,spots,with:[...w]});
+  }});
+  return out;
+}
+const tStart=t=>{ const m=/(\d{1,2})[:.](\d{2})/.exec(t||""); return m?(+m[1])*60+(+m[2]):0; };
+function people(b){ const s=new Set(); b.breaks.forEach(k=>k.spots.forEach(x=>x.a.forEach(c=>c.forEach(p=>s.add(canon(p)))))); return s; }
+const userNames=()=>[...new Set(Object.values(ACCESS).map(e=>e.n))];
+
+// ================= תצוגה =================
+function render(){
+  const B=EDIT?DRAFT:BOARD;
+  $("ttl").textContent=B.title||"";
+  $("who").innerHTML=esc(USER.n)+' <a href="viewer.html">מערכת השעות</a><button id="lo">יציאה</button>';
+  $("lo").onclick=()=>{ if(EDIT&&DIRTY&&!confirm("יש שינויים שלא נשמרו. לצאת בכל זאת?")) return; EDIT=false; setUser(null); showLogin(); };
+  const nav=$("nav"); nav.innerHTML="";
+  const tab=(id,txt)=>{ const b=document.createElement("button"); b.textContent=txt; b.setAttribute("aria-pressed",String(VIEW===id&&!EDIT));
+    b.onclick=()=>{ if(EDIT) return; VIEW=id; render(); }; b.disabled=EDIT; nav.appendChild(b); };
+  tab("mine","השמירות שלי"); tab("all","הלוח המלא");
+  if(canEdit()){ const b=document.createElement("button"); b.textContent="✏️ עריכת הלוח"; b.setAttribute("aria-pressed",String(EDIT));
+    b.onclick=()=>{ if(!EDIT) startEdit(); }; nav.appendChild(b); }
+  if(!EDIT){ const p=document.createElement("button"); p.textContent="🖨️ הדפסה"; p.className="noprint"; p.style.marginInlineStart="auto";
+    p.onclick=()=>{ VIEW="all"; render(); setTimeout(()=>window.print(),50); }; nav.appendChild(p); }
+  const m=$("main");
+  m.innerHTML=(LOADERR?'<div class="note err">לא הצלחתי לטעון את הלוח המעודכן מהשרת ('+esc(LOADERR)+'). מוצג הלוח האחרון שידוע.</div>':"")
+    +(EDIT?editHtml():VIEW==="mine"?mineHtml():allHtml(BOARD,false));
+  wire(); renderBar();
+}
+function mineHtml(){
+  const name=VIEWAS||USER.n, D=dutiesOf(name), td=today(), now=new Date().getHours()*60+new Date().getMinutes();
+  const names=[...new Set([...people(BOARD),USER.n])].sort((a,b)=>a.localeCompare(b,"he"));
+  let h='<div class="noprint" style="margin-top:.8rem"><label class="sub">שמירות של: <select id="viewas">'
+    +names.map(n=>'<option'+(n===name?" selected":"")+'>'+esc(n)+'</option>').join("")+'</select></label></div>';
+  // השמירה הקרובה
+  let nx=null;
+  for(let i=0;i<7&&!nx;i++){ const d=(td+i)%7; const c=D.filter(x=>x.d===d&&(i>0||tStart(x.time)+25>now)).sort((a,b)=>tStart(a.time)-tStart(b.time)); if(c.length) nx={x:c[0],i}; }
+  if(nx){ const when=nx.i===0?"היום":nx.i===1?"מחר":"יום "+DAYS[nx.x.d];
+    h+='<section class="card next"><div class="sub">השמירה הקרובה'+(name!==USER.n?" של "+esc(name):"")+'</div><div class="big">'+when+' · <span class="time">'+esc(nx.x.time)+'</span></div>'
+      +'<div>📍 '+nx.x.spots.map(esc).join(" + ")+'</div>'+(nx.x.with.length?'<div class="sub">יחד עם '+nx.x.with.map(esc).join(", ")+'</div>':"")+'</section>'; }
+  h+='<section class="card"><h2>'+(name===USER.n?"השמירות שלי":"השמירות של "+esc(name))+'</h2><div class="sub">'+(D.length?D.length+" שמירות בשבוע":"")+'</div>';
+  if(!D.length) h+='<p class="none" style="margin-top:.6rem">לא נמצאו שמירות על השם '+esc(name)+'. אם זו טעות - פנו לאסיף או לחסן.</p>';
+  else for(let d=0;d<6;d++){
+    const L=D.filter(x=>x.d===d).sort((a,b)=>tStart(a.time)-tStart(b.time));
+    h+='<div class="dayrow'+(d===td?" today":"")+'"><div class="dname">'+DAYS[d]+(d===td?'<div class="sub">היום</div>':"")+'</div><div>'
+      +(L.length?L.map(x=>'<div class="duty"><span class="time">'+esc(x.time)+'</span><span>'+x.spots.map(esc).join(" + ")+'</span>'
+        +(x.with.length?'<span class="with">עם '+x.with.map(esc).join(", ")+'</span>':"")+'</div>').join(""):'<span class="none">אין שמירה</span>')+'</div></div>';
+  }
+  return h+'</section>';
+}
+function cellHtml(c,me,ed,known){
+  return c.map(p=>'<span class="p'+(canon(p)===me?" me":"")+(ed&&!known.has(canon(p))?" unl":"")+'"'
+    +(ed&&!known.has(canon(p))?' title="לא מקושר/ת למשתמש ברשימת הנכנסים - לא יראו את השמירה בכניסה"':"")+'>'+esc(p)+'</span>').join("");
+}
+function allHtml(B,ed){
+  const me=USER.n, td=today(), known=new Set(userNames());
+  let h="";
+  B.breaks.forEach((bk,bi)=>{
+    h+='<section class="card"><div class="bhead"><h2>הפסקה <span class="time">'+esc(bk.time)+'</span></h2>'
+      +(ed?'<input type="text" data-bt="'+bi+'" value="'+esc(bk.time)+'" aria-label="שעת ההפסקה" style="width:8rem;direction:ltr">'
+          +'<button class="ic" data-bmv="'+bi+',-1" title="הזז למעלה">↑</button><button class="ic" data-bmv="'+bi+',1" title="הזז למטה">↓</button>'
+          +'<button class="ic del" data-bdel="'+bi+'">מחיקת ההפסקה</button>':"")+'</div>'
+      +'<div class="tblwrap"><table><thead><tr><th>מיקום</th>'+DAYS.map((d,i)=>'<th'+(i===td?' class="today"':"")+'>'+d+'</th>').join("")+'</tr></thead><tbody>';
+    bk.spots.forEach((s,si)=>{
+      h+='<tr><th class="spot">'+(ed?'<input type="text" data-sn="'+bi+','+si+'" value="'+esc(s.name)+'" aria-label="שם המקום">'
+          +'<div class="rowtools"><button class="ic" data-smv="'+bi+','+si+',-1" title="הזז למעלה">↑</button><button class="ic" data-smv="'+bi+','+si+',1" title="הזז למטה">↓</button>'
+          +'<button class="ic del" data-sdel="'+bi+','+si+'" title="מחיקת המקום">🗑</button></div>':esc(s.name))+'</th>';
+      s.a.forEach((c,d)=>{ const mine=c.some(p=>canon(p)===me);
+        h+='<td class="'+(mine?"mine ":"")+(d===td&&!mine?"today ":"")+(ed?"ed":"")+'"'+(ed?' tabindex="0" role="button" data-cell="'+bi+','+si+','+d+'"':"")+'>'
+          +(c.length?cellHtml(c,me,ed,known):(ed?'<span class="plus">+</span>':""))+'</td>'; });
+      h+='</tr>';
+    });
+    h+='</tbody></table></div>'+(ed?'<button class="btn" data-sadd="'+bi+'" style="margin-top:.7rem">+ מקום שמירה</button>':"")+'</section>';
+  });
+  return h;
+}
+function editHtml(){
+  const cnt={}; DRAFT.breaks.forEach(k=>{ for(let d=0;d<6;d++){ const s=new Set(); k.spots.forEach(x=>x.a[d].forEach(p=>s.add(canon(p)))); s.forEach(n=>cnt[n]=(cnt[n]||0)+1); } });
+  const rows=Object.entries(cnt).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"he"));
+  return '<div class="note">לחיצה על תא = מי שומר שם. אפשר לשנות שמות מקומות ושעות, להוסיף ולמחוק מקומות והפסקות. '
+    +'שם עם קו מקווקו אדום אינו מקושר למשתמש, ולכן אותו אדם לא יראה את השמירה כשייכנס.'
+    +(DUTY_API?"":' <b>מצב ניסיון:</b> שרת השמירות עוד לא חובר, ולכן השינויים נשמרים רק במכשיר הזה ושאר הצוות לא רואה אותם.')+'</div>'
+    +'<div class="card"><label>כותרת הלוח: <input type="text" id="btitle" value="'+esc(DRAFT.title||"")+'" style="min-width:14rem"></label></div>'
+    +allHtml(DRAFT,true)
+    +'<button class="btn" id="badd" style="margin-top:1rem">+ הפסקה חדשה</button>'
+    +'<section class="card"><h2>כמה שמירות לכל אחד/ת</h2><div class="sub">מספר ההפסקות בשבוע (שתי עמדות באותה הפסקה נספרות פעם אחת)</div>'
+    +'<div class="cnt">'+rows.map(([n,c])=>'<span>'+esc(n)+' · <b>'+c+'</b></span>').join("")+'</div></section>';
+}
+function renderBar(){
+  const bar=$("bar"); bar.hidden=!EDIT; if(!EDIT) return;
+  bar.innerHTML='<span class="msg">'+(BARMSG?'<span class="err">'+esc(BARMSG)+'</span>':DIRTY?"יש שינויים שלא נשמרו":"מצב עריכה")+'</span>'
+    +'<button class="btn" id="ecancel"'+(SAVING?" disabled":"")+'>'+(DIRTY?"ביטול השינויים":"סיום")+'</button>'
+    +'<button class="btn pri" id="esave"'+(SAVING||!DIRTY?" disabled":"")+'>'+(SAVING?"שומר…":"שמירה")+'</button>';
+  $("ecancel").onclick=()=>{ if(DIRTY&&!confirm("לבטל את כל השינויים שלא נשמרו?")) return; EDIT=false; DRAFT=null; DIRTY=false; BARMSG=""; VIEW="all"; render(); };
+  $("esave").onclick=save;
+}
+const touch=()=>{ DIRTY=true; BARMSG=""; };
+function wire(){
+  const m=$("main"), va=$("viewas");
+  if(va) va.onchange=()=>{ VIEWAS=va.value===USER.n?null:va.value; render(); };
+  if(!EDIT) return;
+  const ix=s=>s.split(",").map(Number);
+  $("btitle").oninput=e=>{ DRAFT.title=clean(e.target.value); touch(); renderBar(); };
+  m.querySelectorAll("[data-bt]").forEach(el=>el.onchange=()=>{ DRAFT.breaks[+el.dataset.bt].time=clean(el.value); touch(); render(); });
+  m.querySelectorAll("[data-sn]").forEach(el=>el.oninput=()=>{ const [b,s]=ix(el.dataset.sn); DRAFT.breaks[b].spots[s].name=clean(el.value); touch(); renderBar(); });
+  m.querySelectorAll("[data-cell]").forEach(el=>{ const open=()=>cellDialog(...ix(el.dataset.cell)); el.onclick=open; el.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();open();} }; });
+  m.querySelectorAll("[data-smv]").forEach(el=>el.onclick=()=>{ const [b,s,dir]=ix(el.dataset.smv), L=DRAFT.breaks[b].spots, t=s+dir; if(t<0||t>=L.length) return; [L[s],L[t]]=[L[t],L[s]]; touch(); render(); });
+  m.querySelectorAll("[data-sdel]").forEach(el=>el.onclick=()=>{ const [b,s]=ix(el.dataset.sdel), sp=DRAFT.breaks[b].spots[s];
+    if(sp.a.some(c=>c.length)&&!confirm('למחוק את "'+sp.name+'" עם כל השומרים שבו?')) return; DRAFT.breaks[b].spots.splice(s,1); touch(); render(); });
+  m.querySelectorAll("[data-sadd]").forEach(el=>el.onclick=()=>{ const b=+el.dataset.sadd; DRAFT.breaks[b].spots.push({name:"מקום חדש",a:[[],[],[],[],[],[]]}); touch(); render();
+    const inp=m.querySelector('[data-sn="'+b+','+(DRAFT.breaks[b].spots.length-1)+'"]'); if(inp){inp.focus();inp.select();} });
+  m.querySelectorAll("[data-bmv]").forEach(el=>el.onclick=()=>{ const [b,dir]=ix(el.dataset.bmv), L=DRAFT.breaks, t=b+dir; if(t<0||t>=L.length) return; [L[b],L[t]]=[L[t],L[b]]; touch(); render(); });
+  m.querySelectorAll("[data-bdel]").forEach(el=>el.onclick=()=>{ const b=+el.dataset.bdel; if(!confirm("למחוק את ההפסקה "+DRAFT.breaks[b].time+" עם כל המקומות והשומרים שבה?")) return; DRAFT.breaks.splice(b,1); touch(); render(); });
+  $("badd").onclick=()=>{ const last=DRAFT.breaks[DRAFT.breaks.length-1];
+    DRAFT.breaks.push({time:"00:00-00:00",spots:(last?last.spots:[{name:"מקום חדש"}]).map(s=>({name:s.name,a:[[],[],[],[],[],[]]}))}); touch(); render();
+    const inp=m.querySelector('[data-bt="'+(DRAFT.breaks.length-1)+'"]'); if(inp){inp.scrollIntoView({block:"center"});inp.focus();inp.select();} };
+}
+function cellDialog(b,s,d){
+  const dlg=$("dlg"), sp=DRAFT.breaks[b].spots[s]; let cur=sp.a[d].slice();
+  const opts=[...new Set(userNames().map(n=>LABEL[n]||n).concat([...people(DRAFT)].map(n=>LABEL[n]||n)))].sort((a,b)=>a.localeCompare(b,"he"));
+  const draw=()=>{
+    dlg.innerHTML='<h2 style="font:700 1.1rem Heebo">'+esc(sp.name)+'</h2><div class="sub">יום '+DAYS[d]+' · <span class="time">'+esc(DRAFT.breaks[b].time)+'</span></div>'
+      +'<div class="chips">'+(cur.length?cur.map((p,i)=>'<span class="chipx">'+esc(p)+'<button data-rm="'+i+'" aria-label="הסרת '+esc(p)+'">×</button></span>').join(""):'<span class="none">אין שומר/ת</span>')+'</div>'
+      +'<div class="addrow"><input type="text" id="padd" list="plist" placeholder="שם מהרשימה או שם חופשי" autocomplete="off"><button class="btn" id="paddb">הוספה</button></div>'
+      +'<datalist id="plist">'+opts.filter(o=>!cur.includes(o)).map(o=>'<option value="'+esc(o)+'">').join("")+'</datalist>'
+      +'<div class="dfoot"><button class="btn pri" id="pok">אישור</button><button class="btn" id="pno">ביטול</button></div>';
+    dlg.querySelectorAll("[data-rm]").forEach(x=>x.onclick=()=>{ cur.splice(+x.dataset.rm,1); draw(); });
+    const add=()=>{ const v=clean($("padd").value); if(v&&!cur.includes(v)&&cur.length<8) cur.push(v); draw(); $("padd").focus(); };
+    $("paddb").onclick=add;
+    $("padd").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); if($("padd").value.trim()) add(); else $("pok").click(); } };
+    $("pok").onclick=()=>{ const v=clean($("padd").value); if(v&&!cur.includes(v)&&cur.length<8) cur.push(v);
+      if(JSON.stringify(cur)!==JSON.stringify(sp.a[d])){ sp.a[d]=cur; touch(); } dlg.close(); render(); };
+    $("pno").onclick=()=>dlg.close();
+  };
+  draw(); dlg.showModal(); $("padd").focus();
+}
+function startEdit(){
+  if(DUTY_API&&!hasKey()){ alert("כדי לערוך צריך לפתוח פעם אחת במכשיר הזה את קישור העריכה שנשלח במייל לאסיף."); return; }
+  DRAFT=clone(BOARD); DIRTY=false; BARMSG=""; EDIT=true; render();
+}
+async function save(){
+  DRAFT.breaks.forEach(k=>{ k.time=clean(k.time); k.spots.forEach(s=>{ s.name=clean(s.name)||"מקום"; }); });
+  if(!DUTY_API){ LS("gordon_shmira_local",JSON.stringify(DRAFT)); BOARD=DRAFT; SRC="local"; EDIT=false; DRAFT=null; DIRTY=false; VIEW="all"; render(); return; }
+  SAVING=true; BARMSG=""; renderBar();
+  const sent=JSON.stringify(DRAFT); let res=null;
+  try{ const r=await fetch(DUTY_API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},redirect:"follow",
+        body:JSON.stringify({key:LS("gordon_skey"),name:USER.n,rev:REV,board:DRAFT})}); res=await r.json(); }catch(e){ res=null; }
+  if(!res){   // התשובה לא נקראה (דפדפן/רשת) - בודקים מול השרת אם השמירה נקלטה
+    try{ const d=await jsonp(DUTY_API,{}); if(d&&d.ok&&JSON.stringify(d.board)===sent) res={ok:true,rev:d.rev}; }catch(e){}
+  }
+  SAVING=false;
+  if(res&&res.ok){ BOARD=DRAFT; REV=res.rev||REV+1; SRC="server"; EDIT=false; DRAFT=null; DIRTY=false; VIEW="all"; render(); }
+  else { BARMSG=(res&&res.error)||"השמירה נכשלה - בדקו את החיבור ונסו שוב"; renderBar(); }
+}
+window.addEventListener("beforeunload",e=>{ if(EDIT&&DIRTY){ e.preventDefault(); e.returnValue=""; } });
+document.addEventListener("visibilitychange",async()=>{ if(!document.hidden&&USER&&!EDIT&&DUTY_API){ const r=REV; await loadBoard(); if(REV!==r&&!EDIT) render(); } });
+
+async function start(){ await loadBoard(); if(canEdit()&&!dutiesOf(USER.n).length) VIEW="all"; render(); }
+(async function(){
+  await loadAccess();
+  const saved=LS("gordon_auth");
+  if(saved&&!ACCESS[saved]) await waitUsers();
+  if(saved&&ACCESS[saved]){ setUser(saved); start(); waitUsers().then(()=>{ if(USER_H&&!ACCESS[USER_H]){ setUser(null); showLogin("ההרשאה שלך הוסרה - פנו למנהל/ת"); } }); }
+  else { $("main").innerHTML=""; showLogin(); }
+})();
+</script>
+</body>
+</html>
