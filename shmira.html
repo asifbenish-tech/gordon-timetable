@@ -9,13 +9,15 @@
 :root{
   --bg:#FAF9F6; --surface:#FFFFFF; --ink:#22303D; --muted:#6B7A88; --line:#E3E0D8;
   --accent:#0E6E66; --accent-ink:#FFFFFF; --chip:#EFECE4;
-  --mine:#FFF1C2; --mine-b:#E0B400; --today:#E6F3F1; --warn:#B3261E; --band:#F1EEE6;
+  --mine:#FFF1C2; --mine-b:#E0B400; --today:#E6F3F1; --warn:#B3261E; --warn-bg:#FBE4E1; --band:#F1EEE6; --off:#F3F1EC;
+  --ok:#2E7D32;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#141B22; --surface:#1C2530; --ink:#E8EDF2; --muted:#93A1AE; --line:#2C3742;
     --accent:#3FB8AC; --accent-ink:#0E1A18; --chip:#242E39;
-    --mine:#5A4A00; --mine-b:#E0B400; --today:#17302E; --warn:#FF8A80; --band:#222C37;
+    --mine:#5A4A00; --mine-b:#E0B400; --today:#17302E; --warn:#FF8A80; --warn-bg:#43231F; --band:#222C37; --off:#19212A;
+    --ok:#81C784;
   }
 }
 *{box-sizing:border-box;margin:0}
@@ -30,14 +32,18 @@ nav{display:flex;gap:.4rem;margin-top:.7rem;flex-wrap:wrap;align-items:center}
 nav button,.btn{border:1px solid var(--line);background:var(--surface);color:var(--ink);
   padding:.35rem .9rem;border-radius:999px;font:500 .9rem Heebo;cursor:pointer}
 nav button[aria-pressed="true"],.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button:disabled{opacity:.55;cursor:default}
-select,input[type=text]{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:.3rem .6rem;border-radius:.5rem;font:500 .9rem Heebo}
+select,input[type=text],input[type=time],input[type=number],input[type=search]{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:.3rem .6rem;border-radius:.5rem;font:500 .9rem Heebo}
 main{padding:1rem 1.2rem 4rem;max-width:1080px;margin:0 auto}
+main.wide{max-width:1360px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:.75rem;padding:1rem 1.1rem;margin-top:1rem}
 .card h2{font:700 1.15rem "Frank Ruhl Libre",Heebo,serif}
 .sub{color:var(--muted);font-size:.85rem;margin-top:.15rem}
 .time{direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums}
+.none{color:var(--muted)}
+.err{color:var(--warn)}
+.note{background:var(--band);border-radius:.5rem;padding:.5rem .8rem;font-size:.85rem;margin-top:.8rem}
 /* השמירות שלי */
 .next{border-color:var(--accent);border-width:2px}
 .next .big{font:700 1.25rem Heebo;margin-top:.25rem}
@@ -48,44 +54,71 @@ main{padding:1rem 1.2rem 4rem;max-width:1080px;margin:0 auto}
 .duty{display:flex;gap:.6rem;flex-wrap:wrap;align-items:baseline;padding:.1rem 0}
 .duty .time{font-weight:700;min-width:6.2rem}
 .duty .with{color:var(--muted);font-size:.85rem}
-.none{color:var(--muted)}
-/* הלוח המלא */
+/* טבלאות הלוח */
 .tblwrap{overflow-x:auto;margin-top:.7rem}
-table{border-collapse:collapse;width:100%;min-width:680px}
+table{border-collapse:collapse;width:100%}
+table.grid{min-width:680px}
 th,td{border:1px solid var(--line);padding:.42rem .5rem;text-align:center;font-size:.88rem;vertical-align:middle}
 thead th{background:var(--band);font-weight:700}
 th.spot{text-align:start;font-weight:500;min-width:9.5rem;background:var(--surface)}
 th.today,td.today{background:var(--today)}
-td.mine{background:var(--mine);box-shadow:inset 0 0 0 2px var(--mine-b);font-weight:700}
+td.off{background:var(--off);color:var(--muted)}
+td.mine{background:var(--mine);box-shadow:inset 0 0 0 2px var(--mine-b)}
 td .p{display:block;white-space:nowrap}
 td .p.me{font-weight:700}
-td .p.unl{text-decoration:underline dotted var(--warn);text-underline-offset:3px}
-td.ed{cursor:pointer}
+td .p.away{color:var(--warn)}
+td .p.unl{text-decoration:underline dotted var(--muted);text-underline-offset:3px}
+td.ed{cursor:pointer;min-width:5.5rem}
 td.ed:hover{box-shadow:inset 0 0 0 2px var(--accent)}
-td.ed:empty::after,td.ed .plus{content:"+";color:var(--muted)}
-.bhead{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
-.bhead h2 .time{font-family:Heebo;font-size:1.1rem}
-.rowtools{display:flex;gap:.2rem;margin-top:.25rem}
-.ic{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:.4rem;padding:.05rem .4rem;font-size:.8rem;cursor:pointer}
+td.miss{background:var(--warn-bg)}
+td.miss .need{color:var(--warn);font-size:.78rem;display:block}
+td.dim{opacity:.45}
+.bhead{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}
+/* מסך הסידור */
+.steps{display:flex;gap:.4rem;flex-wrap:wrap}
+.deft td,.deft th{font-size:.9rem;padding:.35rem .4rem}
+.deft input[type=text]{width:100%;min-width:7rem}
+.deft input[type=number]{width:3.6rem;text-align:center}
+.deft .days label{display:inline-flex;flex-direction:column;align-items:center;font-size:.72rem;color:var(--muted);margin:0 .12rem;cursor:pointer}
+.ic{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:.4rem;padding:.1rem .45rem;font-size:.85rem;cursor:pointer}
 .ic.del{color:var(--warn)}
-th.spot input{width:100%;min-width:8rem}
+input[type=checkbox]{width:1.05rem;height:1.05rem;accent-color:var(--accent);cursor:pointer}
+.asg{display:grid;grid-template-columns:minmax(0,1fr) 17rem;gap:1rem;align-items:start}
+.panel{position:sticky;top:7.2rem;background:var(--surface);border:1px solid var(--line);border-radius:.75rem;padding:.8rem;margin-top:1rem;max-height:calc(100vh - 12rem);display:flex;flex-direction:column}
+.panel input[type=search]{width:100%;margin:.5rem 0}
+.plist{overflow-y:auto;flex:1;min-height:6rem}
+.prow{display:flex;align-items:center;gap:.4rem;width:100%;border:none;background:none;color:var(--ink);font:500 .9rem Heebo;padding:.3rem .4rem;border-radius:.45rem;cursor:pointer;text-align:start}
+.prow:hover{background:var(--band)}
+.prow[aria-pressed="true"]{background:var(--mine);box-shadow:inset 0 0 0 2px var(--mine-b)}
+.prow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{background:var(--chip);border-radius:999px;min-width:1.5rem;text-align:center;font-size:.8rem;padding:0 .35rem;font-weight:700}
+.badge.zero{background:var(--warn-bg);color:var(--warn)}
+.dots{display:inline-flex;gap:2px;direction:rtl}
+.dots i{width:.42rem;height:.42rem;border-radius:50%;background:var(--line);display:block}
+.dots i.on{background:var(--accent)}
+.selbar{background:var(--mine);border:1px solid var(--mine-b);border-radius:.6rem;padding:.5rem .8rem;margin-top:1rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;font-size:.9rem}
+.stat{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}
+.stat span{background:var(--surface);border:1px solid var(--line);border-radius:.6rem;padding:.3rem .7rem;font-size:.88rem}
+.stat span.bad{border-color:var(--warn);color:var(--warn)}
+.stat span.good{border-color:var(--ok);color:var(--ok)}
+.issues li{margin:.2rem 1.2rem 0 0;font-size:.9rem}
 #bar{position:sticky;bottom:0;z-index:6;background:var(--surface);border-top:2px solid var(--accent);padding:.6rem 1.2rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
 #bar .msg{flex:1;min-width:10rem;font-size:.9rem}
-.note{background:var(--band);border-radius:.5rem;padding:.5rem .8rem;font-size:.85rem;margin-top:.8rem}
-.err{color:var(--warn)}
-dialog{border:1px solid var(--line);border-radius:.9rem;background:var(--surface);color:var(--ink);padding:1.2rem 1.3rem;width:min(26rem,92vw);margin:auto}
+dialog{border:1px solid var(--line);border-radius:.9rem;background:var(--surface);color:var(--ink);padding:1.2rem 1.3rem;width:min(28rem,94vw);max-height:88vh;margin:auto}
 dialog::backdrop{background:rgba(0,0,0,.4)}
-.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.8rem 0;min-height:2rem}
+.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.7rem 0;min-height:2rem}
 .chipx{background:var(--chip);border-radius:999px;padding:.2rem .3rem .2rem .7rem;display:inline-flex;align-items:center;gap:.3rem}
 .chipx button{border:none;background:none;color:var(--warn);font-size:1rem;cursor:pointer;line-height:1;padding:0 .3rem}
-.addrow{display:flex;gap:.4rem}.addrow input{flex:1;min-width:0}
-.dfoot{display:flex;gap:.5rem;justify-content:flex-start;margin-top:1rem}
-.cnt{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.6rem}
-.cnt span{background:var(--chip);border-radius:.5rem;padding:.15rem .55rem;font-size:.85rem}
+.cands{max-height:42vh;overflow-y:auto;border:1px solid var(--line);border-radius:.6rem;padding:.3rem}
+.cands h4{font:700 .78rem Heebo;color:var(--muted);padding:.4rem .4rem .1rem}
+.cands .prow .why{color:var(--muted);font-size:.75rem}
+.addrow{display:flex;gap:.4rem;margin-top:.6rem}.addrow input{flex:1;min-width:0}
+.dfoot{display:flex;gap:.5rem;margin-top:1rem}
+@media (max-width:900px){ .asg{grid-template-columns:1fr} .panel{position:static;max-height:15rem;order:-1} }
 @media (max-width:600px){ header{padding:.7rem .8rem .6rem} main{padding:.6rem .8rem 4rem} h1{font-size:1.25rem}
   .dayrow{grid-template-columns:4.2rem 1fr} }
 @media print{ header nav,#who,#bar,.noprint{display:none!important} header{position:static} .card{break-inside:avoid;border:none;padding:0}
-  table{min-width:0} body{background:#fff} }
+  table.grid{min-width:0} body{background:#fff} }
 </style>
 </head>
 <body>
@@ -102,48 +135,59 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 // ================= הגדרות =================
 // USERS_API: אותו שרת משתמשים של לוח המערכות (שינויים חיים ברשימת הנכנסים).
 // DUTY_API: כתובת ה-Web App של shmira_admin/Code.gs. ריק = הלוח מוצג מהנתונים המוטבעים,
-//           ועריכה נשמרת רק במכשיר של העורך (מצב ניסיון).
+//           והסידור נשמר רק במכשיר של העורך (מצב ניסיון).
 const USERS_API="https://script.google.com/macros/s/AKfycbwJyZr8roh7yF0P32iXu2MgMoz95K62urGr_BAVOeAsWhMjqP-J3JQP87XKZanTpxNI/exec";
 const DUTY_API="";
-const EDITORS=["אסיף","חסן"];           // מי רשאי לערוך (לפי שם המשתמש ברשימת הנכנסים)
+const EDITORS=["חסן","אסיף"];           // מי רשאי לסדר את הלוח (לפי שם המשתמש ברשימת הנכנסים)
 const DAYS=["ראשון","שני","שלישי","רביעי","חמישי","שישי"];
-// שם כפי שנכתב בלוח -> שם המשתמש ברשימת הנכנסים (כדי שכל אחד/ת יראו את השמירות שלהם)
+// שם כפי שנכתב באקסל / הוקלד ידנית -> שם איש הצוות במערכת (כמו במערכת השעות וברשימת הנכנסים)
 const ALIAS={"אורנה לוי":"אורנה","אלי מור":"אלי","עדי אבן טוב":"עדי שם טוב","גלית ז":"גלית זינגר","גלית ב":"גלית",
   "גלית בצלאל":"גלית","נועה חמו":"נועה","הילית שטרן":"הילית","סימה דוד":"סימה","הדר קורצויל":"הדר","חגית אבידן":"חגית",
   "שחר ש":"שחר","שחר שלייסר":"שחר","ליאור שפירא":"לי-אור","ליאור":"לי-אור","נעמי קציר":"נעמי","טלי ברינברג":"טלי",
-  "מירי קריימר":"מירי","מירי קרימר":"מירי","דניאל צאל":"דניאל","חסאן":"חסן"};
-// איך להציג שם משתמש כשבוחרים אותו מהרשימה (להבדיל בין שמות פרטיים זהים)
-const LABEL={"אורנה":"אורנה לוי","גלית":"גלית ב","גלית זינגר":"גלית ז","לי-אור":"ליאור שפירא"};
+  "מירי קריימר":"מירי","מירי קרימר":"מירי","דניאל צאל":"דניאל","חסאן":"חסן","שיר אופיר":"שיר"};
+// איך להציג שם (להבדיל בין שמות פרטיים זהים)
+const LABEL={"אורנה":"אורנה לוי","גלית":"גלית ב","גלית זינגר":"גלית ז","לי-אור":"ליאור שפירא","שיר":"שיר אופיר"};
 
-// הלוח המקורי (תורנות שמירה תשפ"ז 26/27). עמודות: ראשון|שני|...|שישי, "/" = שניים באותה עמדה.
+// הלוח המקורי (תורנות שמירה תשפ"ז 26/27). [שעה, אחרי איזה שיעור, [אזור, ראשון|שני|...|שישי]], "/" = שניים באותה עמדה.
+// מבנה הלוח: zones = אזורי שמירה (need = כמה שומרים נדרשים), breaks = הפסקות (after = אחרי איזה שיעור,
+// days = באילו ימים, zones = אילו אזורים מאוישים), a = שיבוץ: "הפסקה|אזור|יום" -> שמות.
 const DEFAULT=(function(){
   const src=[
-   ["7:45-8:10",[
+   ["7:45-8:10",0,"לפני הלימודים",[
     ["חצר מתקנים","|||||"],
     ["מגרשים/רחבה בניין החדש","יפעת|יפעת|אורנה לוי|אלי מור|יעל|צבי"]]],
-   ["9:40-10:00",[
+   ["9:40-10:00",2,"",[
     ["חצר שומר ומסדרונות קומת כניסה","עדי אבן טוב|גלית ז|אסיף|דני|נועה חמו|לייה"],
     ["רחבה בניין חדש","הילית שטרן|תדהר|סימה דוד|פנינה|הדר קורצויל|פנינה"],
     ["חצר מתקנים","יערה|חגית אבידן|אנה|פאני|מאמי|צופיה"],
     ["מגרש כדורסל","חסן/תמיר|שחר ש/פאני|מרים/תדהר|ארז|ליאור שפירא|שיר אופיר"],
     ["מגרש כדורגל","חסן/תמיר|שחר ש/פאני|מרים/תדהר|ארז|ליאור שפירא|שיר אופיר"],
     ["קומת יסודי","|||||"]]],
-   ["11:30-11:50",[
+   ["11:30-11:50",4,"",[
     ["חצר שומר ומסדרונות קומת כניסה","גלית ז|אלי מור|לילך|תמיר|אסיף|"],
     ["רחבה בניין חדש","נעמי קציר|הילית שטרן|עינת|שרית|חגית אבידן|"],
     ["חצר מתקנים","גלית ב|תניה|טלי ברינברג|תניה|מרים|"],
     ["מגרש כדורסל","אורנה לוי|אורנה מאיר|שרית|גלית ב|חסן|"],
     ["מגרש כדורגל","אורנה לוי|אורנה מאיר|שרית|גלית ב|חסן|"],
     ["קומת יסודי","|||||"]]],
-   ["12:35-12:55",[
+   ["12:35-12:55",5,"",[
     ["חצר שומר ומסדרונות קומת כניסה","אינס|דני|צבי|צופיה|נעמי קציר|"],
     ["רחבה בניין חדש","אורנה מאיר|דליה|הילה|מירי קריימר|דניאל צאל|"],
     ["חצר מתקנים","עינת|מירי קריימר|דליה|אינס|לייה|"],
     ["מגרש כדורסל","לילך/נועה חמו|דניאל צאל|ליאור שפירא|סימה דוד|יערה|"],
     ["מגרש כדורגל","לילך/נועה חמו|דניאל צאל|ליאור שפירא|סימה דוד|יערה|"],
     ["קומת יסודי","|||||"]]]];
-  return {title:"תורנות שמירה תשפ״ז", breaks:src.map(([time,spots])=>({time,spots:spots.map(([name,row])=>
-    ({name,a:row.split("|").map(c=>c?c.split("/"):[])}))}))};
+  const B={v:2,title:"תורנות שמירה תשפ״ז",zones:[],breaks:[],a:{}}, zid={};
+  src.forEach(([time,after,name,rows],bi)=>{
+    const bk={id:"b"+(bi+1),name,time,after,days:[1,1,1,1,1,bi<2?1:0],zones:[]};
+    rows.forEach(([zn,row])=>{
+      if(!zid[zn]){ zid[zn]="z"+(B.zones.length+1); B.zones.push({id:zid[zn],name:zn,need:zn==="קומת יסודי"?0:1}); }
+      bk.zones.push(zid[zn]);
+      row.split("|").forEach((c,d)=>{ if(c) B.a[bk.id+"|"+zid[zn]+"|"+d]=c.split("/").map(p=>ALIAS[p]||p); });
+    });
+    B.breaks.push(bk);
+  });
+  return B;
 })();
 
 // ================= עזרים =================
@@ -151,9 +195,13 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const LS=(k,v)=>{try{return v===undefined?localStorage.getItem(k):(v===null?localStorage.removeItem(k):localStorage.setItem(k,v));}catch(e){return null;}};
 const clone=o=>JSON.parse(JSON.stringify(o));
-const clean=s=>String(s||"").replace(/[<>"`\\]/g,"").replace(/\s+/g," ").trim().slice(0,40);
+const clean=s=>String(s||"").replace(/[<>"`\\|]/g,"").replace(/\s+/g," ").trim().slice(0,40);
 const canon=p=>ALIAS[p]||p;
+const disp=p=>LABEL[p]||p;
+const he=(a,b)=>a.localeCompare(b,"he");
+const newId=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
 const today=()=>new Date().getDay();   // 0=ראשון … 5=שישי, 6=שבת
+const tStart=t=>{ const m=/(\d{1,2})[:.](\d{2})/.exec(t||""); return m?(+m[1])*60+(+m[2]):0; };
 function jsonp(api,params,ms){
   return new Promise((res,rej)=>{
     const cb="__gs"+Date.now().toString(36)+Math.random().toString(36).slice(2,7), sc=document.createElement("script");
@@ -167,7 +215,7 @@ function jsonp(api,params,ms){
 }
 
 // ================= הזדהות - אותה רשימה ואותו גיבוב כמו לוח המערכות =================
-let ACCESS_BASE={}, ACCESS={}, USER=null, USER_H=null;
+let ACCESS_BASE={}, ACCESS={}, USER=null, USER_H=null, USERS_LIVE=null;
 (function(){   // קישור העריכה מהמייל: ?skey=... נשמר במכשיר ונמחק מהכתובת
   try{const u=new URL(location.href),k=u.searchParams.get("skey");
     if(k){LS("gordon_skey",k);u.searchParams.delete("skey");history.replaceState(null,"",u.pathname+u.search+u.hash);}}catch(e){}
@@ -178,12 +226,12 @@ async function loadAccess(){
 }
 const usersReady=(async()=>{
   if(!USERS_API) return;
+  await null;
   try{ const d=await jsonp(USERS_API,{});
     if(d&&d.ok){ const a=Object.assign({},ACCESS_BASE); Object.keys(d.removed||{}).forEach(h=>{delete a[h];}); Object.assign(a,d.users||{}); USERS_LIVE=a; }
   }catch(e){}
 })();
-let USERS_LIVE=null;
-const waitUsers=()=>Promise.race([usersReady,new Promise(r=>setTimeout(r,6000))]).then(()=>{ if(USERS_LIVE) ACCESS=USERS_LIVE; });
+const waitUsers=()=>Promise.race([usersReady,new Promise(r=>setTimeout(r,6000))]).then(()=>{ if(USERS_LIVE) ACCESS=Object.assign({},ACCESS_BASE,USERS_LIVE); });
 async function idHash(raw){
   const id=(raw||"").replace(/\D/g,"").padStart(9,"0"), enc=new TextEncoder();
   const key=await crypto.subtle.importKey("raw",enc.encode(id),"PBKDF2",false,["deriveBits"]);
@@ -199,7 +247,7 @@ function showLogin(msg){
     ov.innerHTML='<div style="background:var(--surface);border:1px solid var(--line);border-radius:1rem;padding:2rem 2.2rem;max-width:22rem;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.12)">'
       +'<div style="font-size:2rem">🛡️</div><h2 style="margin:.4rem 0">לוח שמירות · גורדון</h2>'
       +'<div style="color:var(--muted);font-size:.9rem;margin-bottom:1rem">הזינו תעודת זהות כדי לראות איפה ומתי אתם שומרים</div>'
-      +'<input id="loginid" inputmode="numeric" autocomplete="off" placeholder="תעודת זהות" style="width:100%;padding:.55rem .8rem;font-size:1.05rem;text-align:center;letter-spacing:.1em">'
+      +'<input id="loginid" type="text" inputmode="numeric" autocomplete="off" placeholder="תעודת זהות" style="width:100%;padding:.55rem .8rem;font-size:1.05rem;text-align:center;letter-spacing:.1em">'
       +'<button id="loginbtn" class="btn pri" style="width:100%;margin-top:.8rem;padding:.55rem;border-radius:.5rem;font-weight:700;font-size:1rem">כניסה</button>'
       +'<div id="loginerr" class="err" style="font-size:.85rem;margin-top:.6rem;min-height:1.2em"></div></div>';
     document.body.appendChild(ov);
@@ -220,10 +268,13 @@ function showLogin(msg){
 
 // ================= נתוני הלוח =================
 let BOARD=clone(DEFAULT), REV=0, SRC="embedded", LOADERR="";
-let VIEW="mine", VIEWAS=null, EDIT=false, DRAFT=null, DIRTY=false, SAVING=false, BARMSG="";
+let VIEW="mine", VIEWAS=null, EDIT=false, ETAB="asg", DRAFT=null, DIRTY=false, SAVING=false, BARMSG="", SEL=null;
+const NOT_STAFF=["אבי קרן צבי","אופיר"];   // שמות במערכת השעות שאינם אנשי צוות לשיבוץ (צירוף שמות / מורה חיצוני)
+let TT=null, TTERR="";    // מערכות המורים (מי בבית הספר באיזה יום ושעה) - נטען רק במסך הסידור
 const canEdit=()=>!!(USER&&EDITORS.includes(USER.n));
 const hasKey=()=>!!LS("gordon_skey");
-function valid(b){ return b&&Array.isArray(b.breaks)&&b.breaks.every(k=>k&&Array.isArray(k.spots)&&k.spots.every(s=>s&&Array.isArray(s.a)&&s.a.length===6)); }
+function valid(b){ return !!(b&&b.v===2&&Array.isArray(b.zones)&&Array.isArray(b.breaks)&&b.a&&typeof b.a==="object"
+  &&b.zones.every(z=>z&&z.id)&&b.breaks.every(k=>k&&k.id&&Array.isArray(k.days)&&k.days.length===6&&Array.isArray(k.zones))); }
 async function loadBoard(){
   if(DUTY_API){
     try{ const d=await jsonp(DUTY_API,{});
@@ -231,55 +282,82 @@ async function loadBoard(){
       else LOADERR=(d&&d.error)||"תשובה לא צפויה מהשרת";
     }catch(e){ LOADERR=e.message; }
   } else {
-    try{ const l=JSON.parse(LS("gordon_shmira_local")||"null"); if(valid(l)){BOARD=l;SRC="local";} }catch(e){}
+    try{ const l=JSON.parse(LS("gordon_shmira_local2")||"null"); if(valid(l)){BOARD=l;SRC="local";} }catch(e){}
   }
 }
-// כל השמירות של אדם: [{d,b,time,spots:[..],with:[..]}]
-function dutiesOf(name){
-  const out=[];
-  BOARD.breaks.forEach((bk,bi)=>{ for(let d=0;d<6;d++){
-    const spots=[], w=new Set();
-    bk.spots.forEach(s=>{ if(s.a[d].some(p=>canon(p)===name)){ spots.push(s.name); s.a[d].forEach(p=>{ if(canon(p)!==name) w.add(p); }); } });
-    if(spots.length) out.push({d,b:bi,time:bk.time,spots,with:[...w]});
-  }});
-  return out;
+const cellOf=(B,b,z,d)=>B.a[b+"|"+z+"|"+d]||[];
+const zonesOf=(B,bk)=>B.zones.filter(z=>bk.zones.includes(z.id));
+// כל התאים הפעילים בלוח: f({bk,z,d,c})
+function eachCell(B,f){ B.breaks.forEach(bk=>zonesOf(B,bk).forEach(z=>{ for(let d=0;d<6;d++) if(bk.days[d]) f({bk,z,d,c:cellOf(B,bk.id,z.id,d)}); })); }
+// כל השמירות של אדם: [{d,time,name,spots:[..],with:[..]}]
+function dutiesOf(B,name){
+  const m={};
+  eachCell(B,({bk,z,d,c})=>{ if(!c.includes(name)) return;
+    const k=bk.id+"|"+d, x=m[k]||(m[k]={d,time:bk.time,name:bk.name,spots:[],w:new Set()});
+    x.spots.push(z.name); c.forEach(p=>{ if(p!==name) x.w.add(disp(p)); }); });
+  return Object.values(m).map(x=>({d:x.d,time:x.time,name:x.name,spots:x.spots,with:[...x.w]}));
 }
-const tStart=t=>{ const m=/(\d{1,2})[:.](\d{2})/.exec(t||""); return m?(+m[1])*60+(+m[2]):0; };
-function people(b){ const s=new Set(); b.breaks.forEach(k=>k.spots.forEach(x=>x.a.forEach(c=>c.forEach(p=>s.add(canon(p)))))); return s; }
+function counts(B){ const s={}; eachCell(B,({bk,d,c})=>c.forEach(p=>{ (s[p]||(s[p]=new Set())).add(bk.id+"|"+d); })); const o={}; for(const p in s) o[p]=s[p].size; return o; }
+function people(B){ const s=new Set(); eachCell(B,({c})=>c.forEach(p=>s.add(p))); return s; }
 const userNames=()=>[...new Set(Object.values(ACCESS).map(e=>e.n))];
+// השמטת שיבוצים של הפסקות/אזורים שנמחקו או שאינם פעילים
+function prune(B){
+  const zs=new Set(B.zones.map(z=>z.id)), bm={}; B.breaks.forEach(k=>{ k.zones=k.zones.filter(z=>zs.has(z)); bm[k.id]=k; });
+  for(const key of Object.keys(B.a)){ const [b,z,d]=key.split("|"), k=bm[b];
+    if(!k||!k.zones.includes(z)||!k.days[+d]||!B.a[key].length) delete B.a[key]; }
+}
+
+// ---- נוכחות לפי מערכת השעות ----
+async function loadTT(){
+  if(TT) return;
+  try{ const j=await (await fetch("timetable.json?v="+Date.now(),{cache:"no-store"})).json(); const T={};
+    for(const n in (j.teachers||{})){ if(NOT_STAFF.includes(n)) continue; const days=[0,1,2,3,4,5].map(()=>new Set()); j.teachers[n].forEach(ev=>{ if(days[ev[1]]) days[ev[1]].add(ev[2]); }); T[n]=days; }
+    TT=T; TTERR="";
+  }catch(e){ TT={}; TTERR="לא הצלחתי לטעון את מערכת השעות - אין מידע על נוכחות"; }
+}
+// 2 = מלמד/ת בצמוד להפסקה, 1 = בבית הספר ביום הזה, 0 = לא בבית הספר, -1 = אין מערכת (לא ידוע)
+function presence(n,d,after){ const t=TT&&TT[n]; if(!t) return -1; if(!t[d].size) return 0; return (t[d].has(after)||t[d].has(after+1))?2:1; }
+function staffList(B){ return [...new Set([...Object.keys(TT||{}),...userNames(),...people(B)])].sort((a,b)=>he(disp(a),disp(b))); }
 
 // ================= תצוגה =================
 function render(){
-  const B=EDIT?DRAFT:BOARD;
+  const B=EDIT?DRAFT:BOARD, m=$("main");
   $("ttl").textContent=B.title||"";
   $("who").innerHTML=esc(USER.n)+' <a href="viewer.html">מערכת השעות</a><button id="lo">יציאה</button>';
   $("lo").onclick=()=>{ if(EDIT&&DIRTY&&!confirm("יש שינויים שלא נשמרו. לצאת בכל זאת?")) return; EDIT=false; setUser(null); showLogin(); };
   const nav=$("nav"); nav.innerHTML="";
-  const tab=(id,txt)=>{ const b=document.createElement("button"); b.textContent=txt; b.setAttribute("aria-pressed",String(VIEW===id&&!EDIT));
-    b.onclick=()=>{ if(EDIT) return; VIEW=id; render(); }; b.disabled=EDIT; nav.appendChild(b); };
-  tab("mine","השמירות שלי"); tab("all","הלוח המלא");
-  if(canEdit()){ const b=document.createElement("button"); b.textContent="✏️ עריכת הלוח"; b.setAttribute("aria-pressed",String(EDIT));
-    b.onclick=()=>{ if(!EDIT) startEdit(); }; nav.appendChild(b); }
-  if(!EDIT){ const p=document.createElement("button"); p.textContent="🖨️ הדפסה"; p.className="noprint"; p.style.marginInlineStart="auto";
-    p.onclick=()=>{ VIEW="all"; render(); setTimeout(()=>window.print(),50); }; nav.appendChild(p); }
-  const m=$("main");
+  const tab=(txt,on,fn,dis)=>{ const b=document.createElement("button"); b.textContent=txt; b.setAttribute("aria-pressed",String(!!on)); b.onclick=fn; b.disabled=!!dis; nav.appendChild(b); return b; };
+  if(EDIT){
+    tab("① הגדרת הלוח",ETAB==="def",()=>{ ETAB="def"; SEL=null; render(); });
+    tab("② שיבוץ הצוות",ETAB==="asg",()=>{ ETAB="asg"; render(); });
+  } else {
+    tab("השמירות שלי",VIEW==="mine",()=>{ VIEW="mine"; render(); });
+    tab("הלוח המלא",VIEW==="all",()=>{ VIEW="all"; render(); });
+    if(canEdit()) tab("🧩 סידור הלוח",false,startEdit);
+    const p=tab("🖨️ הדפסה",false,()=>{ VIEW="all"; render(); setTimeout(()=>window.print(),50); }); p.className="noprint"; p.style.marginInlineStart="auto";
+  }
+  m.className=EDIT&&ETAB==="asg"?"wide":"";
+  const keep=document.querySelector(".plist"), st=keep?keep.scrollTop:0;
   m.innerHTML=(LOADERR?'<div class="note err">לא הצלחתי לטעון את הלוח המעודכן מהשרת ('+esc(LOADERR)+'). מוצג הלוח האחרון שידוע.</div>':"")
-    +(EDIT?editHtml():VIEW==="mine"?mineHtml():allHtml(BOARD,false));
-  wire(); renderBar();
+    +(EDIT?(ETAB==="def"?defHtml():asgHtml()):VIEW==="mine"?mineHtml():gridHtml(BOARD,false));
+  const pl=document.querySelector(".plist"); if(pl) pl.scrollTop=st;
+  const va=$("viewas"); if(va) va.onchange=()=>{ VIEWAS=va.value===USER.n?null:va.value; render(); };
+  const q=$("pq"); if(q) q.oninput=()=>{ const v=q.value.trim(); document.querySelectorAll(".plist .prow").forEach(r=>{ r.hidden=!!v&&!r.dataset.nm.includes(v); }); };
+  renderBar();
 }
 function mineHtml(){
-  const name=VIEWAS||USER.n, D=dutiesOf(name), td=today(), now=new Date().getHours()*60+new Date().getMinutes();
-  const names=[...new Set([...people(BOARD),USER.n])].sort((a,b)=>a.localeCompare(b,"he"));
+  const name=VIEWAS||USER.n, D=dutiesOf(BOARD,name), td=today(), now=new Date().getHours()*60+new Date().getMinutes();
+  const names=[...new Set([...people(BOARD),USER.n])].sort((a,b)=>he(disp(a),disp(b)));
+  const lbl=b=>(b.name?esc(b.name)+" · ":"")+'<span class="time">'+esc(b.time)+'</span>';
   let h='<div class="noprint" style="margin-top:.8rem"><label class="sub">שמירות של: <select id="viewas">'
-    +names.map(n=>'<option'+(n===name?" selected":"")+'>'+esc(n)+'</option>').join("")+'</select></label></div>';
-  // השמירה הקרובה
-  let nx=null;
+    +names.map(n=>'<option value="'+esc(n)+'"'+(n===name?" selected":"")+'>'+esc(disp(n))+'</option>').join("")+'</select></label></div>';
+  let nx=null;   // השמירה הקרובה
   for(let i=0;i<7&&!nx;i++){ const d=(td+i)%7; const c=D.filter(x=>x.d===d&&(i>0||tStart(x.time)+25>now)).sort((a,b)=>tStart(a.time)-tStart(b.time)); if(c.length) nx={x:c[0],i}; }
   if(nx){ const when=nx.i===0?"היום":nx.i===1?"מחר":"יום "+DAYS[nx.x.d];
-    h+='<section class="card next"><div class="sub">השמירה הקרובה'+(name!==USER.n?" של "+esc(name):"")+'</div><div class="big">'+when+' · <span class="time">'+esc(nx.x.time)+'</span></div>'
+    h+='<section class="card next"><div class="sub">השמירה הקרובה'+(name!==USER.n?" של "+esc(disp(name)):"")+'</div><div class="big">'+when+' · '+lbl(nx.x)+'</div>'
       +'<div>📍 '+nx.x.spots.map(esc).join(" + ")+'</div>'+(nx.x.with.length?'<div class="sub">יחד עם '+nx.x.with.map(esc).join(", ")+'</div>':"")+'</section>'; }
-  h+='<section class="card"><h2>'+(name===USER.n?"השמירות שלי":"השמירות של "+esc(name))+'</h2><div class="sub">'+(D.length?D.length+" שמירות בשבוע":"")+'</div>';
-  if(!D.length) h+='<p class="none" style="margin-top:.6rem">לא נמצאו שמירות על השם '+esc(name)+'. אם זו טעות - פנו לאסיף או לחסן.</p>';
+  h+='<section class="card"><h2>'+(name===USER.n?"השמירות שלי":"השמירות של "+esc(disp(name)))+'</h2><div class="sub">'+(D.length?D.length+" שמירות בשבוע":"")+'</div>';
+  if(!D.length) h+='<p class="none" style="margin-top:.6rem">לא נמצאו שמירות על השם '+esc(disp(name))+'. אם זו טעות - פנו לחסן.</p>';
   else for(let d=0;d<6;d++){
     const L=D.filter(x=>x.d===d).sort((a,b)=>tStart(a.time)-tStart(b.time));
     h+='<div class="dayrow'+(d===td?" today":"")+'"><div class="dname">'+DAYS[d]+(d===td?'<div class="sub">היום</div>':"")+'</div><div>'
@@ -288,99 +366,195 @@ function mineHtml(){
   }
   return h+'</section>';
 }
-function cellHtml(c,me,ed,known){
-  return c.map(p=>'<span class="p'+(canon(p)===me?" me":"")+(ed&&!known.has(canon(p))?" unl":"")+'"'
-    +(ed&&!known.has(canon(p))?' title="לא מקושר/ת למשתמש ברשימת הנכנסים - לא יראו את השמירה בכניסה"':"")+'>'+esc(p)+'</span>').join("");
-}
-function allHtml(B,ed){
+// טבלה לכל הפסקה. ed=true: תאים לחיצים + סימוני חוסר/נוכחות (מסך השיבוץ)
+function gridHtml(B,ed){
   const me=USER.n, td=today(), known=new Set(userNames());
   let h="";
-  B.breaks.forEach((bk,bi)=>{
-    h+='<section class="card"><div class="bhead"><h2>הפסקה <span class="time">'+esc(bk.time)+'</span></h2>'
-      +(ed?'<input type="text" data-bt="'+bi+'" value="'+esc(bk.time)+'" aria-label="שעת ההפסקה" style="width:8rem;direction:ltr">'
-          +'<button class="ic" data-bmv="'+bi+',-1" title="הזז למעלה">↑</button><button class="ic" data-bmv="'+bi+',1" title="הזז למטה">↓</button>'
-          +'<button class="ic del" data-bdel="'+bi+'">מחיקת ההפסקה</button>':"")+'</div>'
-      +'<div class="tblwrap"><table><thead><tr><th>מיקום</th>'+DAYS.map((d,i)=>'<th'+(i===td?' class="today"':"")+'>'+d+'</th>').join("")+'</tr></thead><tbody>';
-    bk.spots.forEach((s,si)=>{
-      h+='<tr><th class="spot">'+(ed?'<input type="text" data-sn="'+bi+','+si+'" value="'+esc(s.name)+'" aria-label="שם המקום">'
-          +'<div class="rowtools"><button class="ic" data-smv="'+bi+','+si+',-1" title="הזז למעלה">↑</button><button class="ic" data-smv="'+bi+','+si+',1" title="הזז למטה">↓</button>'
-          +'<button class="ic del" data-sdel="'+bi+','+si+'" title="מחיקת המקום">🗑</button></div>':esc(s.name))+'</th>';
-      s.a.forEach((c,d)=>{ const mine=c.some(p=>canon(p)===me);
-        h+='<td class="'+(mine?"mine ":"")+(d===td&&!mine?"today ":"")+(ed?"ed":"")+'"'+(ed?' tabindex="0" role="button" data-cell="'+bi+','+si+','+d+'"':"")+'>'
-          +(c.length?cellHtml(c,me,ed,known):(ed?'<span class="plus">+</span>':""))+'</td>'; });
+  [...B.breaks].sort((a,b)=>tStart(a.time)-tStart(b.time)).forEach(bk=>{
+    const Z=zonesOf(B,bk);
+    h+='<section class="card"><div class="bhead"><h2>'+(bk.name?esc(bk.name)+" · ":"הפסקה ")+'<span class="time" style="font-family:Heebo;font-size:1.1rem">'+esc(bk.time)+'</span></h2></div>';
+    if(!Z.length){ h+='<p class="none" style="margin-top:.5rem">לא הוגדרו אזורי שמירה להפסקה הזו'+(ed?' - מגדירים בשלב "הגדרת הלוח"':"")+'.</p></section>'; return; }
+    h+='<div class="tblwrap"><table class="grid"><thead><tr><th>אזור</th>'+DAYS.map((d,i)=>'<th'+(i===td&&!ed?' class="today"':"")+'>'+d+'</th>').join("")+'</tr></thead><tbody>';
+    Z.forEach(z=>{
+      h+='<tr><th class="spot">'+esc(z.name)+(ed&&z.need>1?' <span class="sub">('+z.need+' שומרים)</span>':"")+'</th>';
+      for(let d=0;d<6;d++){
+        if(!bk.days[d]){ h+='<td class="off">—</td>'; continue; }
+        const c=cellOf(B,bk.id,z.id,d);
+        if(!ed){ const mine=c.includes(me);
+          h+='<td class="'+(mine?"mine":d===td?"today":"")+'">'+c.map(p=>'<span class="p'+(p===me?" me":"")+'">'+esc(disp(p))+'</span>').join("")+'</td>'; continue; }
+        const miss=c.length<(z.need||0), hasSel=SEL&&c.includes(SEL), dim=SEL&&!hasSel&&presence(SEL,d,bk.after)===0;
+        h+='<td class="ed'+(hasSel?" mine":miss?" miss":"")+(dim?" dim":"")+'" tabindex="0" role="button" data-act="cell" data-b="'+bk.id+'" data-z="'+z.id+'" data-d="'+d+'">'
+          +c.map(p=>{ const away=presence(p,d,bk.after)===0, unl=!known.has(p);
+            return '<span class="p'+(p===SEL?" me":"")+(away?" away":"")+(unl?" unl":"")+'" title="'+(away?"לא בבית הספר ביום הזה לפי מערכת השעות":unl?"לא ברשימת הנכנסים - לא יראו את השמירה בכניסה":"")+'">'+(away?"⚠ ":"")+esc(disp(p))+'</span>'; }).join("")
+          +(miss?'<span class="need">'+(c.length?"חסר/ה עוד "+(z.need-c.length):"חסר שומר/ת")+'</span>':c.length?"":'<span class="none">+</span>')+'</td>';
+      }
       h+='</tr>';
     });
-    h+='</tbody></table></div>'+(ed?'<button class="btn" data-sadd="'+bi+'" style="margin-top:.7rem">+ מקום שמירה</button>':"")+'</section>';
+    h+='</tbody></table></div></section>';
   });
+  return h||'<p class="none" style="margin-top:1rem">הלוח ריק.</p>';
+}
+
+// ================= מסך הסידור: שלב 1 - הגדרת הלוח =================
+const tIn=(t,i)=>{ const p=String(t||"").split("-")[i]||"", m=/(\d{1,2})[:.](\d{2})/.exec(p); return m?m[1].padStart(2,"0")+":"+m[2]:""; };
+const tOut=v=>v?v.replace(/^0/,""):"";
+function defHtml(){
+  const B=DRAFT, afterOpts=k=>['<option value="0"'+(k.after===0?" selected":"")+'>לפני תחילת הלימודים</option>']
+    .concat([1,2,3,4,5,6,7,8].map(n=>'<option value="'+n+'"'+(k.after===n?" selected":"")+'>אחרי שיעור '+n+'</option>')).join("");
+  let h='<div class="note">כאן מגדירים את השלד של הלוח: <b>מתי</b> שומרים (ההפסקות), <b>איפה</b> (אזורי השמירה), ובאיזו הפסקה מאיישים כל אזור. אחר כך עוברים ל"② שיבוץ הצוות".</div>'
+    +'<section class="card"><label>כותרת הלוח: <input type="text" data-f="title" value="'+esc(B.title||"")+'" style="min-width:15rem"></label></section>';
+  // הפסקות
+  h+='<section class="card"><h2>מתי - ההפסקות</h2><div class="sub">"אחרי שיעור" משמש כדי להציע בשיבוץ את מי שמלמד/ת בצמוד להפסקה.</div><div class="tblwrap"><table class="deft"><thead><tr><th>שם (לא חובה)</th><th>מ-</th><th>עד</th><th>מיקום ביום</th><th>ימים</th><th></th></tr></thead><tbody>';
+  B.breaks.forEach((k,i)=>{
+    h+='<tr><td><input type="text" data-f="bname" data-i="'+i+'" value="'+esc(k.name||"")+'" placeholder="למשל: הפסקת עשר"></td>'
+      +'<td><input type="time" data-f="bt0" data-i="'+i+'" value="'+tIn(k.time,0)+'" aria-label="שעת התחלה"></td>'
+      +'<td><input type="time" data-f="bt1" data-i="'+i+'" value="'+tIn(k.time,1)+'" aria-label="שעת סיום"></td>'
+      +'<td><select data-f="bafter" data-i="'+i+'">'+afterOpts(k)+'</select></td>'
+      +'<td class="days">'+DAYS.map((d,j)=>'<label>'+"אבגדהו"[j]+"׳"+'<input type="checkbox" data-f="bday" data-i="'+i+'" data-j="'+j+'"'+(k.days[j]?" checked":"")+' aria-label="'+d+'"></label>').join("")+'</td>'
+      +'<td><button class="ic del" data-act="bdel" data-i="'+i+'" title="מחיקת ההפסקה">🗑</button></td></tr>';
+  });
+  h+='</tbody></table></div><button class="btn" data-act="badd" style="margin-top:.7rem">+ הפסקה</button></section>';
+  // אזורים
+  h+='<section class="card"><h2>איפה - אזורי השמירה</h2><div class="sub">"שומרים נדרשים" קובע מתי תא מסומן כחסר. 0 = אזור שלא חובה לאייש.</div><div class="tblwrap"><table class="deft"><thead><tr><th>שם האזור</th><th>שומרים נדרשים</th><th>סדר</th><th></th></tr></thead><tbody>';
+  B.zones.forEach((z,i)=>{
+    h+='<tr><td><input type="text" data-f="zname" data-i="'+i+'" value="'+esc(z.name)+'"></td>'
+      +'<td><input type="number" min="0" max="4" data-f="zneed" data-i="'+i+'" value="'+(z.need||0)+'"></td>'
+      +'<td><button class="ic" data-act="zmv" data-i="'+i+'" data-dir="-1" title="למעלה">↑</button> <button class="ic" data-act="zmv" data-i="'+i+'" data-dir="1" title="למטה">↓</button></td>'
+      +'<td><button class="ic del" data-act="zdel" data-i="'+i+'" title="מחיקת האזור">🗑</button></td></tr>';
+  });
+  h+='</tbody></table></div><button class="btn" data-act="zadd" style="margin-top:.7rem">+ אזור שמירה</button></section>';
+  // מטריצה
+  h+='<section class="card"><h2>איפה שומרים בכל הפסקה</h2><div class="sub">מסמנים אילו אזורים מאוישים בכל הפסקה.</div><div class="tblwrap"><table class="deft"><thead><tr><th>אזור</th>'
+    +B.breaks.map(k=>'<th><span class="time">'+esc(k.time)+'</span>'+(k.name?'<div class="sub">'+esc(k.name)+'</div>':"")+'</th>').join("")+'</tr></thead><tbody>';
+  B.zones.forEach((z,i)=>{ h+='<tr><th class="spot">'+esc(z.name)+'</th>'+B.breaks.map((k,j)=>'<td><input type="checkbox" data-f="bz" data-i="'+j+'" data-z="'+z.id+'"'+(k.zones.includes(z.id)?" checked":"")+' aria-label="'+esc(z.name)+" בהפסקה "+esc(k.time)+'"></td>').join("")+'</tr>'; });
+  return h+'</tbody></table></div></section>';
+}
+function hasAssign(B,test){ return Object.keys(B.a).some(k=>B.a[k].length&&test(k.split("|"))); }
+
+// ================= מסך הסידור: שלב 2 - שיבוץ הצוות =================
+function issues(B){
+  const miss=[], away=[], cnt=counts(B);
+  eachCell(B,({bk,z,d,c})=>{
+    if(c.length<(z.need||0)) miss.push({bk,z,d});
+    c.forEach(p=>{ if(presence(p,d,bk.after)===0) away.push({bk,z,d,p}); });
+  });
+  const idle=Object.keys(TT||{}).filter(n=>!cnt[n]).sort(he);
+  return {miss,away,idle,cnt};
+}
+function asgHtml(){
+  const B=DRAFT, I=issues(B), S=staffList(B), n=Object.keys(I.cnt).length, tot=Object.values(I.cnt).reduce((a,b)=>a+b,0);
+  const at=x=>"יום "+DAYS[x.d]+" "+x.bk.time+" · "+x.z.name;
+  let h='<div class="stat">'
+    +'<span class="'+(I.miss.length?"bad":"good")+'">'+(I.miss.length?"חסרים שומרים ב-"+I.miss.length+" משבצות":"✓ כל המשבצות מאוישות")+'</span>'
+    +(I.away.length?'<span class="bad">'+I.away.length+' שיבוצים ביום שהמורה לא בבית הספר</span>':"")
+    +'<span>'+n+' שומרים · ממוצע '+(n?(tot/n).toFixed(1):0)+' שמירות לאחד/ת</span>'
+    +(I.idle.length?'<span>'+I.idle.length+' אנשי צוות בלי שמירה</span>':"")+'</div>'
+    +(TTERR?'<div class="note err">'+esc(TTERR)+'</div>':"")
+    +(DUTY_API?"":'<div class="note"><b>מצב ניסיון:</b> שרת השמירות עוד לא חובר, ולכן הסידור נשמר רק במכשיר הזה ושאר הצוות לא רואה אותו.</div>');
+  if(SEL) h+='<div class="selbar"><b>משבצים את '+esc(disp(SEL))+'</b><span>לחיצה על תא מוסיפה או מסירה. תאים דהויים = לא בבית הספר ביום הזה.</span><button class="btn" data-act="unsel">סיום</button></div>';
+  h+='<div class="asg"><div>'+gridHtml(B,true);
+  if(I.miss.length||I.away.length||I.idle.length){
+    h+='<section class="card"><h2>מה נשאר לסדר</h2><ul class="issues">'
+      +I.away.map(x=>'<li class="err">'+esc(disp(x.p))+" משובצ/ת ב"+esc(at(x))+', אבל לפי מערכת השעות לא בבית הספר ביום הזה.</li>').join("")
+      +(I.miss.length?'<li>משבצות בלי מספיק שומרים: '+I.miss.slice(0,40).map(x=>esc(at(x))).join(" | ")+'</li>':"")
+      +(I.idle.length?'<li>בלי שמירה בכלל: '+I.idle.map(x=>esc(disp(x))).join(", ")+'</li>':"")+'</ul></section>';
+  }
+  h+='</div><aside class="panel"><b>הצוות</b><div class="sub">בוחרים שם, ואז לוחצים על תאים בלוח. המספר = שמירות בשבוע, הנקודות = ימי נוכחות (א׳–ו׳).</div>'
+    +'<input type="search" id="pq" placeholder="חיפוש שם"><div class="plist">'
+    +S.map(p=>{ const c=I.cnt[p]||0, t=TT&&TT[p];
+      return '<button class="prow" data-act="sel" data-p="'+esc(p)+'" data-nm="'+esc(disp(p))+'" aria-pressed="'+(SEL===p)+'"><span class="nm">'+esc(disp(p))+'</span>'
+        +(t?'<span class="dots">'+t.map(s=>'<i'+(s.size?' class="on"':"")+'></i>').join("")+'</span>':"")
+        +'<span class="badge'+(c?"":" zero")+'">'+c+'</span></button>'; }).join("")
+    +'</div></aside></div>';
   return h;
 }
-function editHtml(){
-  const cnt={}; DRAFT.breaks.forEach(k=>{ for(let d=0;d<6;d++){ const s=new Set(); k.spots.forEach(x=>x.a[d].forEach(p=>s.add(canon(p)))); s.forEach(n=>cnt[n]=(cnt[n]||0)+1); } });
-  const rows=Object.entries(cnt).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"he"));
-  return '<div class="note">לחיצה על תא = מי שומר שם. אפשר לשנות שמות מקומות ושעות, להוסיף ולמחוק מקומות והפסקות. '
-    +'שם עם קו מקווקו אדום אינו מקושר למשתמש, ולכן אותו אדם לא יראה את השמירה כשייכנס.'
-    +(DUTY_API?"":' <b>מצב ניסיון:</b> שרת השמירות עוד לא חובר, ולכן השינויים נשמרים רק במכשיר הזה ושאר הצוות לא רואה אותם.')+'</div>'
-    +'<div class="card"><label>כותרת הלוח: <input type="text" id="btitle" value="'+esc(DRAFT.title||"")+'" style="min-width:14rem"></label></div>'
-    +allHtml(DRAFT,true)
-    +'<button class="btn" id="badd" style="margin-top:1rem">+ הפסקה חדשה</button>'
-    +'<section class="card"><h2>כמה שמירות לכל אחד/ת</h2><div class="sub">מספר ההפסקות בשבוע (שתי עמדות באותה הפסקה נספרות פעם אחת)</div>'
-    +'<div class="cnt">'+rows.map(([n,c])=>'<span>'+esc(n)+' · <b>'+c+'</b></span>').join("")+'</div></section>';
+function toggle(b,z,d,p){
+  const key=b+"|"+z+"|"+d, c=(DRAFT.a[key]||[]).slice(), i=c.indexOf(p);
+  if(i>=0) c.splice(i,1); else { if(c.length>=8) return; c.push(p); }
+  if(c.length) DRAFT.a[key]=c; else delete DRAFT.a[key];
+  touch();
 }
+function cellDialog(b,z,d){
+  const dlg=$("dlg"), B=DRAFT, bk=B.breaks.find(k=>k.id===b), zn=B.zones.find(x=>x.id===z), key=b+"|"+z+"|"+d;
+  const draw=()=>{
+    const cur=B.a[key]||[], cnt=counts(B), busy={};
+    zonesOf(B,bk).forEach(o=>{ if(o.id!==z) cellOf(B,b,o.id,d).forEach(p=>{ busy[p]=o.name; }); });
+    const G=[["מלמדים בצמוד להפסקה",[]],["בבית הספר ביום הזה",[]],["אין מערכת שעות (לא ידוע)",[]],["לא בבית הספר ביום הזה",[]]];
+    staffList(B).filter(p=>!cur.includes(p)).forEach(p=>{ const pr=presence(p,d,bk.after); G[pr===2?0:pr===1?1:pr===-1?2:3][1].push(p); });
+    G.forEach(g=>g[1].sort((x,y)=>(cnt[x]||0)-(cnt[y]||0)||he(disp(x),disp(y))));
+    dlg.innerHTML='<h2 style="font:700 1.1rem Heebo">'+esc(zn.name)+'</h2><div class="sub">יום '+DAYS[d]+' · <span class="time">'+esc(bk.time)+'</span>'+(zn.need>1?" · נדרשים "+zn.need:"")+'</div>'
+      +'<div class="chips">'+(cur.length?cur.map(p=>'<span class="chipx">'+esc(disp(p))+'<button data-rm="'+esc(p)+'" aria-label="הסרת '+esc(disp(p))+'">×</button></span>').join(""):'<span class="none">אין שומר/ת</span>')+'</div>'
+      +'<div class="cands">'+G.filter(g=>g[1].length).map(g=>'<h4>'+g[0]+'</h4>'+g[1].map(p=>'<button class="prow" data-add="'+esc(p)+'"><span class="nm">'+esc(disp(p))
+          +(busy[p]?' <span class="why">· כבר ב'+esc(busy[p])+'</span>':"")+'</span><span class="badge'+(cnt[p]?"":" zero")+'">'+(cnt[p]||0)+'</span></button>').join("")).join("")+'</div>'
+      +'<div class="addrow"><input type="text" id="padd" placeholder="שם שאינו ברשימה" autocomplete="off"><button class="btn" id="paddb">הוספה</button></div>'
+      +'<div class="dfoot"><button class="btn pri" id="pok">סגירה</button></div>';
+    dlg.querySelectorAll("[data-rm]").forEach(x=>x.onclick=()=>{ toggle(b,z,d,x.dataset.rm); draw(); });
+    dlg.querySelectorAll("[data-add]").forEach(x=>x.onclick=()=>{ const st=dlg.querySelector(".cands").scrollTop; toggle(b,z,d,x.dataset.add); draw(); dlg.querySelector(".cands").scrollTop=st; });
+    const add=()=>{ const v=canon(clean($("padd").value)); if(v&&!(B.a[key]||[]).includes(v)) toggle(b,z,d,v); draw(); };
+    $("paddb").onclick=add; $("padd").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); add(); } };
+    $("pok").onclick=()=>dlg.close();
+  };
+  dlg.onclose=()=>render();
+  draw(); dlg.showModal();
+}
+
+// ---- אירועים במסך הסידור (האזנה אחת על main) ----
+const touch=()=>{ DIRTY=true; BARMSG=""; };
+$("main").addEventListener("click",e=>{
+  if(!EDIT) return;
+  const t=e.target.closest("[data-act]"); if(!t) return;
+  const B=DRAFT, a=t.dataset.act, i=+t.dataset.i;
+  if(a==="cell"){ const {b,z,d}=t.dataset; if(SEL){ toggle(b,z,+d,SEL); render(); } else cellDialog(b,z,+d); return; }
+  if(a==="sel"){ SEL=SEL===t.dataset.p?null:t.dataset.p; render(); return; }
+  if(a==="unsel"){ SEL=null; render(); return; }
+  if(a==="badd"){ const last=B.breaks[B.breaks.length-1];
+    B.breaks.push({id:newId("b"),name:"",time:"10:00-10:20",after:2,days:[1,1,1,1,1,0],zones:last?last.zones.slice():B.zones.map(z=>z.id)}); }
+  else if(a==="bdel"){ const k=B.breaks[i]; if(hasAssign(B,p=>p[0]===k.id)&&!confirm("למחוק את ההפסקה "+k.time+" עם כל השיבוצים שבה?")) return; B.breaks.splice(i,1); }
+  else if(a==="zadd"){ B.zones.push({id:newId("z"),name:"אזור חדש",need:1}); }
+  else if(a==="zdel"){ const z=B.zones[i]; if(hasAssign(B,p=>p[1]===z.id)&&!confirm('למחוק את האזור "'+z.name+'" עם כל השיבוצים שבו?')) return; B.zones.splice(i,1); }
+  else if(a==="zmv"){ const j=i+(+t.dataset.dir); if(j<0||j>=B.zones.length) return; [B.zones[i],B.zones[j]]=[B.zones[j],B.zones[i]]; }
+  else return;
+  prune(B); touch(); render();
+  if(a==="zadd"){ const inp=document.querySelector('[data-f="zname"][data-i="'+(B.zones.length-1)+'"]'); if(inp){ inp.focus(); inp.select(); } }
+});
+$("main").addEventListener("keydown",e=>{ if(EDIT&&(e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches("td[data-act]")){ e.preventDefault(); e.target.click(); } });
+$("main").addEventListener("change",e=>{
+  if(!EDIT) return;
+  const t=e.target, f=t.dataset&&t.dataset.f; if(!f) return;
+  const B=DRAFT, i=+t.dataset.i, k=B.breaks[i]; let re=false;
+  if(f==="title") B.title=clean(t.value);
+  else if(f==="bname"){ k.name=clean(t.value); }
+  else if(f==="bt0"||f==="bt1"){ const p=[tOut(tIn(k.time,0)),tOut(tIn(k.time,1))]; p[f==="bt0"?0:1]=tOut(t.value); k.time=p[0]+"-"+p[1]; }
+  else if(f==="bafter") k.after=+t.value;
+  else if(f==="bday"){ const j=+t.dataset.j;
+    if(!t.checked&&hasAssign(B,p=>p[0]===k.id&&+p[2]===j)&&!confirm("ביום "+DAYS[j]+" כבר יש שיבוצים בהפסקה הזו. לבטל את היום ולמחוק אותם?")){ t.checked=true; return; }
+    k.days[j]=t.checked?1:0; }
+  else if(f==="bz"){ const z=t.dataset.z;
+    if(!t.checked&&hasAssign(B,p=>p[0]===k.id&&p[1]===z)&&!confirm("באזור הזה כבר יש שיבוצים בהפסקה הזו. להסיר אותו ולמחוק אותם?")){ t.checked=true; return; }
+    k.zones=t.checked?[...k.zones,z]:k.zones.filter(x=>x!==z); }
+  else if(f==="zname"){ B.zones[i].name=clean(t.value)||"אזור"; re=true; }
+  else if(f==="zneed") B.zones[i].need=Math.max(0,Math.min(4,Math.round(+t.value)||0));
+  else return;
+  prune(B); touch(); if(re||f==="bt0"||f==="bt1"||f==="bname") render(); else renderBar();
+});
+
 function renderBar(){
   const bar=$("bar"); bar.hidden=!EDIT; if(!EDIT) return;
-  bar.innerHTML='<span class="msg">'+(BARMSG?'<span class="err">'+esc(BARMSG)+'</span>':DIRTY?"יש שינויים שלא נשמרו":"מצב עריכה")+'</span>'
-    +'<button class="btn" id="ecancel"'+(SAVING?" disabled":"")+'>'+(DIRTY?"ביטול השינויים":"סיום")+'</button>'
-    +'<button class="btn pri" id="esave"'+(SAVING||!DIRTY?" disabled":"")+'>'+(SAVING?"שומר…":"שמירה")+'</button>';
-  $("ecancel").onclick=()=>{ if(DIRTY&&!confirm("לבטל את כל השינויים שלא נשמרו?")) return; EDIT=false; DRAFT=null; DIRTY=false; BARMSG=""; VIEW="all"; render(); };
+  bar.innerHTML='<span class="msg">'+(BARMSG?'<span class="err">'+esc(BARMSG)+'</span>':DIRTY?"יש שינויים שלא נשמרו":"מסך הסידור - אין שינויים")+'</span>'
+    +'<button class="btn" id="ecancel"'+(SAVING?" disabled":"")+'>'+(DIRTY?"ביטול השינויים":"חזרה ללוח")+'</button>'
+    +'<button class="btn pri" id="esave"'+(SAVING||!DIRTY?" disabled":"")+'>'+(SAVING?"שומר…":"שמירה ופרסום לצוות")+'</button>';
+  $("ecancel").onclick=()=>{ if(DIRTY&&!confirm("לבטל את כל השינויים שלא נשמרו?")) return; EDIT=false; DRAFT=null; DIRTY=false; BARMSG=""; SEL=null; VIEW="all"; render(); };
   $("esave").onclick=save;
 }
-const touch=()=>{ DIRTY=true; BARMSG=""; };
-function wire(){
-  const m=$("main"), va=$("viewas");
-  if(va) va.onchange=()=>{ VIEWAS=va.value===USER.n?null:va.value; render(); };
-  if(!EDIT) return;
-  const ix=s=>s.split(",").map(Number);
-  $("btitle").oninput=e=>{ DRAFT.title=clean(e.target.value); touch(); renderBar(); };
-  m.querySelectorAll("[data-bt]").forEach(el=>el.onchange=()=>{ DRAFT.breaks[+el.dataset.bt].time=clean(el.value); touch(); render(); });
-  m.querySelectorAll("[data-sn]").forEach(el=>el.oninput=()=>{ const [b,s]=ix(el.dataset.sn); DRAFT.breaks[b].spots[s].name=clean(el.value); touch(); renderBar(); });
-  m.querySelectorAll("[data-cell]").forEach(el=>{ const open=()=>cellDialog(...ix(el.dataset.cell)); el.onclick=open; el.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();open();} }; });
-  m.querySelectorAll("[data-smv]").forEach(el=>el.onclick=()=>{ const [b,s,dir]=ix(el.dataset.smv), L=DRAFT.breaks[b].spots, t=s+dir; if(t<0||t>=L.length) return; [L[s],L[t]]=[L[t],L[s]]; touch(); render(); });
-  m.querySelectorAll("[data-sdel]").forEach(el=>el.onclick=()=>{ const [b,s]=ix(el.dataset.sdel), sp=DRAFT.breaks[b].spots[s];
-    if(sp.a.some(c=>c.length)&&!confirm('למחוק את "'+sp.name+'" עם כל השומרים שבו?')) return; DRAFT.breaks[b].spots.splice(s,1); touch(); render(); });
-  m.querySelectorAll("[data-sadd]").forEach(el=>el.onclick=()=>{ const b=+el.dataset.sadd; DRAFT.breaks[b].spots.push({name:"מקום חדש",a:[[],[],[],[],[],[]]}); touch(); render();
-    const inp=m.querySelector('[data-sn="'+b+','+(DRAFT.breaks[b].spots.length-1)+'"]'); if(inp){inp.focus();inp.select();} });
-  m.querySelectorAll("[data-bmv]").forEach(el=>el.onclick=()=>{ const [b,dir]=ix(el.dataset.bmv), L=DRAFT.breaks, t=b+dir; if(t<0||t>=L.length) return; [L[b],L[t]]=[L[t],L[b]]; touch(); render(); });
-  m.querySelectorAll("[data-bdel]").forEach(el=>el.onclick=()=>{ const b=+el.dataset.bdel; if(!confirm("למחוק את ההפסקה "+DRAFT.breaks[b].time+" עם כל המקומות והשומרים שבה?")) return; DRAFT.breaks.splice(b,1); touch(); render(); });
-  $("badd").onclick=()=>{ const last=DRAFT.breaks[DRAFT.breaks.length-1];
-    DRAFT.breaks.push({time:"00:00-00:00",spots:(last?last.spots:[{name:"מקום חדש"}]).map(s=>({name:s.name,a:[[],[],[],[],[],[]]}))}); touch(); render();
-    const inp=m.querySelector('[data-bt="'+(DRAFT.breaks.length-1)+'"]'); if(inp){inp.scrollIntoView({block:"center"});inp.focus();inp.select();} };
-}
-function cellDialog(b,s,d){
-  const dlg=$("dlg"), sp=DRAFT.breaks[b].spots[s]; let cur=sp.a[d].slice();
-  const opts=[...new Set(userNames().map(n=>LABEL[n]||n).concat([...people(DRAFT)].map(n=>LABEL[n]||n)))].sort((a,b)=>a.localeCompare(b,"he"));
-  const draw=()=>{
-    dlg.innerHTML='<h2 style="font:700 1.1rem Heebo">'+esc(sp.name)+'</h2><div class="sub">יום '+DAYS[d]+' · <span class="time">'+esc(DRAFT.breaks[b].time)+'</span></div>'
-      +'<div class="chips">'+(cur.length?cur.map((p,i)=>'<span class="chipx">'+esc(p)+'<button data-rm="'+i+'" aria-label="הסרת '+esc(p)+'">×</button></span>').join(""):'<span class="none">אין שומר/ת</span>')+'</div>'
-      +'<div class="addrow"><input type="text" id="padd" list="plist" placeholder="שם מהרשימה או שם חופשי" autocomplete="off"><button class="btn" id="paddb">הוספה</button></div>'
-      +'<datalist id="plist">'+opts.filter(o=>!cur.includes(o)).map(o=>'<option value="'+esc(o)+'">').join("")+'</datalist>'
-      +'<div class="dfoot"><button class="btn pri" id="pok">אישור</button><button class="btn" id="pno">ביטול</button></div>';
-    dlg.querySelectorAll("[data-rm]").forEach(x=>x.onclick=()=>{ cur.splice(+x.dataset.rm,1); draw(); });
-    const add=()=>{ const v=clean($("padd").value); if(v&&!cur.includes(v)&&cur.length<8) cur.push(v); draw(); $("padd").focus(); };
-    $("paddb").onclick=add;
-    $("padd").onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); if($("padd").value.trim()) add(); else $("pok").click(); } };
-    $("pok").onclick=()=>{ const v=clean($("padd").value); if(v&&!cur.includes(v)&&cur.length<8) cur.push(v);
-      if(JSON.stringify(cur)!==JSON.stringify(sp.a[d])){ sp.a[d]=cur; touch(); } dlg.close(); render(); };
-    $("pno").onclick=()=>dlg.close();
-  };
-  draw(); dlg.showModal(); $("padd").focus();
-}
-function startEdit(){
-  if(DUTY_API&&!hasKey()){ alert("כדי לערוך צריך לפתוח פעם אחת במכשיר הזה את קישור העריכה שנשלח במייל לאסיף."); return; }
-  DRAFT=clone(BOARD); DIRTY=false; BARMSG=""; EDIT=true; render();
+async function startEdit(){
+  if(DUTY_API&&!hasKey()){ alert("כדי לסדר את הלוח צריך לפתוח פעם אחת במכשיר הזה את קישור העריכה שנשלח במייל."); return; }
+  await loadTT();
+  DRAFT=clone(BOARD); DIRTY=false; BARMSG=""; SEL=null; ETAB="asg"; EDIT=true; render();
 }
 async function save(){
-  DRAFT.breaks.forEach(k=>{ k.time=clean(k.time); k.spots.forEach(s=>{ s.name=clean(s.name)||"מקום"; }); });
-  if(!DUTY_API){ LS("gordon_shmira_local",JSON.stringify(DRAFT)); BOARD=DRAFT; SRC="local"; EDIT=false; DRAFT=null; DIRTY=false; VIEW="all"; render(); return; }
+  prune(DRAFT);
+  const done=()=>{ BOARD=DRAFT; EDIT=false; DRAFT=null; DIRTY=false; SEL=null; VIEW="all"; render(); };
+  if(!DUTY_API){ LS("gordon_shmira_local2",JSON.stringify(DRAFT)); SRC="local"; done(); return; }
   SAVING=true; BARMSG=""; renderBar();
   const sent=JSON.stringify(DRAFT); let res=null;
   try{ const r=await fetch(DUTY_API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},redirect:"follow",
@@ -389,13 +563,13 @@ async function save(){
     try{ const d=await jsonp(DUTY_API,{}); if(d&&d.ok&&JSON.stringify(d.board)===sent) res={ok:true,rev:d.rev}; }catch(e){}
   }
   SAVING=false;
-  if(res&&res.ok){ BOARD=DRAFT; REV=res.rev||REV+1; SRC="server"; EDIT=false; DRAFT=null; DIRTY=false; VIEW="all"; render(); }
+  if(res&&res.ok){ REV=res.rev||REV+1; SRC="server"; done(); }
   else { BARMSG=(res&&res.error)||"השמירה נכשלה - בדקו את החיבור ונסו שוב"; renderBar(); }
 }
 window.addEventListener("beforeunload",e=>{ if(EDIT&&DIRTY){ e.preventDefault(); e.returnValue=""; } });
 document.addEventListener("visibilitychange",async()=>{ if(!document.hidden&&USER&&!EDIT&&DUTY_API){ const r=REV; await loadBoard(); if(REV!==r&&!EDIT) render(); } });
 
-async function start(){ await loadBoard(); if(canEdit()&&!dutiesOf(USER.n).length) VIEW="all"; render(); }
+async function start(){ await loadBoard(); if(canEdit()&&!dutiesOf(BOARD,USER.n).length) VIEW="all"; render(); }
 (async function(){
   await loadAccess();
   const saved=LS("gordon_auth");

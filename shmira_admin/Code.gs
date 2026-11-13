@@ -7,7 +7,7 @@
 // אין כאן תעודות זהות - רק שמות, מקומות ושעות.
 
 var PAGE_URL = "https://asifbenish-tech.github.io/gordon-timetable/shmira.html";
-var EDITORS = {"אסיף": 1, "חסן": 1};
+var EDITORS = {"חסן": 1, "אסיף": 1};
 
 function ensure_() {
   var p = PropertiesService.getScriptProperties();
@@ -77,27 +77,39 @@ function write_(r) {
   } finally { lock.releaseLock(); }
 }
 
-// מנקה ומאמת: עד 20 הפסקות, 30 מקומות בהפסקה, 6 ימים, 8 שמות בתא.
+// מנקה ומאמת את מבנה הלוח (גרסה 2): אזורים, הפסקות, ושיבוץ "הפסקה|אזור|יום" -> שמות.
+// עד 30 אזורים, 20 הפסקות, 8 שמות בתא. שיבוץ שמפנה להפסקה/אזור שלא קיימים נזרק.
 function tidy_(b) {
-  if (!b || !Array.isArray(b.breaks) || b.breaks.length > 20) return null;
-  var out = {title: clean_(b.title), breaks: []};
-  for (var i = 0; i < b.breaks.length; i++) {
-    var k = b.breaks[i];
-    if (!k || !Array.isArray(k.spots) || k.spots.length > 30) return null;
-    var nk = {time: clean_(k.time), spots: []};
-    for (var j = 0; j < k.spots.length; j++) {
-      var s = k.spots[j];
-      if (!s || !Array.isArray(s.a) || s.a.length !== 6) return null;
-      nk.spots.push({name: clean_(s.name), a: s.a.map(function (c) {
-        return (Array.isArray(c) ? c : []).map(clean_).filter(String).slice(0, 8);
-      })});
-    }
+  var ID = /^[a-z0-9]{1,20}$/;
+  if (!b || !Array.isArray(b.zones) || !Array.isArray(b.breaks) || !b.a || typeof b.a !== "object") return null;
+  if (b.zones.length > 30 || b.breaks.length > 20) return null;
+  var out = {v: 2, title: clean_(b.title), zones: [], breaks: [], a: {}}, zs = {}, bs = {};
+  for (var i = 0; i < b.zones.length; i++) {
+    var z = b.zones[i];
+    if (!z || !ID.test(String(z.id)) || zs[z.id]) return null;
+    zs[z.id] = 1;
+    out.zones.push({id: String(z.id), name: clean_(z.name) || "אזור", need: Math.max(0, Math.min(4, Math.round(Number(z.need)) || 0))});
+  }
+  for (var j = 0; j < b.breaks.length; j++) {
+    var k = b.breaks[j];
+    if (!k || !ID.test(String(k.id)) || bs[k.id] || !Array.isArray(k.days) || k.days.length !== 6 || !Array.isArray(k.zones)) return null;
+    var nk = {id: String(k.id), name: clean_(k.name), time: clean_(k.time),
+      after: Math.max(0, Math.min(12, Math.round(Number(k.after)) || 0)),
+      days: k.days.map(function (d) { return d ? 1 : 0; }),
+      zones: k.zones.map(String).filter(function (x, n, arr) { return zs[x] && arr.indexOf(x) === n; })};
+    bs[nk.id] = nk;
     out.breaks.push(nk);
   }
+  Object.keys(b.a).forEach(function (key) {
+    var p = key.split("|"), kk = bs[p[0]];
+    if (p.length !== 3 || !kk || kk.zones.indexOf(p[1]) < 0 || !/^[0-5]$/.test(p[2]) || !kk.days[Number(p[2])]) return;
+    var c = (Array.isArray(b.a[key]) ? b.a[key] : []).map(clean_).filter(String).slice(0, 8);
+    if (c.length) out.a[key] = c;
+  });
   return out;
 }
 
-function clean_(s) { return String(s || "").replace(/[<>"`\\]/g, "").replace(/\s+/g, " ").trim().slice(0, 40); }
+function clean_(s) { return String(s || "").replace(/[<>"`\\|]/g, "").replace(/\s+/g, " ").trim().slice(0, 40); }
 function sheet_(name) {
   return SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty("SHEET_ID")).getSheetByName(name);
 }
