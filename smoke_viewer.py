@@ -6,7 +6,9 @@
    יציאה 1 = כשל. go.py מריץ את זה בסוף הצינור (SMOKE=0 מדלג)."""
 import asyncio, os, sys
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-CHROME = next((p for p in ("/opt/pw-browsers/chromium-1194/chrome-linux/chrome",) if os.path.exists(p)), None)
+import glob as _glob
+CHROME = next((p for p in (["/opt/pw-browsers/chromium-1194/chrome-linux/chrome", "/opt/pw-browsers/chromium"] +
+               sorted(_glob.glob("/opt/pw-browsers/chromium-*/chrome-linux*/chrome"))) if os.path.isfile(p)), None)
 
 JS = r"""() => {
   USER = {n: "אסיף", r: "admin", p: 1};

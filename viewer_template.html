@@ -61,6 +61,8 @@ th,td{border:1px solid var(--line);padding:.42rem .5rem;text-align:center;font-s
 th{background:var(--chip);font-weight:700}
 td .s{display:block;color:var(--muted);font-size:.74rem;margin-top:.1rem}
 td .co{display:block;color:var(--accent);font-size:.74rem;font-weight:700}
+td .subj{display:block;color:var(--accent);font-size:.78rem;font-weight:700}
+td.subjed{cursor:pointer} td.subjed:hover{outline:2px dashed var(--accent);outline-offset:-2px}
 td .aw{display:block;color:var(--muted);font-size:.7rem;font-style:italic}
 tr th:first-child{width:2.6rem;font-variant-numeric:tabular-nums}
 .k-home{background:var(--home);box-shadow:inset 3px 0 0 var(--home-b)}
@@ -450,7 +452,7 @@ function expMenu(){
 const ACCESS_BASE=DATA.access||{}; let ACCESS=Object.assign({},ACCESS_BASE), USER=null, USER_H=null;
 const LS=(k,v)=>{try{return v===undefined?localStorage.getItem(k):(v===null?localStorage.removeItem(k):localStorage.setItem(k,v));}catch(e){return null;}};
 const USERS_API=DATA.users_api||"";
-let USERS_DYN=null, USERS_ADMIN=false, USERS_ERR="";
+let USERS_DYN=null, USERS_ADMIN=false, USERS_ERR="", SUBJ={};   // SUBJ: "כיתה|יום,שעה" -> שם מקצוע שהמחנך/ת כתב/ה
 (function(){   // קישור הניהול מהמייל: ?ukey=... נשמר במכשיר הזה ונמחק מהכתובת
   try{const u=new URL(location.href),k=u.searchParams.get("ukey");
     if(k){LS("gordon_ukey",k);u.searchParams.delete("ukey");history.replaceState(null,"",u.pathname+u.search+u.hash);}}catch(e){}
@@ -474,13 +476,13 @@ function mergeAccess(){
 function loadUsers(){
   if(!USERS_API) return Promise.resolve();
   const k=LS("gordon_ukey");
-  return jsonp(k?{key:k}:{}).then(d=>{ if(d&&d.ok){USERS_DYN=d; USERS_ADMIN=!!d.admin; USERS_ERR=""; mergeAccess();}
+  return jsonp(k?{key:k}:{}).then(d=>{ if(d&&d.ok){USERS_DYN=d; USERS_ADMIN=!!d.admin; USERS_ERR=""; SUBJ=d.subjects||{}; mergeAccess();}
     else USERS_ERR=(d&&d.error)||"תשובה לא צפויה מהשרת"; }).catch(e=>{USERS_ERR=e.message;});
 }
 let usersReady=loadUsers();
 const waitUsers=()=>Promise.race([usersReady,new Promise(r=>setTimeout(r,6000))]);
 function isOwner(){ return !!(USERS_API&&USER_H&&USER_H===DATA.users_owner); }
-function setUser(h){ USER_H=h||null; USER=h?ACCESS[h]:null; LS("gordon_auth",h||null); }
+function setUser(h){ USER_H=h||null; USER=h?ACCESS[h]:null; LS("gordon_auth",h||null); if(h) usersReady.then(()=>syncEditors()); }
 async function idHash(raw){
   const id=(raw||"").replace(/\D/g,"").padStart(9,"0");
   const enc=new TextEncoder();
@@ -609,8 +611,53 @@ function applyQuery(){
   if(!note){note=document.createElement("div");note.id="qnote";note.style.cssText="font-size:.85rem;color:var(--muted);margin-top:.6rem";$q("#main").prepend(note);}
   note.textContent=q?('חיפוש "'+q+'": '+shown+' תוצאות'):"";
 }
+// ---- שמות מקצועות שהמחנכים כותבים (נשמרים בשרת המשתמשים, מוצגים בכל המערכות) ----
+const subjOf=(cls,key)=>(cls&&key&&SUBJ[cls+"|"+key])||"";
+function canEditSubj(cls){
+  if(!USERS_API||!USER||!cls||!(DATA.elem[cls]||DATA.jun[cls])) return false;
+  if(isOwner()&&USERS_ADMIN) return true;
+  return (DATA.elem[cls]||DATA.jun[cls]).home===USER.n;
+}
+function subjModal(cls,key){
+  const [d,h]=key.split(",").map(Number); const side=DATA.elem[cls]?"elem":"jun";
+  const c=DATA[side][cls].cells[key]||{}; const who=side==="jun"?(c.s||""):(c.t||""); const cur=subjOf(cls,key);
+  const esc2=x=>String(x||"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  infoModal('<div style="font:700 1.05rem Heebo">'+esc2(cls)+' · '+DAYS[d]+' שעה '+h+'</div>'+
+    '<div style="color:var(--muted);font-size:.9rem;margin:.2rem 0 .7rem">מורה: '+esc2(who||"—")+(side==="jun"&&c.t?' · היום: '+esc2(c.t):'')+'</div>'+
+    '<label style="display:block;font-weight:700;margin-bottom:.3rem" for="subjin">שם המקצוע</label>'+
+    '<input id="subjin" maxlength="30" value="'+esc2(cur)+'" placeholder="למשל: חשבון" style="width:100%;padding:.45rem .6rem;border:1px solid var(--line);border-radius:.5rem;background:var(--bg);color:var(--ink);font:1rem Heebo">'+
+    '<div style="font-size:.82rem;color:var(--muted);margin:.4rem 0 .6rem">השם יופיע בתא הזה, במערכת של הכיתה ובמערכת האישית של המורה. השעות עצמן לא משתנות. ריק = מחיקה.</div>'+
+    '<button id="subjsave" class="pinb" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700">שמירה</button> '+
+    '<span id="subjmsg" style="font-size:.88rem"></span>');
+  const inp=document.getElementById("subjin"); inp.focus();
+  document.getElementById("subjsave").onclick=async()=>{
+    const v=inp.value.trim(), msg=document.getElementById("subjmsg"), btn=document.getElementById("subjsave");
+    btn.disabled=true; msg.textContent="שומר…";
+    try{
+      const r=await jsonp({action:"subject",hash:USER_H||"",name:USER?USER.n:"",cls:cls,slot:key,subject:v,key:LS("gordon_ukey")||""},15000);
+      if(r&&r.ok){ if(v) SUBJ[cls+"|"+key]=v; else delete SUBJ[cls+"|"+key]; msg.style.color="#2E7D32"; msg.textContent="נשמר ✓"; render(); }
+      else{ msg.style.color="#B3261E"; msg.textContent=(r&&r.error)||"השמירה נכשלה"; }
+    }catch(err){ msg.style.color="#B3261E"; msg.textContent="השמירה נכשלה: "+err.message; }
+    btn.disabled=false;
+  };
+}
+document.addEventListener("click",e=>{
+  const td=e.target.closest&&e.target.closest("td.subjed");
+  if(td&&td.classList.contains("pick")) return;   // תא של הנהלה: הכפתור נמצא בחלון האפשרויות
+  if(td&&td.dataset.scls&&td.dataset.skey&&canEditSubj(td.dataset.scls)) subjModal(td.dataset.scls,td.dataset.skey);
+});
+// הבעלים מעדכן/ת בשרת מי מחנך/ת איזו כיתה (לפי הגיבובים בלוח) - רק כשהרשימה השתנתה
+function syncEditors(){
+  if(!(isOwner()&&USERS_ADMIN)) return;
+  const homes={}; ["elem","jun"].forEach(sd=>Object.entries(DATA[sd]).forEach(([c,i])=>{ if(i.home) (homes[i.home]=homes[i.home]||[]).push(c); }));
+  const map={}; Object.entries(ACCESS).forEach(([h,e])=>{ if(homes[e.n]) map[h]=homes[e.n]; });
+  const js=JSON.stringify(map); if(LS("gordon_editors")===js) return;
+  jsonp({action:"editors",key:LS("gordon_ukey")||"",map:js},15000).then(r=>{ if(r&&r.ok) LS("gordon_editors",js); }).catch(()=>{});
+}
 function cellHtml(c,info,extraCls,cls,key){
-  let inner=(c.t||"");
+  const sj=subjOf(cls,key), isJ=!!(cls&&DATA.jun[cls]);
+  let inner=(sj&&isJ)?sj:(c.t||"");
+  if(sj&&!isJ) inner+='<span class="subj">'+sj+'</span>';
   if(c.s) inner+='<span class="s">'+c.s+'</span>';
   if(c.co) inner+='<span class="co">'+c.co+'</span>';
   if(c.away) inner+='<span class="aw">'+info.home+' בחוץ: '+c.away+'</span>';
@@ -619,7 +666,10 @@ function cellHtml(c,info,extraCls,cls,key){
   if(dch){ inner+='<span class="was">היה: '+dch.was+'</span>'; extraCls=(extraCls||"")+' chg'+(dch.src==="y"?' src-y':''); }
   // כל מנהל/ת מקבל/ת את זה, וכן מי שסומן/ה במפורש (PICKERS ב-gen_access)
   const admin=!!(USER&&(USER.p||USER.r==="admin"));
-  const clk=(admin&&cls&&key)?(' class="'+extraCls+' pick" data-cls="'+cls+'" data-key="'+key+'" title="לחצו לאפשרויות החלפה"'):(' class="'+extraCls+'"');
+  const ed=canEditSubj(cls)&&key&&c&&(c.t||c.s)&&c.k!=="off"&&c.k!=="mag";
+  const sd=ed?(' data-scls="'+cls+'" data-skey="'+key+'"'):'';
+  const clk=(admin&&cls&&key)?(' class="'+extraCls+' pick'+(ed?' subjed':'')+'" data-cls="'+cls+'" data-key="'+key+'"'+sd+' title="לחצו לאפשרויות החלפה'+(ed?' ולשם המקצוע':'')+'"'):
+            (ed?(' class="'+extraCls+' subjed"'+sd+' title="לחצו כדי לכתוב את שם המקצוע"'):(' class="'+extraCls+'"'));
   return '<td'+clk+'>'+inner+'</td>';
 }
 
@@ -686,9 +736,12 @@ function slotPanel(cls,key){
     const j2=!!DATA.jun[c2];
     pb+='<button class="pinb" data-pin=\''+JSON.stringify([JSON.parse(mk(cls,t2,isJun?cc.t:"",1)),JSON.parse(mk(c2,who||"",j2?cur.t:"",who?1:0))])+'\'>⇄ להחליף עם '+c2+' ('+nm(t2)+')</button>';});
   html+=sec("בקשת שינוי להרצה הבאה (נשמר בדפדפן; ייצוא בכפתור 🔒 בכותרת)", pb||'<span style="color:var(--muted);font-size:.85rem">אין מה לנעול בתא ריק.</span>');
+  if(canEditSubj(cls)) html+='<div style="margin:.2rem 0 .7rem"><button class="pinb" id="subjfrompanel">✏️ שם המקצוע בתא'+(subjOf(cls,key)?' ('+subjOf(cls,key)+')':'')+'</button></div>';
   html+='<div style="color:var(--muted);font-size:.8rem;border-top:1px solid var(--line);padding-top:.5rem;margin-top:.3rem">'+
         'זו תצוגת מידע בלבד — היא לא משנה את המערכת. בקשות נעילה נאספות ומיוצאות כקובץ PINS להצעה (propose.py).</div>';
   infoModal(html);
+  const sb=document.getElementById("subjfrompanel");
+  if(sb) sb.onclick=()=>{ const ov=sb.closest("div[style*='position:fixed']"); if(ov) ov.remove(); subjModal(cls,key); };
 }
 // ---- בקשות נעילה (PINS) ----
 const PINS=()=>{try{return JSON.parse(LS("gordon_pins")||"[]");}catch(e){return [];}};
@@ -733,7 +786,7 @@ document.addEventListener("click",e=>{
   if(!(USER&&USER.p)) return;          // שכבה שנייה: גם אם תא סומן, בלי הרשאה אין פאנל
   if(!(USER&&(USER.p||USER.r==="admin"))) return;   // שכבה שנייה: בלי הרשאה אין פאנל
   const td=e.target.closest&&e.target.closest("td.pick");
-  if(td&&td.dataset.cls&&td.dataset.key) slotPanel(td.dataset.cls,td.dataset.key);   // רשת האילוצים משתמשת ב-pick רק לעיצוב
+  if(td&&td.dataset.cls&&td.dataset.key){ e.stopImmediatePropagation(); slotPanel(td.dataset.cls,td.dataset.key); }   // רשת האילוצים משתמשת ב-pick רק לעיצוב
 });
 
 // ---------- העתקת המערכת כתמונה ----------
@@ -1018,7 +1071,11 @@ function grid(name,info,duty){
     '<div class="tblwrap"><table>'+head+rows+'</table></div>'+planTable(info)+'</section>';
 }
 function teacherGrid(t){
-  const ev=DATA.teachers[t]||[]; const per={};
+  const ev=(DATA.teachers[t]||[]).map(e=>{   // שם מקצוע שהמחנך/ת כתב/ה - גם במערכת האישית של המורה
+    if(e[0]!=="יסודי"&&e[0]!=="חטיבה") return e;
+    const cl=e[3].split(" · ")[0], sj=SUBJ[cl+"|"+e[1]+","+e[2]];
+    return sj?[e[0],e[1],e[2],cl+" · "+sj]:e;});
+  const per={};
   const sedOnly={};
   ev.forEach(e=>{const side=e[0],d=e[1],h=e[2],label=e[3];
     const key=d+","+h;
@@ -1417,6 +1474,8 @@ if(DATA.prop){   // לוח של הצעה: כותרת, סרט וסימוני שי
   // כשהרשימה החיה מגיעה: הרשאה שהוסרה - יציאה; הרשאה ששונתה - מתעדכנת מיד
   usersReady.then(()=>{
     if(!USER_H) return;
+    syncEditors();
+    if(Object.keys(SUBJ).length&&ACCESS[USER_H]&&JSON.stringify(ACCESS[USER_H])===JSON.stringify(USER)) render();
     if(!ACCESS[USER_H]){setUser(null);showLogin("ההרשאה שלך ללוח הוסרה - פנו למנהל/ת");render();}
     else if(JSON.stringify(ACCESS[USER_H])!==JSON.stringify(USER)){USER=ACCESS[USER_H];render();}
   });
