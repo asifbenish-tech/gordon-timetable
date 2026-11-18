@@ -28,6 +28,13 @@ function ensure_() {
     p.setProperty("SHEET_ID", ss.getId());
   }
   if (!p.getProperty("ADMIN_KEY")) p.setProperty("ADMIN_KEY", Utilities.getUuid().replace(/-/g, ""));
+  // שמות מקצועות שהמחנכים כותבים בתאים (מגרסה 18.11)
+  var ss2 = SpreadsheetApp.openById(p.getProperty("SHEET_ID"));
+  if (!ss2.getSheetByName("subjects")) {
+    var sj = ss2.insertSheet("subjects");
+    sj.getRange("A:D").setNumberFormat("@");
+    sj.appendRow(["key", "subject", "by", "updatedAt"]);
+  }
   // גיליון מגרסה קודמת: משלים כותרות לעמודות החדשות
   var u2 = sheet_("users"), h0 = u2.getDataRange().getValues()[0];
   if (h0.length < HEAD.length || String(h0[HEAD.length - 1]) !== HEAD[HEAD.length - 1]) {
@@ -60,7 +67,9 @@ function doGet(e) {
 }
 
 function act_(r) {
+  if (r.action === "subject") return subject_(r);       // מחנכים - בלי מפתח הניהול (ראו subject_)
   if (!isAdmin_(r.key)) return {ok: false, error: "אין הרשאה (מפתח הניהול חסר או שגוי)."};
+  if (r.action === "editors") return editors_(r);
   var h = String(r.hash || "");
   if (!/^[0-9a-f]{64}$/.test(h)) return {ok: false, error: "גיבוב לא תקין."};
   var lock = LockService.getScriptLock();
@@ -121,7 +130,55 @@ function list_(admin) {
     }
     users[w.hash] = e;
   });
-  return {ok: true, users: users, removed: removed, admin: admin};
+  var subjects = {};
+  rowsOf_("subjects").forEach(function (w) { if (w.key && w.subject) subjects[w.key] = w.subject; });
+  return {ok: true, users: users, removed: removed, admin: admin, subjects: subjects};
+}
+
+// ---- שמות מקצועות בתאים ----
+// מי רשאי: מחנך/ת - רק בכיתה שלו/ה (רשימת EDITORS שהלוח של הבעלים מעדכן אוטומטית:
+// {גיבוב: [כיתות]}), והבעלים עם מפתח הניהול - בכל כיתה. כל שינוי נרשם ב-log.
+function editors_(r) {
+  var m;
+  try { m = JSON.parse(String(r.map || "{}")); } catch (err) { return {ok: false, error: "רשימה לא תקינה."}; }
+  var clean = {};
+  Object.keys(m).forEach(function (h) {
+    if (/^[0-9a-f]{64}$/.test(h) && m[h] && m[h].length) clean[h] = m[h].map(clean_).filter(String).slice(0, 4);
+  });
+  PropertiesService.getScriptProperties().setProperty("EDITORS", JSON.stringify(clean));
+  return {ok: true, n: Object.keys(clean).length};
+}
+
+function subject_(r) {
+  var h = String(r.hash || ""), cls = clean_(r.cls), slot = String(r.slot || "");
+  if (!cls || !/^[0-5],[1-8]$/.test(slot)) return {ok: false, error: "תא לא תקין."};
+  var ed = {};
+  try { ed = JSON.parse(PropertiesService.getScriptProperties().getProperty("EDITORS") || "{}"); } catch (err) {}
+  var allowed = isAdmin_(r.key) || ((ed[h] || []).indexOf(cls) >= 0);
+  if (!allowed) return {ok: false, error: "רק מחנך/ת הכיתה יכול/ה לערוך את שמות המקצועות בה."};
+  var subj = clean_(r.subject).slice(0, 30), key = cls + "|" + slot;
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) return {ok: false, error: "המערכת עמוסה. נסו שוב בעוד רגע."};
+  try {
+    var sh = sheet_("subjects"), v = sh.getDataRange().getValues(), n = 0, old = "";
+    for (var i = 1; i < v.length; i++) if (String(v[i][0]) === key) { n = i + 1; old = String(v[i][1]); }
+    var now = new Date().toISOString(), by = clean_(r.name) || "?";
+    if (n) sh.getRange(n, 1, 1, 4).setValues([[key, subj, by, now]]);
+    else if (subj) sh.appendRow([key, subj, by, now]);
+    log_("subject", by, key + ": " + (old || "—") + " → " + (subj || "—"));
+    return {ok: true};
+  } finally { lock.releaseLock(); }
+}
+
+function rowsOf_(name) {
+  var sh = sheet_(name); if (!sh) return [];
+  var v = sh.getDataRange().getValues(), head = v[0], out = [];
+  for (var i = 1; i < v.length; i++) {
+    var row = {};
+    head.forEach(function (k, j) { row[k] = v[i][j] == null ? "" : String(v[i][j]); });
+    out.push(row);
+  }
+  return out;
 }
 
 function put_(h, vals) {
